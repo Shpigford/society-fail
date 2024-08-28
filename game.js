@@ -365,15 +365,17 @@ const RANDOM_EVENTS = [
     },
     {
         name: "Lucky Find", effect: (state) => {
-            state.food += 30;
-            state.water += 30;
-            return "You found a hidden cache of supplies! (+30 🍖, +30 💧)";
+            const amount = Math.floor(Math.random() * 46) + 5; // Random number between 5 and 50
+            state.food += amount;
+            state.water += amount;
+            return `You found a hidden cache of supplies! (+${amount} 🍖, +${amount} 💧)`;
         }, type: "positive"
     },
     {
         name: "Windfall", effect: (state) => {
-            state.wood += 15;
-            return "A fallen tree provided extra wood! (+15 🪵)";
+            const woodAmount = Math.floor(Math.random() * 16) + 10; // Random amount between 10 and 25
+            state.wood += woodAmount;
+            return `A fallen tree provided extra wood! (+${woodAmount} 🪵)`;
         }, type: "positive"
     },
     {
@@ -414,6 +416,89 @@ const RANDOM_EVENTS = [
             const lost = Math.floor(state.water * 0.3);
             state.water -= lost;
             return `Some of your water got contaminated! (-${lost} 💧)`;
+        }, type: "negative"
+    },
+    {
+        name: "Unexpected Visitor", effect: (state) => {
+            const foodGain = Math.floor(Math.random() * 20) + 10;
+            state.food += foodGain;
+            return `A friendly traveler shared some food with your group! (+${foodGain} 🍖)`;
+        }, type: "positive"
+    },
+    {
+        name: "Tool Upgrade", effect: (state) => {
+            state.party.forEach(person => {
+                person.traits.maxStamina += 10;
+            });
+            return "You've found ways to improve your tools! (+10 max stamina for all)";
+        }, type: "positive"
+    },
+    {
+        name: "Harsh Weather", effect: (state) => {
+            state.party.forEach(person => {
+                person.stamina = Math.max(0, person.stamina - 15);
+            });
+            return "A spell of harsh weather has drained everyone's energy! (-15 stamina for all)";
+        }, type: "negative"
+    },
+    {
+        name: "Natural Spring", effect: (state) => {
+            const waterGain = Math.floor(Math.random() * 40) + 20;
+            state.water += waterGain;
+            return `You've discovered a natural spring! (+${waterGain} 💧)`;
+        }, type: "positive"
+    },
+    {
+        name: "Wildlife Stampede", effect: (state) => {
+            const foodLoss = Math.floor(state.food * 0.15);
+            state.food -= foodLoss;
+            return `A stampede of animals trampled some of your food stores! (-${foodLoss} 🍖)`;
+        }, type: "negative"
+    },
+    {
+        name: "Ancient Knowledge", effect: (state) => {
+            if (state.upgrades.farming) {
+                state.farming.maxCrops += 5;
+                return "You've uncovered ancient farming techniques! (+5 max crop capacity)";
+            }
+            return "You've found some interesting old documents.";
+        }, type: "positive"
+    },
+    {
+        name: "Unexpected Frost", effect: (state) => {
+            if (state.upgrades.farming) {
+                state.farming.grid.forEach(row => {
+                    row.forEach(crop => {
+                        if (crop) crop.plantedAt += 12; // Delay growth
+                    });
+                });
+                return "An unexpected frost has slowed the growth of your crops! (12 hour delay)";
+            }
+            return "There was an unexpected frost last night.";
+        }, type: "negative"
+    },
+    {
+        name: "Community Spirit", effect: (state) => {
+            const staminaGain = 25;
+            state.party.forEach(person => {
+                person.stamina = Math.min(person.traits.maxStamina, person.stamina + staminaGain);
+            });
+            return `A wave of community spirit energizes everyone! (+${staminaGain} stamina for all)`;
+        }, type: "positive"
+    },
+    {
+        name: "Tool Innovation", effect: (state) => {
+            state.staminaPerAction = Math.max(5, state.staminaPerAction - 2);
+            return "You've found a way to make your tools more efficient! (-2 stamina cost per action)";
+        }, type: "positive"
+    },
+    {
+        name: "Mysterious Illness", effect: (state) => {
+            state.party.forEach(person => {
+                person.health = Math.max(0, person.health - 5);
+                person.stamina = Math.max(0, person.stamina - 10);
+            });
+            return "A mysterious illness affects everyone in the group! (-5 health, -10 stamina for all)";
         }, type: "negative"
     }
 ];
