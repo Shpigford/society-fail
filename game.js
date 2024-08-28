@@ -361,7 +361,7 @@ function updateUI() {
         };
 
         partyElement.innerHTML += `
-            <div class="person border border-white rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
+            <div class="person rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : 'border border-white'} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
                 <h3 class="text-sm border-b border-neutral-600 pb-1 mb-1">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
                 ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
                 <div class="stat flex items-center mb-1 ${getCriticalClass(person.health)}">
