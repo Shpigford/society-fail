@@ -18,9 +18,10 @@ function initializeGameState() {
         selectedPerson: 0,
         busyUntil: {},
         farming: {
-            grid: Array(3).fill().map(() => Array(3).fill(null)),
-            maxCrops: 9
-        }
+            grid: Array(5).fill().map(() => Array(5).fill(null)),
+            maxCrops: 25
+        },
+        plantingCrop: 'wheat' // Default to wheat
     };
 }
 
@@ -360,56 +361,55 @@ function updateUI() {
         };
 
         partyElement.innerHTML += `
-            <div class="person flex-1 min-w-[250px] max-w-[400px] border border-white rounded-lg p-4 m-1 bg-neutral-800 cursor-pointer transition-all duration-300 relative ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-4 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
-                <h3 class="text-lg border-b border-neutral-600 pb-2 mb-2">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-2xl rounded-md text-red-500 border-2 border-red-500 py-2 px-3 pointer-events-none bg-black font-black">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-                <div class="stat flex items-center mb-2 ${getCriticalClass(person.health)}">
-                    <label class="w-16 text-right mr-2">Health:</label>
-                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+            <div class="person border border-white rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
+                <h3 class="text-sm border-b border-neutral-600 pb-1 mb-1">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
+                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
+                <div class="stat flex items-center mb-1 ${getCriticalClass(person.health)}">
+                    <label class="w-12 text-right mr-1">Health:</label>
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
                         <div class="h-full ${getProgressBarColor(person.health)}" style="width: ${person.health}%"></div>
                     </div>
-                    <span class="w-10 text-left ml-2">${Math.floor(person.health)}%</span>
+                    <span class="w-8 text-left ml-1">${Math.floor(person.health)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2 ${getCriticalClass(100 - person.hunger)}">
-                    <label class="w-16 text-right mr-2">Hunger:</label>
-                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.hunger)}">
+                    <label class="w-12 text-right mr-1">Hunger:</label>
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
                         <div class="h-full ${getProgressBarColor(100 - person.hunger)}" style="width: ${100 - person.hunger}%"></div>
                     </div>
-                    <span class="w-10 text-left ml-2">${Math.floor(100 - person.hunger)}%</span>
+                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.hunger)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2 ${getCriticalClass(100 - person.thirst)}">
-                    <label class="w-16 text-right mr-2">Thirst:</label>
-                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.thirst)}">
+                    <label class="w-12 text-right mr-1">Thirst:</label>
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
                         <div class="h-full ${getProgressBarColor(100 - person.thirst)}" style="width: ${100 - person.thirst}%"></div>
                     </div>
-                    <span class="w-10 text-left ml-2">${Math.floor(100 - person.thirst)}%</span>
+                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.thirst)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2 ${getCriticalClass(person.energy)}">
-                    <label class="w-16 text-right mr-2">Energy:</label>
-                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                <div class="stat flex items-center mb-1 ${getCriticalClass(person.energy)}">
+                    <label class="w-12 text-right mr-1">Energy:</label>
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
                         <div class="h-full ${getProgressBarColor(person.energy)}" style="width: ${person.energy}%"></div>
                     </div>
-                    <span class="w-10 text-left ml-2">${Math.floor(person.energy)}%</span>
+                    <span class="w-8 text-left ml-1">${Math.floor(person.energy)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
-                    <label class="w-16 text-right mr-2">Stamina:</label>
-                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                <div class="stat flex items-center mb-1 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
+                    <label class="w-12 text-right mr-1">Stamina:</label>
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
                         <div class="h-full ${getProgressBarColor((person.stamina / person.traits.maxStamina) * 100)}" style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div>
                     </div>
-                    <span class="w-10 text-left ml-2">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
+                    <span class="w-8 text-left ml-1">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
                 </div>
-                <div class="traits flex flex-wrap justify-around text-sm mt-4">
-                    <strong class="w-full mb-2">Traits:</strong>
+                <div class="traits flex flex-wrap justify-around text-xs mt-2">
                     <span title="Hunger Rate" class="cursor-help">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
                     <span title="Thirst Rate" class="cursor-help">💧: ${person.traits.thirstRate.toFixed(2)}</span>
                     <span title="Energy Rate" class="cursor-help">⚡: ${person.traits.energyRate.toFixed(2)}</span>
                     <span title="Max Stamina" class="cursor-help">💪: ${person.traits.maxStamina}</span>
                     <span title="Stamina Recovery Rate" class="cursor-help">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
                 </div>
-                <div class="person-actions flex flex-wrap justify-around mt-4">
-                    <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded transition ${isBusy || gameState.food < 10 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
-                    <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded transition ${isBusy || gameState.water < 5 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
-                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
+                <div class="person-actions flex flex-wrap justify-around mt-2 gap-1">
+                    <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.food < 10 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
+                    <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.water < 5 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
+                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
                 </div>
             </div>
         `;
@@ -420,24 +420,41 @@ function updateUI() {
     if (gameState.upgrades.farming) {
         farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <h2 class="text-xl mb-4">Farming</h2>
-            <div id="farming-grid" class="grid grid-cols-3 gap-2 mb-4"></div>
+            <h2 class="text-2xl mb-4 font-black">Farming</h2>
             <div class="mb-4">
-                <button onclick="waterCrops()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Water All Crops (5 💧 each)</button>
-            </div>
-            <div>
                 Plant: 
-                <button onclick="setPlantingCrop('wheat')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Wheat (5 💧)</button>
-                <button onclick="setPlantingCrop('corn')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Corn (10 💧)</button>
-                <button onclick="setPlantingCrop('potato')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Potato (15 💧)</button>
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
+                <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
+                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
+            </div>
+            <div id="farming-grid" class="grid grid-cols-5 gap-2 mb-4"></div>
+            <div class="mt-4">
+                <button onclick="waterCrops()" class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Water All Crops (5 💧 each)</button>
             </div>
         `;
+
+        // Update active state for planting buttons
+        const plantButtons = {
+            wheat: document.getElementById('plantWheat'),
+            corn: document.getElementById('plantCorn'),
+            potato: document.getElementById('plantPotato')
+        };
+
+        for (const [crop, button] of Object.entries(plantButtons)) {
+            if (gameState.plantingCrop === crop) {
+                button.classList.add('bg-yellow-700', 'border-yellow-400');
+                button.classList.remove('bg-yellow-900/50', 'hover:bg-yellow-700');
+            } else {
+                button.classList.remove('bg-yellow-700', 'border-yellow-400');
+                button.classList.add('bg-yellow-900/50', 'hover:bg-yellow-700');
+            }
+        }
 
         const farmingGrid = document.getElementById('farming-grid');
         gameState.farming.grid.forEach((row, rowIndex) => {
             row.forEach((plot, colIndex) => {
                 const plotElement = document.createElement('div');
-                plotElement.className = 'w-16 h-16 border border-white flex justify-center items-center text-3xl cursor-pointer';
+                plotElement.className = 'w-12 h-12 border border-neutral-600 flex justify-center items-center text-2xl cursor-pointer bg-neutral-800 rounded';
 
                 if (plot) {
                     const now = gameState.hour + (gameState.day - 1) * 24;
@@ -452,7 +469,7 @@ function updateUI() {
 
                     if (growthProgress === 100) {
                         plotElement.onclick = () => harvestCrop(rowIndex, colIndex);
-                        plotElement.classList.add('bg-green-600');
+                        plotElement.classList.add('bg-green-900/50', 'border-green-600');
                     }
                 } else {
                     plotElement.textContent = '🟫';
@@ -581,7 +598,7 @@ function unlockFarming() {
 }
 
 function initializeFarmingGrid() {
-    gameState.farming.grid = Array(3).fill().map(() => Array(3).fill(null));
+    gameState.farming.grid = Array(5).fill().map(() => Array(5).fill(null));
 }
 
 function plantCrop(row, col, cropType) {
@@ -656,6 +673,7 @@ function isPersonBusy(personIndex) {
 
 function setPlantingCrop(cropType) {
     gameState.plantingCrop = cropType;
+    updateUI();
 }
 
 function updateDayNightIndicator() {
@@ -699,8 +717,11 @@ function updateUpgradeButtons() {
                 button.disabled = true;
                 button.classList.add('opacity-30', 'cursor-not-allowed');
             } else {
-                button.disabled = gameState[upgrade.resource] < upgrade.cost;
-                button.classList.remove('opacity-30', 'cursor-not-allowed');
+                const canAfford = gameState[upgrade.resource] >= upgrade.cost;
+                button.disabled = !canAfford;
+                button.classList.toggle('opacity-50', !canAfford);
+                button.classList.toggle('cursor-not-allowed', !canAfford);
+                button.classList.toggle('hover:bg-green-700', canAfford);
             }
         }
     });
@@ -714,7 +735,11 @@ function updateUpgradeButtons() {
             farmingButton.classList.add('bg-green-800', 'cursor-default');
             farmingButton.classList.remove('hover:bg-green-700');
         } else {
-            farmingButton.disabled = gameState.food < 100;
+            const canAfford = gameState.food >= 100;
+            farmingButton.disabled = !canAfford;
+            farmingButton.classList.toggle('opacity-50', !canAfford);
+            farmingButton.classList.toggle('cursor-not-allowed', !canAfford);
+            farmingButton.classList.toggle('hover:bg-green-700', canAfford);
         }
     }
 }
