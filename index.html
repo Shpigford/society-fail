@@ -84,22 +84,22 @@
                         class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-1 px-3 rounded transition">Reset</button>
                 </div>
             </header>
-            <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
-                <h2 class="text-xl mb-4 font-black">Your Party</h2>
-                <div id="party" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
-            </div>
             <div id="actions-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900 text-center">
                 <div id="actions" class="flex gap-2 justify-between">
                     <button id="gatherFoodBtn" onclick="gatherFood()"
-                        class="flex-1 bg-blue-600 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Gather
+                        class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Gather
                         Food 🍖</button>
                     <button id="collectWaterBtn" onclick="collectWater()"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Collect
+                        class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Collect
                         Water 💧</button>
-                    <button onclick="chopWood()"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Chop
+                    <button id="chopWoodBtn" onclick="chopWood()"
+                        class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Chop
                         Wood 🪵</button>
                 </div>
+            </div>
+            <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
+                <h2 class="text-xl mb-4 font-black">Your Party</h2>
+                <div id="party" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
                 <div id="log-module"

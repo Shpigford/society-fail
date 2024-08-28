@@ -362,7 +362,7 @@ function updateUI() {
         partyElement.innerHTML += `
             <div class="person flex-1 min-w-[250px] max-w-[400px] border border-white rounded-lg p-4 m-1 bg-neutral-800 cursor-pointer transition-all duration-300 relative ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-4 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
                 <h3 class="text-lg border-b border-neutral-600 pb-2 mb-2">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-2xl text-red-500 border-2 border-red-500 p-2 pointer-events-none bg-black bg-opacity-70">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
+                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-2xl rounded-md text-red-500 border-2 border-red-500 py-2 px-3 pointer-events-none bg-black font-black">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
                 <div class="stat flex items-center mb-2 ${getCriticalClass(person.health)}">
                     <label class="w-16 text-right mr-2">Health:</label>
                     <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
@@ -739,8 +739,34 @@ function buyUpgrade(upgradeType) {
 }
 
 function updateActionButtons() {
-    // Remove this function or leave it empty
-    // We don't want to disable the main action buttons
+    const selectedPerson = gameState.party[gameState.selectedPerson];
+    const isBusy = isPersonBusy(gameState.selectedPerson);
+    const hasEnoughStamina = selectedPerson.stamina >= gameState.staminaPerAction;
+    const hasEnoughEnergy = selectedPerson.energy > 0;
+
+    const actions = [
+        { id: 'gatherFoodBtn', resource: 'food', amount: 5 },
+        { id: 'collectWaterBtn', resource: 'water', amount: 10 * (1 + gameState.upgrades.waterCollection * 0.5) },
+        { id: 'chopWoodBtn', resource: 'wood', amount: 3 * (1 + gameState.upgrades.woodChopping * 0.5) }
+    ];
+
+    actions.forEach(action => {
+        const button = document.getElementById(action.id);
+        if (button) {
+            const isDisabled = isBusy || !hasEnoughStamina || !hasEnoughEnergy;
+            button.disabled = isDisabled;
+            button.classList.toggle('opacity-50', isDisabled);
+            button.classList.toggle('cursor-not-allowed', isDisabled);
+
+            let tooltip = '';
+            if (isBusy) tooltip = `${selectedPerson.name} is busy`;
+            else if (!hasEnoughStamina) tooltip = `Not enough stamina`;
+            else if (!hasEnoughEnergy) tooltip = `Not enough energy`;
+            else tooltip = `Gather ${action.amount} ${action.resource}`;
+
+            button.title = tooltip;
+        }
+    });
 }
 
 // Add these event listeners at the end of the file
