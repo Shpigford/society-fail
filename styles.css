@@ -12,6 +12,8 @@ body {
 }
 
 #game-container {
+    max-width: 100%;
+    overflow-x: hidden;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -58,50 +60,50 @@ h1 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-    padding: 20px;
     width: 100%;
-    max-width: 100%;
     box-sizing: border-box;
 }
 
-@media (min-width: 1201px) {
-    .game-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+.full-width {
+    grid-column: 1 / -1;
+    width: 100%;
 }
 
-@media (max-width: 1200px) and (min-width: 769px) {
-    .game-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+#party-module {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+
+#party {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.person {
+    flex: 1 1 300px;
+    max-width: 400px;
+    min-width: 250px;
+    border: 1px solid white;
+    padding: 10px;
+    margin: 5px;
+    background-color: #222;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
+    .person {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
     .game-grid {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 1240px) {
-
-    /* 1200px + 2 * 20px padding */
-    .game-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .game-grid {
-        grid-template-columns: 1fr;
-    }
-
-    header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    #time-module {
-        margin-top: 10px;
     }
 }
 
@@ -109,6 +111,7 @@ h1 {
     border: 1px solid white;
     padding: 15px;
     background-color: #111;
+    box-sizing: border-box;
 }
 
 button {

@@ -46,14 +46,14 @@
                     <button id="reset-game" onclick="resetGame()">Reset Game</button>
                 </div>
             </header>
+            <div id="party-module" class="module full-width">
+                <h2>Your Party</h2>
+                <div id="party"></div>
+            </div>
             <div class="game-grid">
                 <div id="log-module" class="module">
                     <h2>Activity Log</h2>
                     <div id="log-content"></div>
-                </div>
-                <div id="party-module" class="module">
-                    <h2>Your Party</h2>
-                    <div id="party"></div>
                 </div>
                 <div id="actions-module" class="module">
                     <h2>Actions</h2>
@@ -71,17 +71,6 @@
                         <button onclick="buyUpgrade('woodChopping')">Upgrade Wood Chopping</button>
                     </div>
                 </div>
-                <!-- Remove this entire block: -->
-                <!--
-                <div id="auto-gatherers-module" class="module">
-                    <h2>Auto-Gatherers</h2>
-                    <div id="auto-gatherers">
-                        <button onclick="buyAutoGatherer('food')">Buy Food Auto-Gatherer</button>
-                        <button onclick="buyAutoGatherer('water')">Buy Water Auto-Gatherer</button>
-                        <button onclick="buyAutoGatherer('wood')">Buy Wood Auto-Gatherer</button>
-                    </div>
-                </div>
-                -->
                 <div id="farming-module" class="module" style="display: none;">
                     <!-- This will be populated by JavaScript -->
                 </div>
