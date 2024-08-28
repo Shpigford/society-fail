@@ -1,31 +1,37 @@
-let gameState = {
-    day: 1,
-    hour: 1,
-    party: [],
-    food: 0,
-    water: 0,
-    wood: 0,
-    upgrades: {
-        farming: false,
-        waterCollection: 0,
-        woodChopping: 0
-    },
-    autoGatherers: {
+// Add this new function at the beginning of the file
+function initializeGameState() {
+    return {
+        day: 1,
+        hour: 1,
+        party: [],
         food: 0,
         water: 0,
-        wood: 0
-    },
-    prestige: 0,
-    maxStamina: 100,
-    staminaPerAction: 10,
-    staminaRecoveryPerHour: 5,
-    selectedPerson: 0,
-    busyUntil: {},
-    farming: {
-        grid: Array(3).fill().map(() => Array(3).fill(null)),
-        maxCrops: 9
-    }
-};
+        wood: 0,
+        upgrades: {
+            farming: false,
+            waterCollection: 0,
+            woodChopping: 0
+        },
+        autoGatherers: {
+            food: 0,
+            water: 0,
+            wood: 0
+        },
+        prestige: 0,
+        maxStamina: 100,
+        staminaPerAction: 10,
+        staminaRecoveryPerHour: 5,
+        selectedPerson: 0,
+        busyUntil: {},
+        farming: {
+            grid: Array(3).fill().map(() => Array(3).fill(null)),
+            maxCrops: 9
+        }
+    };
+}
+
+// Initialize gameState at the beginning of the file
+let gameState = initializeGameState();
 
 const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia"];
 
@@ -59,6 +65,79 @@ function getRandomTrait(traitName) {
     return Math.random() * (range.max - range.min) + range.min;
 }
 
+// Add this function at the beginning of the file
+function addLogEntry(message) {
+    const logContent = document.getElementById('log-content');
+    const logEntry = document.createElement('div');
+    logEntry.className = 'log-entry';
+    logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
+    logContent.insertBefore(logEntry, logContent.firstChild);
+
+    // Limit log entries to 100
+    while (logContent.children.length > 100) {
+        logContent.removeChild(logContent.lastChild);
+    }
+}
+
+// Add these functions at the beginning of the file
+function saveGame() {
+    // Get the last 25 log entries
+    const logContent = document.getElementById('log-content');
+    const logEntries = Array.from(logContent.children).slice(0, 25).map(entry => entry.textContent);
+
+    // Create a save object
+    const saveObject = {
+        gameState: gameState,
+        logEntries: logEntries
+    };
+
+    localStorage.setItem('societyFailSave', JSON.stringify(saveObject));
+}
+
+function loadGame() {
+    const savedGame = localStorage.getItem('societyFailSave');
+    if (savedGame) {
+        const saveObject = JSON.parse(savedGame);
+        gameState = saveObject.gameState;
+        document.getElementById('difficulty-selection').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'block';
+        updateUI();
+        loadActivityLog(saveObject.logEntries);
+        startGameLoop();
+    } else {
+        document.getElementById('difficulty-selection').style.display = 'block';
+        document.getElementById('game-ui').style.display = 'none';
+    }
+}
+
+// Modify the resetGame function
+function resetGame() {
+    console.log("resetGame function called");
+    if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
+        console.log("Reset confirmed");
+        localStorage.removeItem('societyFailSave');
+        console.log("localStorage cleared");
+        location.reload();
+        console.log("Page should have reloaded");
+    } else {
+        console.log("Reset cancelled");
+    }
+}
+
+// Add this new function
+function loadActivityLog(logEntries) {
+    const logContent = document.getElementById('log-content');
+    logContent.innerHTML = ''; // Clear existing log entries
+
+    logEntries.forEach(entry => {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.textContent = entry;
+        logContent.appendChild(logEntry);
+    });
+}
+
+// Modify the startGame function
 function startGame(difficulty) {
     const partySize = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
     
@@ -96,7 +175,17 @@ function startGame(difficulty) {
     document.getElementById('game-ui').style.display = 'block';
 
     updateUI();
-    setInterval(gameLoop, 1000);
+    startGameLoop();
+
+    addLogEntry(`Game started on ${difficulty} difficulty.`);
+}
+
+// Add this new function
+function startGameLoop() {
+    if (window.gameInterval) {
+        clearInterval(window.gameInterval);
+    }
+    window.gameInterval = setInterval(gameLoop, 1000);
 }
 
 function gameLoop() {
@@ -104,6 +193,10 @@ function gameLoop() {
     if (gameState.hour > 24) {
         gameState.hour = 1;
         gameState.day++;
+    }
+
+    if (gameState.hour === 1) {
+        addLogEntry(`Day ${gameState.day} has begun.`);
     }
 
     gameState.party.forEach((person, index) => {
@@ -171,6 +264,7 @@ function gameLoop() {
 
     checkForRandomEvent();
     updateUI();
+    saveGame();
 }
 
 function checkForRandomEvent() {
@@ -193,6 +287,8 @@ function randomEvent() {
     event.effect();
     alert(`Random Event: ${event.name}`);
     updateUI();
+
+    addLogEntry(`Random Event: ${event.name}`);
 }
 
 function updateUI() {
@@ -389,18 +485,23 @@ function setBusy(personIndex, duration) {
 function gatherFood() {
     performAction(gameState.selectedPerson, () => {
         gameState.food += 5;
+        addLogEntry(`${gameState.party[gameState.selectedPerson].name} gathered 5 food.`);
     }, "gatherFood");
 }
 
 function collectWater() {
     performAction(gameState.selectedPerson, () => {
-        gameState.water += 10 * (1 + gameState.upgrades.waterCollection * 0.5);
+        const amount = 10 * (1 + gameState.upgrades.waterCollection * 0.5);
+        gameState.water += amount;
+        addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
 }
 
 function chopWood() {
     performAction(gameState.selectedPerson, () => {
-        gameState.wood += 3 * (1 + gameState.upgrades.woodChopping * 0.5);
+        const amount = 3 * (1 + gameState.upgrades.woodChopping * 0.5);
+        gameState.wood += amount;
+        addLogEntry(`${gameState.party[gameState.selectedPerson].name} chopped ${amount} wood.`);
     }, "chopWood");
 }
 
@@ -412,8 +513,10 @@ function eat(personIndex) {
             person.hunger = Math.max(0, person.hunger - 30);
             person.health = Math.min(100, person.health + 5);
             person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
+            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 stamina.`);
         } else {
             alert("Not enough food!");
+            addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`);
         }
     }, "eat");
 }
@@ -425,15 +528,17 @@ function drink(personIndex) {
             gameState.water -= 5;
             person.thirst = Math.max(0, person.thirst - 25);
             person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10);
+            addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 stamina.`);
         } else {
             alert("Not enough water!");
+            addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`);
         }
     }, "drink");
 }
 
 function sleep(personIndex) {
     performAction(personIndex, () => {
-        // Sleep logic is handled in the gameLoop function
+        addLogEntry(`${gameState.party[personIndex].name} went to sleep.`);
     }, "sleep");
 }
 
@@ -444,9 +549,11 @@ function unlockFarming() {
         gameState.upgrades.farming = true;
         initializeFarmingGrid();
         updateUI();
+        addLogEntry("Farming has been unlocked!");
         alert("Farming unlocked! You can now plant and harvest crops.");
     } else {
         alert("Not enough food to unlock farming!");
+        addLogEntry("Failed to unlock farming due to insufficient food.");
     }
 }
 
@@ -469,8 +576,10 @@ function plantCrop(row, col, cropType) {
             watered: true
         };
         updateUI();
+        addLogEntry(`Planted ${cropType} at row ${row + 1}, column ${col + 1}.`);
     } else {
         alert("Not enough water to plant this crop!");
+        addLogEntry(`Failed to plant ${cropType} due to insufficient water.`);
     }
 }
 
@@ -490,8 +599,10 @@ function waterCrops() {
             });
         });
         updateUI();
+        addLogEntry(`Watered all crops, using ${waterNeeded} water.`);
     } else {
         alert("Not enough water to water all crops!");
+        addLogEntry("Failed to water crops due to insufficient water.");
     }
 }
 
@@ -507,30 +618,20 @@ function harvestCrop(row, col) {
         gameState.food += CROP_TYPES[plot.type].yield;
         gameState.farming.grid[row][col] = null;
         updateUI();
+        addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${CROP_TYPES[plot.type].yield} food.`);
     } else {
         alert("This crop is not ready for harvest yet!");
+        addLogEntry(`Attempted to harvest immature crop at row ${row + 1}, column ${col + 1}.`);
     }
 }
 
 function prestige() {
     if (confirm("Are you sure you want to restart? You'll gain prestige points based on your progress.")) {
-        gameState.prestige += Math.floor(Math.log(gameState.day));
+        const prestigeGained = Math.floor(Math.log(gameState.day));
+        addLogEntry(`Prestiged! Gained ${prestigeGained} prestige points.`);
+        gameState.prestige += prestigeGained;
         resetGame();
     }
-}
-
-function resetGame() {
-    // Reset game state but keep prestige
-    gameState = {
-        day: 1,
-        hour: 1,
-        party: [],
-        food: 10 * gameState.prestige,
-        water: 10 * gameState.prestige,
-        wood: 5 * gameState.prestige,
-        prestige: gameState.prestige
-    };
-    startGame('medium'); // Or let player choose difficulty again
 }
 
 function selectPerson(index) {
@@ -568,3 +669,29 @@ function updateProgressBarColor(progressBar, value, max, reverse = false) {
 
     progressBar.style.setProperty('--progress-color', color);
 }
+
+// Add these event listeners at the end of the file
+window.addEventListener('load', loadGame);
+
+window.addEventListener('focus', function() {
+    if (gameState.party.length > 0) {
+        startGameLoop();
+    }
+});
+
+window.addEventListener('blur', function() {
+    if (window.gameInterval) {
+        clearInterval(window.gameInterval);
+    }
+});
+
+// Add this at the end of your game.js file
+window.addEventListener('load', function () {
+  const resetButton = document.querySelector('#prestige-module button:nth-child(2)');
+  if (resetButton) {
+    resetButton.addEventListener('click', resetGame);
+    console.log("Reset button listener added");
+  } else {
+    console.log("Reset button not found");
+  }
+});
