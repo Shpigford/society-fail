@@ -80,7 +80,7 @@
                         <span id="time">Day 1, Hour 1</span>
                         <div id="day-night-indicator" class="w-5 h-5 rounded-full"></div>
                     </div>
-                    <button id="reset-game" onclick="resetGame()"
+                    <button id="reset-game" onclick="resetGame(false)"
                         class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-1 px-3 rounded transition">Reset</button>
                 </div>
             </header>
@@ -130,7 +130,8 @@
             <div id="game-stats" class="mb-8">
                 <!-- Stats will be populated here -->
             </div>
-            <button onclick="resetGame()" class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded transition">
+            <button onclick="resetGame(true)"
+                class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded transition">
                 Try Again
             </button>
         </div>

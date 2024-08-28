@@ -24,7 +24,12 @@ function initializeGameState() {
         well: {
             capacity: 100,
             current: 0,
-            fillRate: 10
+            fillRate: 1
+        },
+        totalResourcesGathered: {
+            food: 0,
+            water: 0,
+            wood: 0
         }
     };
 }
@@ -115,17 +120,19 @@ function loadGame() {
 }
 
 // Modify the resetGame function
-function resetGame() {
-    if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
-        localStorage.removeItem('societyFailSave');
-        gameState = initializeGameState();
-        document.getElementById('game-over-screen').classList.add('hidden');
-        document.getElementById('game-ui').classList.add('hidden');
-        document.getElementById('start-screen').classList.remove('hidden');
-        updateUI();
-        if (window.gameInterval) {
-            clearInterval(window.gameInterval);
-        }
+function resetGame(fromGameOver = false) {
+    if (!fromGameOver && !confirm("Are you sure you want to reset the game? All progress will be lost.")) {
+        return;
+    }
+
+    localStorage.removeItem('societyFailSave');
+    gameState = initializeGameState();
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('game-ui').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    updateUI();
+    if (window.gameInterval) {
+        clearInterval(window.gameInterval);
     }
 }
 
@@ -227,11 +234,11 @@ function showGameOverScreen() {
 
     gameStats.innerHTML = `
         <p>Time Survived: ${daysPlayed} days, ${hoursPlayed % 24} hours</p>
-        <p>Resources Gathered:</p>
+        <p>Total Resources Gathered:</p>
         <ul class="list-none">
-            <li>🍖 Food: ${Math.floor(gameState.food)}</li>
-            <li>💧 Water: ${Math.floor(gameState.water)}</li>
-            <li>🪵 Wood: ${Math.floor(gameState.wood)}</li>
+            <li>🍖 Food: ${Math.floor(gameState.totalResourcesGathered.food)}</li>
+            <li>💧 Water: ${Math.floor(gameState.totalResourcesGathered.water)}</li>
+            <li>🪵 Wood: ${Math.floor(gameState.totalResourcesGathered.wood)}</li>
         </ul>
     `;
 }
@@ -556,23 +563,33 @@ function setBusy(personIndex, duration) {
 
 function gatherFood() {
     performAction(gameState.selectedPerson, () => {
-        gameState.food += 5;
-        addLogEntry(`${gameState.party[gameState.selectedPerson].name} gathered 5 food.`);
+        const baseAmount = 5;
+        const randomAmount = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 food is gathered
+        gameState.food += amount;
+        gameState.totalResourcesGathered.food += amount;
+        addLogEntry(`${gameState.party[gameState.selectedPerson].name} gathered ${amount} food.`);
     }, "gatherFood");
 }
 
 function collectWater() {
     performAction(gameState.selectedPerson, () => {
-        const amount = 10;
+        const baseAmount = 10;
+        const randomAmount = Math.floor(Math.random() * 5) - 2; // -2, -1, 0, 1, or 2
+        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 water is collected
         gameState.water += amount;
+        gameState.totalResourcesGathered.water += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
 }
 
 function chopWood() {
     performAction(gameState.selectedPerson, () => {
-        const amount = 3;
+        const baseAmount = 3;
+        const randomAmount = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 wood is chopped
         gameState.wood += amount;
+        gameState.totalResourcesGathered.wood += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} chopped ${amount} wood.`);
     }, "chopWood");
 }
@@ -658,6 +675,11 @@ function waterCrops() {
         });
     });
 
+    if (waterNeeded === 0) {
+        addLogEntry("All crops are already watered!", 'info');
+        return;
+    }
+
     if (gameState.water >= waterNeeded) {
         gameState.water -= waterNeeded;
         gameState.farming.grid.forEach(row => {
@@ -666,9 +688,9 @@ function waterCrops() {
             });
         });
         updateUI();
-        addLogEntry(`Watered all crops, using ${waterNeeded} water.`);
+        addLogEntry(`Watered all crops, using ${waterNeeded} water.`, 'success');
     } else {
-        addLogEntry("Not enough water to water all crops!", 'error');
+        addLogEntry(`Not enough water to water all crops! Need ${waterNeeded} water, but only have ${Math.floor(gameState.water)}.`, 'error');
     }
 }
 
@@ -681,10 +703,12 @@ function harvestCrop(row, col) {
 
     const now = gameState.hour + (gameState.day - 1) * 24;
     if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime && plot.watered) {
-        gameState.food += CROP_TYPES[plot.type].yield;
+        const yield = CROP_TYPES[plot.type].yield;
+        gameState.food += yield;
+        gameState.totalResourcesGathered.food += yield;
         gameState.farming.grid[row][col] = null;
         updateUI();
-        addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${CROP_TYPES[plot.type].yield} food.`);
+        addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${yield} food.`);
     } else {
         addLogEntry("This crop is not ready for harvest yet!", 'warning');
     }
@@ -791,6 +815,7 @@ function updateUpgradeButtons() {
 function collectWellWater() {
     const collected = gameState.well.current;
     gameState.water += collected;
+    gameState.totalResourcesGathered.water += collected;
     gameState.well.current = 0;
     addLogEntry(`Collected ${collected} water from the well.`);
     updateUI();
@@ -811,6 +836,7 @@ function buyWellUpgrade() {
 function collectWellWater() {
     const collected = gameState.well.current;
     gameState.water += collected;
+    gameState.totalResourcesGathered.water += collected;
     gameState.well.current = 0;
     addLogEntry(`Collected ${collected} water from the well.`);
     updateUI();
@@ -823,9 +849,9 @@ function updateActionButtons() {
     const hasEnoughEnergy = selectedPerson.energy > 0;
 
     const actions = [
-        { id: 'gatherFoodBtn', resource: 'food', amount: 5 },
-        { id: 'collectWaterBtn', resource: 'water', amount: 10 },
-        { id: 'chopWoodBtn', resource: 'wood', amount: 3 }
+        { id: 'gatherFoodBtn', resource: 'food', amount: '4-6' },
+        { id: 'collectWaterBtn', resource: 'water', amount: '8-12' },
+        { id: 'chopWoodBtn', resource: 'wood', amount: '2-4' }
     ];
 
     actions.forEach(action => {
