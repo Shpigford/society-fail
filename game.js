@@ -12,11 +12,6 @@ function initializeGameState() {
             waterCollection: 0,
             woodChopping: 0
         },
-        autoGatherers: {
-            food: 0,
-            water: 0,
-            wood: 0
-        },
         maxStamina: 100,
         staminaPerAction: 10,
         staminaRecoveryPerHour: 5,
@@ -142,14 +137,14 @@ function loadActivityLog(logEntries) {
 // Modify the startGame function
 function startGame(difficulty) {
     const partySize = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
-    
+
     let availableNames = [...names];
-    
+
     gameState.party = Array(partySize).fill().map(() => {
         const randomIndex = Math.floor(Math.random() * availableNames.length);
         const name = availableNames[randomIndex];
         availableNames.splice(randomIndex, 1);
-        
+
         return {
             name: name,
             health: 100,
@@ -227,7 +222,7 @@ function gameLoop() {
             // Person is resting
             person.energy = Math.min(100, person.energy + 10);
             person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10 * person.traits.staminaRecoveryRate);
-            
+
             // Check if rest is complete
             if (person.energy === 100 && person.stamina === person.traits.maxStamina) {
                 gameState.busyUntil[index] = 0;
@@ -255,11 +250,6 @@ function gameLoop() {
             delete gameState.busyUntil[index];
         }
     });
-
-    // Auto-gathering
-    gameState.food += gameState.autoGatherers.food;
-    gameState.water += gameState.autoGatherers.water;
-    gameState.wood += gameState.autoGatherers.wood;
 
     // Update busy status
     for (let index in gameState.busyUntil) {
@@ -304,7 +294,7 @@ function randomEvent() {
         { name: "Lucky Find", effect: () => { gameState.food += 30; gameState.water += 30; } },
         { name: "Windfall", effect: () => { gameState.wood += 15; } }
     ];
-    
+
     const event = events[Math.floor(Math.random() * events.length)];
     event.effect();
     addLogEntry(`Random Event: ${event.name}`, 'event');
@@ -324,9 +314,9 @@ function updateUI() {
     gameState.party.forEach((person, index) => {
         const isBusy = isPersonBusy(index);
         const isResting = gameState.busyUntil[index] === -1;
-        const busyTimeLeft = isBusy && !isResting ? 
+        const busyTimeLeft = isBusy && !isResting ?
             gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
-        
+
         partyElement.innerHTML += `
             <div class="person ${index === gameState.selectedPerson ? 'selected' : ''} ${isBusy ? 'busy' : ''}" onclick="selectPerson(${index})">
                 <h3>${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
@@ -414,7 +404,7 @@ function updateUI() {
                     const cropEmoji = CROP_TYPES[plot.type].emoji;
                     plotElement.textContent = cropEmoji;
                     plotElement.title = `${plot.type}: ${growthProgress.toFixed(0)}% grown, ${plot.watered ? 'Watered' : 'Needs Water'}`;
-                    
+
                     if (!plot.watered) {
                         plotElement.style.opacity = '0.5';
                     }
@@ -442,7 +432,7 @@ function updateUI() {
             console.warn(`Person element not found for index ${index}`);
             return;
         }
-        
+
         const statElements = personElement.querySelectorAll('.stat');
         const expectedStatCount = 5; // Health, Hunger, Thirst, Energy, Stamina
 
@@ -470,18 +460,27 @@ function updateUI() {
         updateStat(4, person.energy, 100);
         updateStat(5, person.stamina, person.traits.maxStamina);
     });
+
+    updateUpgradeButtons();
 }
 
 function performAction(personIndex, action, actionName) {
     const person = gameState.party[personIndex];
     if (isPersonBusy(personIndex)) {
         addLogEntry(`${person.name} is busy and can't ${actionName} right now!`, 'warning');
-    } else if (person.stamina >= gameState.staminaPerAction) {
+    } else if (person.energy <= 0 && !['eat', 'drink', 'sleep'].includes(actionName)) {
+        addLogEntry(`${person.name} is too exhausted to ${actionName}!`, 'warning');
+    } else if (person.stamina >= gameState.staminaPerAction || ['eat', 'drink', 'sleep'].includes(actionName)) {
         action();
-        person.stamina -= gameState.staminaPerAction;
+        // Increase energy drain for gather, collect, and chop actions
+        const energyDrain = ['gatherFood', 'collectWater', 'chopWood'].includes(actionName) ? 15 : 5;
+        if (!['eat', 'drink', 'sleep'].includes(actionName)) {
+            person.stamina -= gameState.staminaPerAction;
+            person.energy = Math.max(0, person.energy - energyDrain);
+        }
         setBusy(personIndex, ACTION_DURATIONS[actionName]);
         updateUI();
-        
+
         // Add cooldown animation
         const button = document.querySelector(`#party .person:nth-child(${personIndex + 1}) button[onclick^="${actionName}"]`);
         if (button) {
@@ -584,7 +583,7 @@ function plantCrop(row, col, cropType) {
         addLogEntry("This plot is already occupied!", 'warning');
         return;
     }
-    
+
     const waterCost = CROP_TYPES[cropType].waterNeeded;
     if (gameState.water >= waterCost) {
         gameState.water -= waterCost;
@@ -698,16 +697,74 @@ function updateDayNightIndicator() {
     indicator.style.filter = `brightness(${brightness}%)`;
 }
 
+// Add this new function
+function updateUpgradeButtons() {
+    const upgrades = [
+        { id: 'farming', cost: 100, resource: 'food', unlocked: true },
+        { id: 'waterCollection', cost: 50, resource: 'water', unlocked: gameState.upgrades.farming },
+        { id: 'woodChopping', cost: 50, resource: 'wood', unlocked: gameState.upgrades.farming }
+    ];
+
+    upgrades.forEach(upgrade => {
+        const button = document.querySelector(`button[onclick="buyUpgrade('${upgrade.id}')"]`);
+        if (button) {
+            if (gameState.upgrades[upgrade.id]) {
+                button.innerHTML = `${upgrade.id} ✅`;
+                button.disabled = true;
+                button.classList.add('purchased');
+            } else if (!upgrade.unlocked) {
+                button.disabled = true;
+                button.classList.add('locked');
+            } else {
+                button.disabled = gameState[upgrade.resource] < upgrade.cost;
+                button.classList.remove('locked');
+            }
+        }
+    });
+
+    // Update farming button separately
+    const farmingButton = document.querySelector('button[onclick="unlockFarming()"]');
+    if (farmingButton) {
+        if (gameState.upgrades.farming) {
+            farmingButton.innerHTML = 'Farming Unlocked ✅';
+            farmingButton.disabled = true;
+            farmingButton.classList.add('purchased');
+        } else {
+            farmingButton.disabled = gameState.food < 100;
+        }
+    }
+}
+
+// Add this new function
+function buyUpgrade(upgradeType) {
+    const upgradeCosts = {
+        waterCollection: 50,
+        woodChopping: 50
+    };
+
+    const cost = upgradeCosts[upgradeType];
+    const resource = upgradeType === 'waterCollection' ? 'water' : 'wood';
+
+    if (gameState[resource] >= cost) {
+        gameState[resource] -= cost;
+        gameState.upgrades[upgradeType]++;
+        updateUI();
+        addLogEntry(`${upgradeType} upgrade purchased!`, 'success');
+    } else {
+        addLogEntry(`Not enough ${resource} to purchase ${upgradeType} upgrade.`, 'error');
+    }
+}
+
 // Add these event listeners at the end of the file
 window.addEventListener('load', loadGame);
 
-window.addEventListener('focus', function() {
+window.addEventListener('focus', function () {
     if (gameState.party.length > 0) {
         startGameLoop();
     }
 });
 
-window.addEventListener('blur', function() {
+window.addEventListener('blur', function () {
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
     }
@@ -715,11 +772,11 @@ window.addEventListener('blur', function() {
 
 // Add this at the end of your game.js file
 window.addEventListener('load', function () {
-  const resetButton = document.querySelector('#prestige-module button:nth-child(2)');
-  if (resetButton) {
-    resetButton.addEventListener('click', resetGame);
-    console.log("Reset button listener added");
-  } else {
-    console.log("Reset button not found");
-  }
+    const resetButton = document.querySelector('#prestige-module button:nth-child(2)');
+    if (resetButton) {
+        resetButton.addEventListener('click', resetGame);
+        console.log("Reset button listener added");
+    } else {
+        console.log("Reset button not found");
+    }
 });

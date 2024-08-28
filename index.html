@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div id="game-container">
         <div id="start-screen">
@@ -23,9 +25,18 @@
             <header>
                 <h1>Society Fail 💀</h1>
                 <div id="resources">
-                    <span>Food: <span id="food">0</span> 🍖</span>
-                    <span>Water: <span id="water">0</span> 💧</span>
-                    <span>Wood: <span id="wood">0</span> 🪵</span>
+                    <div class="resource">
+                        <span class="resource-icon">🍖</span>
+                        <span class="resource-value" id="food">0</span>
+                    </div>
+                    <div class="resource">
+                        <span class="resource-icon">💧</span>
+                        <span class="resource-value" id="water">0</span>
+                    </div>
+                    <div class="resource">
+                        <span class="resource-icon">🪵</span>
+                        <span class="resource-value" id="wood">0</span>
+                    </div>
                 </div>
                 <div id="time-module">
                     <div id="time-display">
@@ -36,6 +47,10 @@
                 </div>
             </header>
             <div class="game-grid">
+                <div id="log-module" class="module">
+                    <h2>Activity Log</h2>
+                    <div id="log-content"></div>
+                </div>
                 <div id="party-module" class="module">
                     <h2>Your Party</h2>
                     <div id="party"></div>
@@ -56,6 +71,8 @@
                         <button onclick="buyUpgrade('woodChopping')">Upgrade Wood Chopping</button>
                     </div>
                 </div>
+                <!-- Remove this entire block: -->
+                <!--
                 <div id="auto-gatherers-module" class="module">
                     <h2>Auto-Gatherers</h2>
                     <div id="auto-gatherers">
@@ -64,16 +81,14 @@
                         <button onclick="buyAutoGatherer('wood')">Buy Wood Auto-Gatherer</button>
                     </div>
                 </div>
+                -->
                 <div id="farming-module" class="module" style="display: none;">
                     <!-- This will be populated by JavaScript -->
-                </div>
-                <div id="log-module" class="module">
-                    <h2>Activity Log</h2>
-                    <div id="log-content"></div>
                 </div>
             </div>
         </div>
     </div>
     <script src="game.js"></script>
 </body>
+
 </html>

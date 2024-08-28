@@ -38,7 +38,8 @@ h1 {
     font-size: 1em;
     display: flex;
     align-items: center;
-    gap: 15px; /* Add space between time display and reset button */
+    gap: 15px;
+    /* Add space between time display and reset button */
 }
 
 #time-display {
@@ -58,6 +59,50 @@ h1 {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 1201px) {
+    .game-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+    .game-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .game-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1240px) {
+
+    /* 1200px + 2 * 20px padding */
+    .game-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .game-grid {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #time-module {
+        margin-top: 10px;
+    }
 }
 
 .module {
@@ -80,7 +125,11 @@ button:hover {
     background-color: #444;
 }
 
-#resources, #party, #actions, #upgrades, #auto-gatherers {
+#resources,
+#party,
+#actions,
+#upgrades,
+#auto-gatherers {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -95,7 +144,8 @@ button:hover {
     background-color: #222;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative; /* Add this line */
+    position: relative;
+    /* Add this line */
 }
 
 .person:hover {
@@ -163,21 +213,6 @@ progress::-moz-progress-bar {
 
 /* Remove the keyframes for cooldown animation as it's not needed for this change */
 
-@media (max-width: 600px) {
-    .game-grid {
-        grid-template-columns: 1fr;
-    }
-
-    header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    #time-module {
-        margin-top: 10px;
-    }
-}
-
 .person-actions {
     margin-top: 10px;
     display: flex;
@@ -231,13 +266,15 @@ progress::-moz-progress-bar {
 @media (max-width: 768px) {
     header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
     }
 
     #resources {
         margin-top: 10px;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        width: 100%;
+        justify-content: space-around;
+        gap: 20px;
+        /* Slightly reduced gap for mobile to ensure fit */
     }
 
     #time-module {
@@ -259,8 +296,13 @@ progress::-moz-progress-bar {
 }
 
 @keyframes cooldown {
-    from { width: 100%; }
-    to { width: 0%; }
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
 }
 
 #log-module {
@@ -338,11 +380,12 @@ progress::-moz-progress-bar {
 #difficulty-selection button {
     font-size: 1.1em;
     padding: 15px 30px;
-    transition: transform 0.1s;
+    transition: none;
 }
 
 #difficulty-selection button:hover {
-    transform: scale(1.05);
+    transform: none;
+    box-shadow: none;
 }
 
 #difficulty-selection button:active {
@@ -384,4 +427,69 @@ progress::-moz-progress-bar {
 
 .message.success {
     background-color: #2ecc71;
+}
+
+/* Add these styles at the end of your CSS file */
+#resources {
+    display: flex;
+    gap: 30px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 30px;
+    border-radius: 20px;
+}
+
+.resource {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    /* Reduced from 10px to 5px */
+}
+
+.resource-icon {
+    font-size: 1.5em;
+}
+
+.resource-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    min-width: 30px;
+    /* Reduced from 50px to 30px */
+    text-align: left;
+    /* Changed from right to left */
+}
+
+/* Update the existing media query for mobile devices */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #resources {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-around;
+        gap: 20px;
+    }
+
+    #time-module {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.purchased {
+    background-color: #2ecc71;
+    cursor: default;
+}
+
+button.locked {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
