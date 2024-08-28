@@ -30,7 +30,8 @@ function initializeGameState() {
             food: 0,
             water: 0,
             wood: 0
-        }
+        },
+        lastEventDay: 0
     };
 }
 
@@ -125,15 +126,33 @@ function resetGame(fromGameOver = false) {
         return;
     }
 
+    // Completely remove the save from localStorage
     localStorage.removeItem('societyFailSave');
+
+    // Reset the game state
     gameState = initializeGameState();
+
+    // Clear the log content
+    const logContent = document.getElementById('log-content');
+    if (logContent) {
+        logContent.innerHTML = '';
+    }
+
+    // Hide game over and game UI, show start screen
     document.getElementById('game-over-screen').classList.add('hidden');
     document.getElementById('game-ui').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
+
+    // Update the UI
     updateUI();
+
+    // Clear any existing game interval
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
     }
+
+    // Add a log entry about the game reset
+    addLogEntry("Game has been reset. All progress has been cleared.");
 }
 
 // Add this new function
@@ -315,8 +334,10 @@ function gameLoop() {
         return; // Exit the game loop
     }
 
-    // Comment out or remove this line to disable random events
-    // checkForRandomEvent();
+    // Only check for random events at the start of each day
+    if (gameState.hour === 1) {
+        checkForRandomEvent();
+    }
 
     if (gameState.upgrades.well) {
         gameState.well.current = Math.min(gameState.well.capacity, gameState.well.current + gameState.well.fillRate);
@@ -326,26 +347,114 @@ function gameLoop() {
     saveGame();
 }
 
+// Add this constant near the top of the file
+const RANDOM_EVENTS = [
+    { name: "Rainstorm", effect: (state) => { state.water += 50; return "A sudden rainstorm replenished your water supply! (+50 💧)"; }, type: "positive" },
+    {
+        name: "Wild Animal Attack", effect: (state) => {
+            const victim = state.party[Math.floor(Math.random() * state.party.length)];
+            victim.health -= 20;
+            return `${victim.name} was attacked by a wild animal! (-20 health)`;
+        }, type: "negative"
+    },
+    {
+        name: "Food Spoilage", effect: (state) => {
+            const spoiled = Math.floor(state.food * 0.2);
+            state.food -= spoiled;
+            return `Some of your food has spoiled! (-${spoiled} 🍖)`;
+        }, type: "negative"
+    },
+    {
+        name: "Lucky Find", effect: (state) => {
+            state.food += 30;
+            state.water += 30;
+            return "You found a hidden cache of supplies! (+30 🍖, +30 💧)";
+        }, type: "positive"
+    },
+    {
+        name: "Windfall", effect: (state) => {
+            state.wood += 15;
+            return "A fallen tree provided extra wood! (+15 🪵)";
+        }, type: "positive"
+    },
+    {
+        name: "Illness", effect: (state) => {
+            const victim = state.party[Math.floor(Math.random() * state.party.length)];
+            victim.health -= 10;
+            victim.stamina = Math.max(0, victim.stamina - 30);
+            return `${victim.name} has fallen ill! (-10 health, -30 stamina)`;
+        }, type: "negative"
+    },
+    {
+        name: "Morale Boost", effect: (state) => {
+            state.party.forEach(person => {
+                person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
+                person.energy = Math.min(100, person.energy + 20);
+            });
+            return "A surge of hope boosts everyone's morale! (+20 stamina, +20 energy for all)";
+        }, type: "positive"
+    },
+    {
+        name: "Tool Breaking", effect: (state) => {
+            state.wood -= 10;
+            return "One of your tools broke! (-10 🪵)";
+        }, type: "negative"
+    },
+    {
+        name: "Bountiful Harvest", effect: (state) => {
+            if (state.upgrades.farming) {
+                const bonus = Math.floor(Math.random() * 30) + 20;
+                state.food += bonus;
+                return `Your crops yielded an exceptional harvest! (+${bonus} 🍖)`;
+            }
+            return "Your crops look healthy!";
+        }, type: "positive"
+    },
+    {
+        name: "Water Contamination", effect: (state) => {
+            const lost = Math.floor(state.water * 0.3);
+            state.water -= lost;
+            return `Some of your water got contaminated! (-${lost} 💧)`;
+        }, type: "negative"
+    }
+];
+
+// Replace the existing checkForRandomEvent function with this one
 function checkForRandomEvent() {
-    // 5% chance of a random event occurring each hour
+    // Check if an event has already occurred today
+    if (gameState.day <= gameState.lastEventDay) {
+        return;
+    }
+
+    // 5% chance of a random event occurring each hour (adjusted for rarity)
     if (Math.random() < 0.05) {
-        randomEvent();
+        const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+        const message = event.effect(gameState);
+        addLogEntry(`Random Event: ${event.name}. ${message}`, event.type === 'positive' ? 'success' : 'error');
+        gameState.lastEventDay = gameState.day; // Update the last event day
+        updateUI();
     }
 }
 
-function randomEvent() {
-    const events = [
-        { name: "Rainstorm", effect: () => { gameState.water += 50; } },
-        { name: "Wild Animal Attack", effect: () => { gameState.party[0].health -= 20; } },
-        { name: "Food Spoilage", effect: () => { gameState.food = Math.max(0, gameState.food - 20); } },
-        { name: "Lucky Find", effect: () => { gameState.food += 30; gameState.water += 30; } },
-        { name: "Windfall", effect: () => { gameState.wood += 15; } }
-    ];
+// Update the addLogEntry function to handle different types of events
+function addLogEntry(message, type = 'info') {
+    const logContent = document.getElementById('log-content');
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry mb-1 p-1 rounded transition-colors duration-300 ${type === 'info' ? 'bg-blue-900 text-blue-200' :
+        type === 'error' ? 'bg-red-900 text-red-200 font-bold' :
+            type === 'success' ? 'bg-green-900 text-green-200' :
+                'bg-yellow-900 text-yellow-200'
+        }`;
+    logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
+    logContent.insertBefore(logEntry, logContent.firstChild);
 
-    const event = events[Math.floor(Math.random() * events.length)];
-    event.effect();
-    addLogEntry(`Random Event: ${event.name}`, 'event');
-    updateUI();
+    // Limit log entries to 100
+    while (logContent.children.length > 100) {
+        logContent.removeChild(logContent.lastChild);
+    }
+
+    // Scroll to the top of the log
+    logContent.scrollTop = 0;
 }
 
 function updateUI() {
@@ -440,7 +549,7 @@ function updateUI() {
                 Plant: 
                 <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
                 <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
-                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
+                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 ���)">🥔 15💧</button>
             </div>
             <div id="farming-grid" class="grid grid-cols-5 gap-2 mb-4"></div>
             <div class="mt-4">
