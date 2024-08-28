@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
 body {
-    font-family: 'Courier New', monospace;
+    font-family: 'Roboto Mono', monospace;
     background-color: black;
     color: white;
     margin: 0;
@@ -34,6 +36,15 @@ h1 {
 
 #time-module {
     font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Add space between time display and reset button */
+}
+
+#time-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 #difficulty-selection {
@@ -231,6 +242,8 @@ progress::-moz-progress-bar {
 
     #time-module {
         margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
@@ -267,4 +280,56 @@ progress::-moz-progress-bar {
 
 .log-entry:last-child {
     border-bottom: none;
+}
+
+/* Add these styles at the end of your existing CSS file */
+
+#start-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+}
+
+#start-screen h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+#start-screen p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+#difficulty-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#difficulty-selection h2 {
+    margin-bottom: 15px;
+}
+
+#difficulty-selection button {
+    font-size: 1.1em;
+    padding: 15px 30px;
+    transition: transform 0.1s;
+}
+
+#difficulty-selection button:hover {
+    transform: scale(1.05);
+}
+
+#difficulty-selection button:active {
+    transform: scale(0.95);
+}
+
+#day-night-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transition: background-color 0.5s ease;
 }

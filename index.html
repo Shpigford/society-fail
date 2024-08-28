@@ -5,26 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Society Fail</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="game-container">
-        <header>
+        <div id="start-screen">
             <h1>Society Fail 💀</h1>
-            <div id="resources">
-                <span>Food: <span id="food">0</span> 🍖</span>
-                <span>Water: <span id="water">0</span> 💧</span>
-                <span>Wood: <span id="wood">0</span> 🪵</span>
+            <p>Can you survive and rebuild society?</p>
+            <div id="difficulty-selection">
+                <h2>Select Difficulty</h2>
+                <button onclick="startGame('easy')">Easy (1 person) 👤</button>
+                <button onclick="startGame('medium')">Medium (3 people) 👥</button>
+                <button onclick="startGame('hard')">Hard (5 people) 👥👥</button>
             </div>
-            <div id="time-module">
-                <div id="time">Day 1, Hour 1</div>
-            </div>
-        </header>
-        <div id="difficulty-selection">
-            <button onclick="startGame('easy')">Easy (1 person) 👤</button>
-            <button onclick="startGame('medium')">Medium (3 people) 👥</button>
-            <button onclick="startGame('hard')">Hard (5 people) 👥👥</button>
         </div>
         <div id="game-ui" style="display: none;">
+            <header>
+                <h1>Society Fail 💀</h1>
+                <div id="resources">
+                    <span>Food: <span id="food">0</span> 🍖</span>
+                    <span>Water: <span id="water">0</span> 💧</span>
+                    <span>Wood: <span id="wood">0</span> 🪵</span>
+                </div>
+                <div id="time-module">
+                    <div id="time-display">
+                        <span id="time">Day 1, Hour 1</span>
+                        <div id="day-night-indicator"></div>
+                    </div>
+                    <button id="reset-game" onclick="resetGame()">Reset Game</button>
+                </div>
+            </header>
             <div class="game-grid">
                 <div id="party-module" class="module">
                     <h2>Your Party</h2>
@@ -53,11 +63,6 @@
                         <button onclick="buyAutoGatherer('water')">Buy Water Auto-Gatherer</button>
                         <button onclick="buyAutoGatherer('wood')">Buy Wood Auto-Gatherer</button>
                     </div>
-                </div>
-                <div id="prestige-module" class="module">
-                    <h2>Prestige</h2>
-                    <button onclick="prestige()">Prestige</button>
-                    <button onclick="resetGame()">Reset Game</button>
                 </div>
                 <div id="farming-module" class="module" style="display: none;">
                     <!-- This will be populated by JavaScript -->

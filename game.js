@@ -17,7 +17,6 @@ function initializeGameState() {
             water: 0,
             wood: 0
         },
-        prestige: 0,
         maxStamina: 100,
         staminaPerAction: 10,
         staminaRecoveryPerHour: 5,
@@ -99,13 +98,13 @@ function loadGame() {
     if (savedGame) {
         const saveObject = JSON.parse(savedGame);
         gameState = saveObject.gameState;
-        document.getElementById('difficulty-selection').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'none';
         document.getElementById('game-ui').style.display = 'block';
         updateUI();
         loadActivityLog(saveObject.logEntries);
         startGameLoop();
     } else {
-        document.getElementById('difficulty-selection').style.display = 'block';
+        document.getElementById('start-screen').style.display = 'block';
         document.getElementById('game-ui').style.display = 'none';
     }
 }
@@ -155,7 +154,6 @@ function startGame(difficulty) {
             thirst: 0,
             energy: 100,
             stamina: gameState.maxStamina,
-            // Add personality traits
             traits: {
                 hungerRate: getRandomTrait('hungerRate'),
                 thirstRate: getRandomTrait('thirstRate'),
@@ -171,7 +169,7 @@ function startGame(difficulty) {
         gameState.busyUntil[index] = 0;
     });
 
-    document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-ui').style.display = 'block';
 
     updateUI();
@@ -262,7 +260,9 @@ function gameLoop() {
         location.reload();
     }
 
-    checkForRandomEvent();
+    // Comment out or remove this line to disable random events
+    // checkForRandomEvent();
+
     updateUI();
     saveGame();
 }
@@ -296,6 +296,8 @@ function updateUI() {
     document.getElementById('food').textContent = Math.floor(gameState.food);
     document.getElementById('water').textContent = Math.floor(gameState.water);
     document.getElementById('wood').textContent = Math.floor(gameState.wood);
+
+    updateDayNightIndicator();
 
     const partyElement = document.getElementById('party');
     partyElement.innerHTML = '';
@@ -625,15 +627,6 @@ function harvestCrop(row, col) {
     }
 }
 
-function prestige() {
-    if (confirm("Are you sure you want to restart? You'll gain prestige points based on your progress.")) {
-        const prestigeGained = Math.floor(Math.log(gameState.day));
-        addLogEntry(`Prestiged! Gained ${prestigeGained} prestige points.`);
-        gameState.prestige += prestigeGained;
-        resetGame();
-    }
-}
-
 function selectPerson(index) {
     gameState.selectedPerson = index;
     updateUI();
@@ -668,6 +661,28 @@ function updateProgressBarColor(progressBar, value, max, reverse = false) {
     }
 
     progressBar.style.setProperty('--progress-color', color);
+}
+
+function updateDayNightIndicator() {
+    const indicator = document.getElementById('day-night-indicator');
+    const hour = gameState.hour;
+
+    if (hour >= 6 && hour < 18) {
+        // Daytime
+        indicator.style.backgroundColor = '#FFD700'; // Gold for sun
+        indicator.title = 'Day';
+    } else {
+        // Nighttime
+        indicator.style.backgroundColor = '#87CEEB'; // Sky blue for moon
+        indicator.title = 'Night';
+    }
+
+    // Adjust brightness based on time of day
+    const brightness = hour >= 6 && hour < 18
+        ? Math.sin((hour - 6) / 12 * Math.PI) * 50 + 50
+        : Math.sin((hour - 18) / 12 * Math.PI) * 25 + 25;
+
+    indicator.style.filter = `brightness(${brightness}%)`;
 }
 
 // Add these event listeners at the end of the file
