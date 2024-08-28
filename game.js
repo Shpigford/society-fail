@@ -65,10 +65,10 @@ function getRandomTrait(traitName) {
 }
 
 // Add this function at the beginning of the file
-function addLogEntry(message) {
+function addLogEntry(message, type = 'info') {
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
-    logEntry.className = 'log-entry';
+    logEntry.className = `log-entry ${type}`;
     logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
     logContent.insertBefore(logEntry, logContent.firstChild);
 
@@ -76,6 +76,9 @@ function addLogEntry(message) {
     while (logContent.children.length > 100) {
         logContent.removeChild(logContent.lastChild);
     }
+
+    // Scroll to the top of the log
+    logContent.scrollTop = 0;
 }
 
 // Add these functions at the beginning of the file
@@ -169,13 +172,32 @@ function startGame(difficulty) {
         gameState.busyUntil[index] = 0;
     });
 
+    // Set initial resources based on difficulty
+    if (difficulty === 'easy') {
+        gameState.food = 50;
+        gameState.water = 50;
+        gameState.wood = 30;
+    } else if (difficulty === 'medium') {
+        gameState.food = 30;
+        gameState.water = 30;
+        gameState.wood = 20;
+    } else {
+        // Hard difficulty starts with no resources
+        gameState.food = 0;
+        gameState.water = 0;
+        gameState.wood = 0;
+    }
+
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-ui').style.display = 'block';
 
     updateUI();
     startGameLoop();
 
-    addLogEntry(`Game started on ${difficulty} difficulty.`);
+    addLogEntry(`Game started on ${difficulty} difficulty with ${partySize} people.`);
+    if (difficulty !== 'hard') {
+        addLogEntry(`Starting resources: ${gameState.food} food, ${gameState.water} water, ${gameState.wood} wood.`);
+    }
 }
 
 // Add this new function
@@ -228,7 +250,7 @@ function gameLoop() {
 
         // Check if person has died
         if (person.health <= 0) {
-            alert(`${person.name} has died!`);
+            addLogEntry(`${person.name} has died!`, 'error');
             gameState.party.splice(index, 1);
             delete gameState.busyUntil[index];
         }
@@ -256,7 +278,7 @@ function gameLoop() {
     });
 
     if (gameState.party.length === 0) {
-        alert('Game Over! Everyone has died.');
+        addLogEntry('Game Over! Everyone has died.', 'error');
         location.reload();
     }
 
@@ -285,10 +307,8 @@ function randomEvent() {
     
     const event = events[Math.floor(Math.random() * events.length)];
     event.effect();
-    alert(`Random Event: ${event.name}`);
+    addLogEntry(`Random Event: ${event.name}`, 'event');
     updateUI();
-
-    addLogEntry(`Random Event: ${event.name}`);
 }
 
 function updateUI() {
@@ -455,7 +475,7 @@ function updateUI() {
 function performAction(personIndex, action, actionName) {
     const person = gameState.party[personIndex];
     if (isPersonBusy(personIndex)) {
-        alert(`${person.name} is busy and can't ${actionName} right now!`);
+        addLogEntry(`${person.name} is busy and can't ${actionName} right now!`, 'warning');
     } else if (person.stamina >= gameState.staminaPerAction) {
         action();
         person.stamina -= gameState.staminaPerAction;
@@ -472,7 +492,7 @@ function performAction(personIndex, action, actionName) {
             }, { once: true });
         }
     } else {
-        alert(`${person.name} doesn't have enough stamina to ${actionName}!`);
+        addLogEntry(`${person.name} doesn't have enough stamina to ${actionName}!`, 'warning');
     }
 }
 
@@ -515,10 +535,9 @@ function eat(personIndex) {
             person.hunger = Math.max(0, person.hunger - 30);
             person.health = Math.min(100, person.health + 5);
             person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
-            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 stamina.`);
+            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 stamina.`, 'success');
         } else {
-            alert("Not enough food!");
-            addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`);
+            addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`, 'error');
         }
     }, "eat");
 }
@@ -532,8 +551,7 @@ function drink(personIndex) {
             person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10);
             addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 stamina.`);
         } else {
-            alert("Not enough water!");
-            addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`);
+            addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`, 'error');
         }
     }, "drink");
 }
@@ -551,11 +569,9 @@ function unlockFarming() {
         gameState.upgrades.farming = true;
         initializeFarmingGrid();
         updateUI();
-        addLogEntry("Farming has been unlocked!");
-        alert("Farming unlocked! You can now plant and harvest crops.");
+        addLogEntry("Farming has been unlocked! You can now plant and harvest crops.", 'success');
     } else {
-        alert("Not enough food to unlock farming!");
-        addLogEntry("Failed to unlock farming due to insufficient food.");
+        addLogEntry("Failed to unlock farming due to insufficient food.", 'error');
     }
 }
 
@@ -565,7 +581,7 @@ function initializeFarmingGrid() {
 
 function plantCrop(row, col, cropType) {
     if (gameState.farming.grid[row][col] !== null) {
-        alert("This plot is already occupied!");
+        addLogEntry("This plot is already occupied!", 'warning');
         return;
     }
     
@@ -580,8 +596,7 @@ function plantCrop(row, col, cropType) {
         updateUI();
         addLogEntry(`Planted ${cropType} at row ${row + 1}, column ${col + 1}.`);
     } else {
-        alert("Not enough water to plant this crop!");
-        addLogEntry(`Failed to plant ${cropType} due to insufficient water.`);
+        addLogEntry("Not enough water to plant this crop!", 'error');
     }
 }
 
@@ -603,15 +618,14 @@ function waterCrops() {
         updateUI();
         addLogEntry(`Watered all crops, using ${waterNeeded} water.`);
     } else {
-        alert("Not enough water to water all crops!");
-        addLogEntry("Failed to water crops due to insufficient water.");
+        addLogEntry("Not enough water to water all crops!", 'error');
     }
 }
 
 function harvestCrop(row, col) {
     const plot = gameState.farming.grid[row][col];
     if (!plot) {
-        alert("No crop to harvest here!");
+        addLogEntry("No crop to harvest here!", 'warning');
         return;
     }
 
@@ -622,8 +636,7 @@ function harvestCrop(row, col) {
         updateUI();
         addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${CROP_TYPES[plot.type].yield} food.`);
     } else {
-        alert("This crop is not ready for harvest yet!");
-        addLogEntry(`Attempted to harvest immature crop at row ${row + 1}, column ${col + 1}.`);
+        addLogEntry("This crop is not ready for harvest yet!", 'warning');
     }
 }
 

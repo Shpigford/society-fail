@@ -274,12 +274,34 @@ progress::-moz-progress-bar {
 
 .log-entry {
     margin-bottom: 5px;
-    padding: 2px 5px;
-    border-bottom: 1px solid #333;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
 }
 
-.log-entry:last-child {
-    border-bottom: none;
+.log-entry:hover {
+    opacity: 1;
+}
+
+.log-entry.info {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.log-entry.error {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.log-entry.success {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+
+.log-entry.warning {
+    background-color: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
 }
 
 /* Add these styles at the end of your existing CSS file */
@@ -332,4 +354,34 @@ progress::-moz-progress-bar {
     height: 20px;
     border-radius: 50%;
     transition: background-color 0.5s ease;
+}
+
+/* Add these styles at the end of your CSS file */
+#message-area {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    z-index: 1000;
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+.message.info {
+    background-color: #3498db;
+}
+
+.message.error {
+    background-color: #e74c3c;
+}
+
+.message.success {
+    background-color: #2ecc71;
 }
