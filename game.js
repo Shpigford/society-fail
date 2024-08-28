@@ -810,6 +810,11 @@ function updateUI() {
     const huntingModule = document.getElementById('hunting-module');
     if (gameState.upgrades.huntingLodge) {
         huntingModule.classList.remove('hidden');
+        huntingModule.innerHTML = `
+            <h2 class="text-2xl mb-4 font-black">Hunting Lodge</h2>
+            <div id="hunting-area" class="w-full h-64 bg-green-900/30 relative overflow-hidden rounded-lg"></div>
+            <p class="mt-2 text-sm">Click on the animal to hunt it before it escapes!</p>
+        `;
         if (!gameState.huntingInterval) {
             startHunting();
         }
@@ -848,11 +853,15 @@ function stopHunting() {
     gameState.huntingInterval = null;
     gameState.moveInterval = null;
     const huntingArea = document.getElementById('hunting-area');
-    huntingArea.innerHTML = '';
+    if (huntingArea) {
+        huntingArea.innerHTML = '';
+    }
 }
 
 function spawnWildlife() {
     const huntingArea = document.getElementById('hunting-area');
+    if (!huntingArea) return; // Exit the function if hunting area doesn't exist
+
     huntingArea.innerHTML = '';
 
     const animal = WILDLIFE[Math.floor(Math.random() * WILDLIFE.length)];
@@ -872,7 +881,7 @@ function spawnWildlife() {
 
     // Animal escapes after 4 seconds
     setTimeout(() => {
-        if (gameState.huntingTarget === target) {
+        if (gameState.huntingTarget === target && huntingArea) {
             huntingArea.innerHTML = '';
             clearInterval(gameState.moveInterval);
         }
@@ -1352,6 +1361,14 @@ function setDebugMode(enabled) {
                 }
             });
         }
+        // Initialize well if it's not already initialized
+        if (!gameState.well) {
+            gameState.well = {
+                capacity: 100,
+                current: 50,
+                fillRate: 1
+            };
+        }
         // Initialize hunting if it's not already started
         if (gameState.upgrades.huntingLodge && !gameState.huntingInterval) {
             startHunting();
@@ -1389,6 +1406,37 @@ window.addEventListener('blur', function () {
 function updateWellVisual() {
     const wellWater = document.getElementById('well-water');
     const wellLevel = document.getElementById('well-level');
+
+    if (!wellWater || !wellLevel) {
+        // If the well elements don't exist, update the well module HTML
+        const wellModule = document.getElementById('well-module');
+        if (wellModule) {
+            wellModule.innerHTML = `
+                <h2 class="text-2xl mb-4 font-black">Well</h2>
+                <div class="flex items-center justify-between">
+                    <div id="well-container"
+                        class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
+                        <div id="well-water"
+                            class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500">
+                        </div>
+                    </div>
+                    <div class="ml-4 flex flex-col items-start">
+                        <span id="well-level" class="text-xl mb-2">0/100</span>
+                        <button onclick="collectWellWater()"
+                            class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
+                            Water</button>
+                    </div>
+                </div>
+            `;
+        }
+        // Try to get the elements again after updating the HTML
+        wellWater = document.getElementById('well-water');
+        wellLevel = document.getElementById('well-level');
+
+        // If they still don't exist, exit the function
+        if (!wellWater || !wellLevel) return;
+    }
+
     const percentage = (gameState.well.current / gameState.well.capacity) * 100;
 
     wellWater.style.height = `${percentage}%`;
