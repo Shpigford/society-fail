@@ -13,6 +13,15 @@
                     fontFamily: {
                         'geist-mono': ['GeistMono', 'monospace'],
                     },
+                    animation: {
+                        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        pulse: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: .5 },
+                        }
+                    }
                 },
             },
         }
@@ -77,22 +86,19 @@
             </header>
             <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
                 <h2 class="text-xl mb-4 font-black">Your Party</h2>
-                <div id="party" class="flex flex-wrap justify-around gap-5"></div>
+                <div id="party" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
             </div>
             <div id="actions-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900 text-center">
                 <div id="actions" class="flex gap-2 justify-between">
-                    <button onclick="gatherFood()"
+                    <button id="gatherFoodBtn" onclick="gatherFood()"
                         class="flex-1 bg-blue-600 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Gather
-                        Food
-                        🍖</button>
-                    <button onclick="collectWater()"
+                        Food 🍖</button>
+                    <button id="collectWaterBtn" onclick="collectWater()"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Collect
-                        Water
-                        💧</button>
+                        Water 💧</button>
                     <button onclick="chopWood()"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Chop
-                        Wood
-                        🪵</button>
+                        Wood 🪵</button>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
@@ -119,6 +125,16 @@
                     <!-- This will be populated by JavaScript -->
                 </div>
             </div>
+        </div>
+        <div id="game-over-screen" class="hidden flex flex-col items-center justify-center text-center m-12">
+            <h1 class="text-5xl mb-5 font-black">💀 Society Failed</h1>
+            <p class="text-xl mb-8">Your society has collapsed.</p>
+            <div id="game-stats" class="mb-8">
+                <!-- Stats will be populated here -->
+            </div>
+            <button onclick="resetGame()" class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded transition">
+                Try Again
+            </button>
         </div>
     </div>
     <script src="game.js"></script>

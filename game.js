@@ -96,28 +96,31 @@ function loadGame() {
     if (savedGame) {
         const saveObject = JSON.parse(savedGame);
         gameState = saveObject.gameState;
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('game-ui').style.display = 'block';
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('game-ui').classList.remove('hidden');
         updateUI();
         loadActivityLog(saveObject.logEntries);
         startGameLoop();
     } else {
-        document.getElementById('start-screen').style.display = 'block';
-        document.getElementById('game-ui').style.display = 'none';
+        document.getElementById('start-screen').classList.remove('hidden');
+        document.getElementById('game-ui').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
     }
 }
 
 // Modify the resetGame function
 function resetGame() {
-    console.log("resetGame function called");
     if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
-        console.log("Reset confirmed");
         localStorage.removeItem('societyFailSave');
-        console.log("localStorage cleared");
-        location.reload();
-        console.log("Page should have reloaded");
-    } else {
-        console.log("Reset cancelled");
+        gameState = initializeGameState();
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('game-ui').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+        updateUI();
+        if (window.gameInterval) {
+            clearInterval(window.gameInterval);
+        }
     }
 }
 
@@ -183,8 +186,9 @@ function startGame(difficulty) {
         gameState.wood = 0;
     }
 
-    document.getElementById('start-screen').style.display = 'none';
-    document.getElementById('game-ui').style.display = 'block';
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('game-ui').classList.remove('hidden');
 
     updateUI();
     startGameLoop();
@@ -193,6 +197,8 @@ function startGame(difficulty) {
     if (difficulty !== 'hard') {
         addLogEntry(`Starting resources: ${gameState.food} food, ${gameState.water} water, ${gameState.wood} wood.`);
     }
+
+    updateActionButtons();
 }
 
 // Add this new function
@@ -203,6 +209,29 @@ function startGameLoop() {
     window.gameInterval = setInterval(gameLoop, 1000);
 }
 
+// Add this new function
+function showGameOverScreen() {
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-ui').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.remove('hidden');
+
+    const gameStats = document.getElementById('game-stats');
+    const timePlayed = (gameState.day - 1) * 24 + gameState.hour;
+    const hoursPlayed = Math.floor(timePlayed);
+    const daysPlayed = Math.floor(hoursPlayed / 24);
+
+    gameStats.innerHTML = `
+        <p>Time Survived: ${daysPlayed} days, ${hoursPlayed % 24} hours</p>
+        <p>Resources Gathered:</p>
+        <ul class="list-none">
+            <li>🍖 Food: ${Math.floor(gameState.food)}</li>
+            <li>💧 Water: ${Math.floor(gameState.water)}</li>
+            <li>🪵 Wood: ${Math.floor(gameState.wood)}</li>
+        </ul>
+    `;
+}
+
+// Modify the gameLoop function
 function gameLoop() {
     gameState.hour++;
     if (gameState.hour > 24) {
@@ -269,7 +298,9 @@ function gameLoop() {
 
     if (gameState.party.length === 0) {
         addLogEntry('Game Over! Everyone has died.', 'error');
-        location.reload();
+        clearInterval(window.gameInterval);
+        showGameOverScreen();
+        return; // Exit the game loop
     }
 
     // Comment out or remove this line to disable random events
@@ -317,34 +348,55 @@ function updateUI() {
         const busyTimeLeft = isBusy && !isResting ?
             gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
 
+        const getProgressBarColor = (value) => {
+            if (value > 75) return 'bg-green-500';
+            if (value > 50) return 'bg-yellow-500';
+            if (value > 25) return 'bg-orange-500';
+            return 'bg-red-500';
+        };
+
+        const getCriticalClass = (value) => {
+            return value === 0 ? 'text-red-500 animate-pulse font-bold' : '';
+        };
+
         partyElement.innerHTML += `
             <div class="person flex-1 min-w-[250px] max-w-[400px] border border-white rounded-lg p-4 m-1 bg-neutral-800 cursor-pointer transition-all duration-300 relative ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-4 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
                 <h3 class="text-lg border-b border-neutral-600 pb-2 mb-2">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
                 ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-2xl text-red-500 border-2 border-red-500 p-2 pointer-events-none bg-black bg-opacity-70">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-                <div class="stat flex items-center mb-2">
+                <div class="stat flex items-center mb-2 ${getCriticalClass(person.health)}">
                     <label class="w-16 text-right mr-2">Health:</label>
-                    <progress value="${person.health}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-green-500 [&::-moz-progress-bar]:bg-green-500"></progress>
+                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                        <div class="h-full ${getProgressBarColor(person.health)}" style="width: ${person.health}%"></div>
+                    </div>
                     <span class="w-10 text-left ml-2">${Math.floor(person.health)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2">
+                <div class="stat flex items-center mb-2 ${getCriticalClass(100 - person.hunger)}">
                     <label class="w-16 text-right mr-2">Hunger:</label>
-                    <progress value="${100 - person.hunger}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-yellow-500 [&::-moz-progress-bar]:bg-yellow-500"></progress>
+                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                        <div class="h-full ${getProgressBarColor(100 - person.hunger)}" style="width: ${100 - person.hunger}%"></div>
+                    </div>
                     <span class="w-10 text-left ml-2">${Math.floor(100 - person.hunger)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2">
+                <div class="stat flex items-center mb-2 ${getCriticalClass(100 - person.thirst)}">
                     <label class="w-16 text-right mr-2">Thirst:</label>
-                    <progress value="${100 - person.thirst}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"></progress>
+                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                        <div class="h-full ${getProgressBarColor(100 - person.thirst)}" style="width: ${100 - person.thirst}%"></div>
+                    </div>
                     <span class="w-10 text-left ml-2">${Math.floor(100 - person.thirst)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2">
+                <div class="stat flex items-center mb-2 ${getCriticalClass(person.energy)}">
                     <label class="w-16 text-right mr-2">Energy:</label>
-                    <progress value="${person.energy}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-purple-500 [&::-moz-progress-bar]:bg-purple-500"></progress>
+                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                        <div class="h-full ${getProgressBarColor(person.energy)}" style="width: ${person.energy}%"></div>
+                    </div>
                     <span class="w-10 text-left ml-2">${Math.floor(person.energy)}%</span>
                 </div>
-                <div class="stat flex items-center mb-2">
+                <div class="stat flex items-center mb-2 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
                     <label class="w-16 text-right mr-2">Stamina:</label>
-                    <progress value="${(person.stamina / person.traits.maxStamina) * 100}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500"></progress>
-                    <span class="w-10 text-left ml-2">${Math.floor(person.stamina)}/${person.traits.maxStamina}</span>
+                    <div class="flex-grow h-5 bg-neutral-700 rounded-full overflow-hidden">
+                        <div class="h-full ${getProgressBarColor((person.stamina / person.traits.maxStamina) * 100)}" style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div>
+                    </div>
+                    <span class="w-10 text-left ml-2">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
                 </div>
                 <div class="traits flex flex-wrap justify-around text-sm mt-4">
                     <strong class="w-full mb-2">Traits:</strong>
@@ -355,8 +407,8 @@ function updateUI() {
                     <span title="Stamina Recovery Rate" class="cursor-help">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
                 </div>
                 <div class="person-actions flex flex-wrap justify-around mt-4">
-                    <button onclick="eat(${index})" ${isBusy ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
-                    <button onclick="drink(${index})" ${isBusy ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
+                    <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded transition ${isBusy || gameState.food < 10 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
+                    <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded transition ${isBusy || gameState.water < 5 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
                     <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
                 </div>
             </div>
@@ -415,6 +467,7 @@ function updateUI() {
     }
 
     updateUpgradeButtons();
+    updateActionButtons();
 }
 
 function performAction(personIndex, action, actionName) {
@@ -683,6 +736,11 @@ function buyUpgrade(upgradeType) {
     } else {
         addLogEntry(`Not enough ${resource} to purchase ${upgradeType} upgrade.`, 'error');
     }
+}
+
+function updateActionButtons() {
+    // Remove this function or leave it empty
+    // We don't want to disable the main action buttons
 }
 
 // Add these event listeners at the end of the file
