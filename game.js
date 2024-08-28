@@ -63,7 +63,7 @@ function getRandomTrait(traitName) {
 function addLogEntry(message, type = 'info') {
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
-    logEntry.className = `log-entry ${type}`;
+    logEntry.className = `log-entry mb-1 p-1 rounded transition-colors duration-300 ${type === 'info' ? 'bg-blue-900 text-blue-200' : type === 'error' ? 'bg-red-900 text-red-200 font-bold' : type === 'success' ? 'bg-green-900 text-green-200' : 'bg-yellow-900 text-yellow-200'}`;
     logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
     logContent.insertBefore(logEntry, logContent.firstChild);
 
@@ -318,46 +318,46 @@ function updateUI() {
             gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
 
         partyElement.innerHTML += `
-            <div class="person ${index === gameState.selectedPerson ? 'selected' : ''} ${isBusy ? 'busy' : ''}" onclick="selectPerson(${index})">
-                <h3>${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-                <div class="stat">
-                    <label>Health:</label>
-                    <progress value="${person.health}" max="100"></progress>
-                    <span>${Math.floor(person.health)}%</span>
+            <div class="person flex-1 min-w-[250px] max-w-[400px] border border-white rounded-lg p-4 m-1 bg-neutral-800 cursor-pointer transition-all duration-300 relative ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-4 ring-green-500/20' : ''} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
+                <h3 class="text-lg border-b border-neutral-600 pb-2 mb-2">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
+                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-2xl text-red-500 border-2 border-red-500 p-2 pointer-events-none bg-black bg-opacity-70">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
+                <div class="stat flex items-center mb-2">
+                    <label class="w-16 text-right mr-2">Health:</label>
+                    <progress value="${person.health}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-green-500 [&::-moz-progress-bar]:bg-green-500"></progress>
+                    <span class="w-10 text-left ml-2">${Math.floor(person.health)}%</span>
                 </div>
-                <div class="stat">
-                    <label>Hunger:</label>
-                    <progress value="${100 - person.hunger}" max="100"></progress>
-                    <span>${Math.floor(100 - person.hunger)}%</span>
+                <div class="stat flex items-center mb-2">
+                    <label class="w-16 text-right mr-2">Hunger:</label>
+                    <progress value="${100 - person.hunger}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-yellow-500 [&::-moz-progress-bar]:bg-yellow-500"></progress>
+                    <span class="w-10 text-left ml-2">${Math.floor(100 - person.hunger)}%</span>
                 </div>
-                <div class="stat">
-                    <label>Thirst:</label>
-                    <progress value="${100 - person.thirst}" max="100"></progress>
-                    <span>${Math.floor(100 - person.thirst)}%</span>
+                <div class="stat flex items-center mb-2">
+                    <label class="w-16 text-right mr-2">Thirst:</label>
+                    <progress value="${100 - person.thirst}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"></progress>
+                    <span class="w-10 text-left ml-2">${Math.floor(100 - person.thirst)}%</span>
                 </div>
-                <div class="stat">
-                    <label>Energy:</label>
-                    <progress value="${person.energy}" max="100"></progress>
-                    <span>${Math.floor(person.energy)}%</span>
+                <div class="stat flex items-center mb-2">
+                    <label class="w-16 text-right mr-2">Energy:</label>
+                    <progress value="${person.energy}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-purple-500 [&::-moz-progress-bar]:bg-purple-500"></progress>
+                    <span class="w-10 text-left ml-2">${Math.floor(person.energy)}%</span>
                 </div>
-                <div class="stat">
-                    <label>Stamina:</label>
-                    <progress value="${(person.stamina / person.traits.maxStamina) * 100}" max="100"></progress>
-                    <span>${Math.floor(person.stamina)}/${person.traits.maxStamina}</span>
+                <div class="stat flex items-center mb-2">
+                    <label class="w-16 text-right mr-2">Stamina:</label>
+                    <progress value="${(person.stamina / person.traits.maxStamina) * 100}" max="100" class="flex-grow h-5 [&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500"></progress>
+                    <span class="w-10 text-left ml-2">${Math.floor(person.stamina)}/${person.traits.maxStamina}</span>
                 </div>
-                <div class="traits">
-                    <strong>Traits:</strong>
-                    <span title="Hunger Rate">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
-                    <span title="Thirst Rate">💧: ${person.traits.thirstRate.toFixed(2)}</span>
-                    <span title="Energy Rate">⚡: ${person.traits.energyRate.toFixed(2)}</span>
-                    <span title="Max Stamina">💪: ${person.traits.maxStamina}</span>
-                    <span title="Stamina Recovery Rate">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
+                <div class="traits flex flex-wrap justify-around text-sm mt-4">
+                    <strong class="w-full mb-2">Traits:</strong>
+                    <span title="Hunger Rate" class="cursor-help">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
+                    <span title="Thirst Rate" class="cursor-help">💧: ${person.traits.thirstRate.toFixed(2)}</span>
+                    <span title="Energy Rate" class="cursor-help">⚡: ${person.traits.energyRate.toFixed(2)}</span>
+                    <span title="Max Stamina" class="cursor-help">💪: ${person.traits.maxStamina}</span>
+                    <span title="Stamina Recovery Rate" class="cursor-help">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
                 </div>
-                <div class="person-actions">
-                    <button onclick="eat(${index})" ${isBusy ? 'disabled' : ''} style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
-                    <button onclick="drink(${index})" ${isBusy ? 'disabled' : ''} style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
-                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest</button>
+                <div class="person-actions flex flex-wrap justify-around mt-4">
+                    <button onclick="eat(${index})" ${isBusy ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
+                    <button onclick="drink(${index})" ${isBusy ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
+                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
                 </div>
             </div>
         `;
@@ -366,37 +366,26 @@ function updateUI() {
     // Update farming UI
     const farmingModule = document.getElementById('farming-module');
     if (gameState.upgrades.farming) {
-        farmingModule.style.display = 'block';
+        farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <h2>Farming</h2>
-            <div id="farming-grid"></div>
-            <div>
-                <button onclick="waterCrops()">Water All Crops (5 💧 each)</button>
+            <h2 class="text-xl mb-4">Farming</h2>
+            <div id="farming-grid" class="grid grid-cols-3 gap-2 mb-4"></div>
+            <div class="mb-4">
+                <button onclick="waterCrops()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Water All Crops (5 💧 each)</button>
             </div>
             <div>
                 Plant: 
-                <button onclick="setPlantingCrop('wheat')">Wheat (5 💧)</button>
-                <button onclick="setPlantingCrop('corn')">Corn (10 💧)</button>
-                <button onclick="setPlantingCrop('potato')">Potato (15 💧)</button>
+                <button onclick="setPlantingCrop('wheat')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Wheat (5 💧)</button>
+                <button onclick="setPlantingCrop('corn')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Corn (10 💧)</button>
+                <button onclick="setPlantingCrop('potato')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded transition">Potato (15 💧)</button>
             </div>
         `;
 
         const farmingGrid = document.getElementById('farming-grid');
-        farmingGrid.style.display = 'grid';
-        farmingGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        farmingGrid.style.gap = '10px';
-
         gameState.farming.grid.forEach((row, rowIndex) => {
             row.forEach((plot, colIndex) => {
                 const plotElement = document.createElement('div');
-                plotElement.style.width = '50px';
-                plotElement.style.height = '50px';
-                plotElement.style.border = '1px solid white';
-                plotElement.style.display = 'flex';
-                plotElement.style.justifyContent = 'center';
-                plotElement.style.alignItems = 'center';
-                plotElement.style.fontSize = '24px';
-                plotElement.style.cursor = 'pointer';
+                plotElement.className = 'w-16 h-16 border border-white flex justify-center items-center text-3xl cursor-pointer';
 
                 if (plot) {
                     const now = gameState.hour + (gameState.day - 1) * 24;
@@ -406,12 +395,12 @@ function updateUI() {
                     plotElement.title = `${plot.type}: ${growthProgress.toFixed(0)}% grown, ${plot.watered ? 'Watered' : 'Needs Water'}`;
 
                     if (!plot.watered) {
-                        plotElement.style.opacity = '0.5';
+                        plotElement.classList.add('opacity-50');
                     }
 
                     if (growthProgress === 100) {
                         plotElement.onclick = () => harvestCrop(rowIndex, colIndex);
-                        plotElement.style.backgroundColor = 'green';
+                        plotElement.classList.add('bg-green-600');
                     }
                 } else {
                     plotElement.textContent = '🟫';
@@ -422,44 +411,8 @@ function updateUI() {
             });
         });
     } else {
-        farmingModule.style.display = 'none';
+        farmingModule.classList.add('hidden');
     }
-
-    // Update progress bar colors
-    gameState.party.forEach((person, index) => {
-        const personElement = partyElement.children[index];
-        if (!personElement) {
-            console.warn(`Person element not found for index ${index}`);
-            return;
-        }
-
-        const statElements = personElement.querySelectorAll('.stat');
-        const expectedStatCount = 5; // Health, Hunger, Thirst, Energy, Stamina
-
-        if (statElements.length < expectedStatCount) {
-            console.warn(`Not enough stat elements found for person ${index}. Expected ${expectedStatCount}, found ${statElements.length}`);
-            return;
-        }
-
-        const updateStat = (statIndex, value, max, reverse = false) => {
-            if (statIndex > statElements.length) {
-                console.warn(`Stat index ${statIndex} out of range for person ${index}`);
-                return;
-            }
-            const progressBar = statElements[statIndex - 1].querySelector('progress');
-            if (progressBar) {
-                updateProgressBarColor(progressBar, value, max, reverse);
-            } else {
-                console.warn(`Progress bar not found for stat ${statIndex} of person ${index}`);
-            }
-        };
-
-        updateStat(1, person.health, 100);
-        updateStat(2, person.hunger, 100, true);
-        updateStat(3, person.thirst, 100, true);
-        updateStat(4, person.energy, 100);
-        updateStat(5, person.stamina, person.traits.maxStamina);
-    });
 
     updateUpgradeButtons();
 }
@@ -652,29 +605,6 @@ function setPlantingCrop(cropType) {
     gameState.plantingCrop = cropType;
 }
 
-// Add this new function
-function updateProgressBarColor(progressBar, value, max, reverse = false) {
-    if (!progressBar) {
-        console.warn('Progress bar element not found');
-        return;
-    }
-
-    const percentage = reverse ? (1 - value / max) * 100 : (value / max) * 100;
-    let color;
-
-    if (percentage >= 75) {
-        color = '#00ff00'; // Green
-    } else if (percentage >= 50) {
-        color = '#ffff00'; // Yellow
-    } else if (percentage >= 25) {
-        color = '#ff8000'; // Orange
-    } else {
-        color = '#ff0000'; // Red
-    }
-
-    progressBar.style.setProperty('--progress-color', color);
-}
-
 function updateDayNightIndicator() {
     const indicator = document.getElementById('day-night-indicator');
     const hour = gameState.hour;
@@ -697,7 +627,6 @@ function updateDayNightIndicator() {
     indicator.style.filter = `brightness(${brightness}%)`;
 }
 
-// Add this new function
 function updateUpgradeButtons() {
     const upgrades = [
         { id: 'farming', cost: 100, resource: 'food', unlocked: true },
@@ -711,13 +640,14 @@ function updateUpgradeButtons() {
             if (gameState.upgrades[upgrade.id]) {
                 button.innerHTML = `${upgrade.id} ✅`;
                 button.disabled = true;
-                button.classList.add('purchased');
+                button.classList.add('bg-green-800', 'cursor-default');
+                button.classList.remove('hover:bg-green-700');
             } else if (!upgrade.unlocked) {
                 button.disabled = true;
-                button.classList.add('locked');
+                button.classList.add('opacity-30', 'cursor-not-allowed');
             } else {
                 button.disabled = gameState[upgrade.resource] < upgrade.cost;
-                button.classList.remove('locked');
+                button.classList.remove('opacity-30', 'cursor-not-allowed');
             }
         }
     });
@@ -728,14 +658,14 @@ function updateUpgradeButtons() {
         if (gameState.upgrades.farming) {
             farmingButton.innerHTML = 'Farming Unlocked ✅';
             farmingButton.disabled = true;
-            farmingButton.classList.add('purchased');
+            farmingButton.classList.add('bg-green-800', 'cursor-default');
+            farmingButton.classList.remove('hover:bg-green-700');
         } else {
             farmingButton.disabled = gameState.food < 100;
         }
     }
 }
 
-// Add this new function
 function buyUpgrade(upgradeType) {
     const upgradeCosts = {
         waterCollection: 50,

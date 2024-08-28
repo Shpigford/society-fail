@@ -1,76 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Society Fail</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'geist-mono': ['GeistMono', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'GeistMono';
+            src: url('assets/fonts/GeistMonoVF.ttf') format('truetype-variations');
+            font-weight: 100 900;
+            font-style: normal;
+        }
+    </style>
 </head>
 
-<body>
-    <div id="game-container">
-        <div id="start-screen">
-            <h1>Society Fail 💀</h1>
-            <p>Can you survive and rebuild society?</p>
-            <div id="difficulty-selection">
-                <h2>Select Difficulty</h2>
-                <button onclick="startGame('easy')">Easy (1 person) 👤<br>Start with: 50 🍖, 50 💧, 30 🪵</button>
-                <button onclick="startGame('medium')">Medium (3 people) 👥<br>Start with: 30 🍖, 30 💧, 20 🪵</button>
-                <button onclick="startGame('hard')">Hard (5 people) 👥👥<br>Start with: No resources</button>
+<body class="font-geist-mono bg-black text-white min-h-screen flex flex-col">
+    <div id="game-container" class="max-w-full overflow-x-hidden flex-grow flex flex-col w-full">
+        <div id="start-screen" class="flex flex-col items-center justify-center text-center m-12">
+            <h1 class="text-5xl mb-5 font-black">💀 Society Fail</h1>
+            <p class="text-xl mb-8">Can you survive the apocalypse &amp; rebuild society?</p>
+
+            <div class="w-full h-px bg-neutral-800 my-8"></div>
+
+            <div id="difficulty-selection" class="flex flex-col gap-4">
+                <h2 class="text-2xl mb-4">How much pain can you take?</h2>
+                <button onclick="startGame('easy')"
+                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Easy (1 person)
+                    👤<br>Start with: 50 🍖, 50 💧, 30 🪵</button>
+                <button onclick="startGame('medium')"
+                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Medium (3
+                    people)
+                    👥<br>Start with: 30 🍖, 30 💧, 20 🪵</button>
+                <button onclick="startGame('hard')"
+                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Hard (5 people)
+                    👥👥<br>Start with: No resources</button>
             </div>
         </div>
-        <div id="game-ui" style="display: none;">
-            <header>
-                <h1>Society Fail 💀</h1>
-                <div id="resources">
-                    <div class="resource">
-                        <span class="resource-icon">🍖</span>
-                        <span class="resource-value" id="food">0</span>
+        <div id="game-ui" class="hidden">
+            <header class="flex justify-between items-center p-4 bg-neutral-900 sticky top-0 z-50">
+                <h1 class="text-2xl font-black">💀 Society Fail</h1>
+                <div id="resources" class="flex gap-8 bg-black bg-opacity-50 px-8 py-2 rounded-full">
+                    <div class="resource flex items-center gap-1">
+                        <span class="text-2xl">🍖</span>
+                        <span id="food" class="text-xl font-bold min-w-[30px] text-left">0</span>
                     </div>
-                    <div class="resource">
-                        <span class="resource-icon">💧</span>
-                        <span class="resource-value" id="water">0</span>
+                    <div class="resource flex items-center gap-1">
+                        <span class="text-2xl">💧</span>
+                        <span id="water" class="text-xl font-bold min-w-[30px] text-left">0</span>
                     </div>
-                    <div class="resource">
-                        <span class="resource-icon">🪵</span>
-                        <span class="resource-value" id="wood">0</span>
+                    <div class="resource flex items-center gap-1">
+                        <span class="text-2xl">🪵</span>
+                        <span id="wood" class="text-xl font-bold min-w-[30px] text-left">0</span>
                     </div>
                 </div>
-                <div id="time-module">
-                    <div id="time-display">
+                <div id="time-module" class="flex items-center gap-4">
+                    <div id="time-display" class="flex items-center gap-2">
                         <span id="time">Day 1, Hour 1</span>
-                        <div id="day-night-indicator"></div>
+                        <div id="day-night-indicator" class="w-5 h-5 rounded-full"></div>
                     </div>
-                    <button id="reset-game" onclick="resetGame()">Reset Game</button>
+                    <button id="reset-game" onclick="resetGame()"
+                        class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-1 px-3 rounded transition">Reset</button>
                 </div>
             </header>
-            <div id="party-module" class="module full-width">
-                <h2>Your Party</h2>
-                <div id="party"></div>
+            <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
+                <h2 class="text-xl mb-4 font-black">Your Party</h2>
+                <div id="party" class="flex flex-wrap justify-around gap-5"></div>
             </div>
-            <div class="game-grid">
-                <div id="log-module" class="module">
-                    <h2>Activity Log</h2>
-                    <div id="log-content"></div>
+            <div id="actions-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900 text-center">
+                <div id="actions" class="flex gap-2 justify-between">
+                    <button onclick="gatherFood()"
+                        class="flex-1 bg-blue-600 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Gather
+                        Food
+                        🍖</button>
+                    <button onclick="collectWater()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Collect
+                        Water
+                        💧</button>
+                    <button onclick="chopWood()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-xl text-white py-3 px-4 rounded transition">Chop
+                        Wood
+                        🪵</button>
                 </div>
-                <div id="actions-module" class="module">
-                    <h2>Actions</h2>
-                    <div id="actions">
-                        <button onclick="gatherFood()">Gather Food 🍖</button>
-                        <button onclick="collectWater()">Collect Water 💧</button>
-                        <button onclick="chopWood()">Chop Wood 🪵</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
+                <div id="log-module"
+                    class="p-4 rounded-lg border border-neutral-800 bg-neutral-900 max-h-[300px] overflow-y-auto">
+                    <h2 class="text-xl mb-4 font-black">Activity Log</h2>
+                    <div id="log-content" class="text-sm"></div>
+                </div>
+                <div id="upgrades-module" class="p-4 rounded-lg border border-neutral-800 bg-neutral-900">
+                    <h2 class="text-xl mb-4 font-black">Upgrades</h2>
+                    <div id="upgrades" class="flex flex-wrap gap-2">
+                        <button onclick="unlockFarming()"
+                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Unlock
+                            Farming (100 🍖)</button>
+                        <button onclick="buyUpgrade('waterCollection')"
+                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Upgrade
+                            Water Collection</button>
+                        <button onclick="buyUpgrade('woodChopping')"
+                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Upgrade Wood
+                            Chopping</button>
                     </div>
                 </div>
-                <div id="upgrades-module" class="module">
-                    <h2>Upgrades</h2>
-                    <div id="upgrades">
-                        <button onclick="unlockFarming()">Unlock Farming (100 🍖)</button>
-                        <button onclick="buyUpgrade('waterCollection')">Upgrade Water Collection</button>
-                        <button onclick="buyUpgrade('woodChopping')">Upgrade Wood Chopping</button>
-                    </div>
-                </div>
-                <div id="farming-module" class="module" style="display: none;">
+                <div id="farming-module" class="border border-white bg-neutral-900 p-4 hidden">
                     <!-- This will be populated by JavaScript -->
                 </div>
             </div>
