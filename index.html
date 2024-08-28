@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Society Fail</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Society Fail 💀</h1>
+            <div id="resources">
+                <span>Food: <span id="food">0</span> 🍖</span>
+                <span>Water: <span id="water">0</span> 💧</span>
+                <span>Wood: <span id="wood">0</span> 🪵</span>
+            </div>
+            <div id="time-module">
+                <div id="time">Day 1, Hour 1</div>
+            </div>
+        </header>
+        <div id="difficulty-selection">
+            <button onclick="startGame('easy')">Easy (1 person) 👤</button>
+            <button onclick="startGame('medium')">Medium (3 people) 👥</button>
+            <button onclick="startGame('hard')">Hard (5 people) 👥👥</button>
+        </div>
+        <div id="game-ui" style="display: none;">
+            <div class="game-grid">
+                <div id="party-module" class="module">
+                    <h2>Your Party</h2>
+                    <div id="party"></div>
+                </div>
+                <div id="actions-module" class="module">
+                    <h2>Actions</h2>
+                    <div id="actions">
+                        <button onclick="gatherFood()">Gather Food 🍖</button>
+                        <button onclick="collectWater()">Collect Water 💧</button>
+                        <button onclick="chopWood()">Chop Wood 🪵</button>
+                    </div>
+                </div>
+                <div id="upgrades-module" class="module">
+                    <h2>Upgrades</h2>
+                    <div id="upgrades">
+                        <button onclick="unlockFarming()">Unlock Farming (100 🍖)</button>
+                        <button onclick="buyUpgrade('waterCollection')">Upgrade Water Collection</button>
+                        <button onclick="buyUpgrade('woodChopping')">Upgrade Wood Chopping</button>
+                    </div>
+                </div>
+                <div id="auto-gatherers-module" class="module">
+                    <h2>Auto-Gatherers</h2>
+                    <div id="auto-gatherers">
+                        <button onclick="buyAutoGatherer('food')">Buy Food Auto-Gatherer</button>
+                        <button onclick="buyAutoGatherer('water')">Buy Water Auto-Gatherer</button>
+                        <button onclick="buyAutoGatherer('wood')">Buy Wood Auto-Gatherer</button>
+                    </div>
+                </div>
+                <div id="prestige-module" class="module">
+                    <h2>Prestige</h2>
+                    <button onclick="prestige()">Prestige</button>
+                </div>
+                <div id="farming-module" class="module" style="display: none;">
+                    <!-- This will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

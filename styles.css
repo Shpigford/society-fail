@@ -1,0 +1,270 @@
+body {
+    font-family: 'Courier New', monospace;
+    background-color: black;
+    color: white;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#game-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #111;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+#time-module {
+    font-size: 1em;
+}
+
+#difficulty-selection {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.module {
+    border: 1px solid white;
+    padding: 15px;
+    background-color: #111;
+}
+
+button {
+    background-color: #222;
+    color: white;
+    border: 1px solid white;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+#resources, #party, #actions, #upgrades, #auto-gatherers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.person {
+    border: 1px solid white;
+    padding: 10px;
+    margin: 5px;
+    width: 100%;
+    background-color: #222;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative; /* Add this line */
+}
+
+.person:hover {
+    background-color: #333;
+}
+
+.person.selected {
+    border: 2px solid #0f0;
+    background-color: #1a1a1a;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.person h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.stat label {
+    width: 60px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.stat progress {
+    flex-grow: 1;
+}
+
+.stat span {
+    width: 40px;
+    text-align: left;
+    margin-left: 10px;
+}
+
+/* Replace the existing progress bar styles with these */
+progress {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 20px;
+}
+
+progress::-webkit-progress-bar {
+    background-color: #333;
+    border-radius: 5px;
+}
+
+progress::-webkit-progress-value {
+    border-radius: 5px;
+    background-color: var(--progress-color, #00ff00);
+    transition: background-color 0.3s ease-in-out;
+}
+
+progress::-moz-progress-bar {
+    border-radius: 5px;
+    background-color: var(--progress-color, #00ff00);
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Remove the keyframes for cooldown animation as it's not needed for this change */
+
+@media (max-width: 600px) {
+    .game-grid {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #time-module {
+        margin-top: 10px;
+    }
+}
+
+.person-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.person-actions button {
+    font-size: 0.9em;
+    padding: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.person-actions button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    transform-origin: left;
+}
+
+.person-actions button.cooldown::after {
+    animation: cooldown linear forwards;
+}
+
+.person.busy {
+    opacity: 0.7;
+}
+
+.person .busy-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 1.5em;
+    color: red;
+    border: 2px solid red;
+    padding: 5px;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.person-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #resources {
+        margin-top: 10px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #time-module {
+        margin-top: 10px;
+    }
+}
+
+.traits {
+    font-size: 0.9em;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.traits span {
+    cursor: help;
+}
+
+@keyframes cooldown {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+#log-module {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#log-content {
+    font-size: 0.9em;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    padding: 2px 5px;
+    border-bottom: 1px solid #333;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
