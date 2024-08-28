@@ -47,7 +47,8 @@ function initializeGameState() {
         totalPlayTime: 0,
         totalCropsHarvested: 0,
         totalAnimalsHunted: 0,
-        totalWellWaterCollected: 0
+        totalWellWaterCollected: 0,
+        logEntries: []
     };
 }
 
@@ -143,8 +144,11 @@ function getRandomTrait(traitName) {
 function addLogEntry(message, type = 'info') {
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
-    logEntry.className = `log-entry mb-1 p-1 rounded transition-colors duration-300 ${type === 'info' ? 'bg-blue-900 text-blue-200' : type === 'error' ? 'bg-red-900 text-red-200 font-bold' : type === 'success' ? 'bg-green-900 text-green-200' : 'bg-yellow-900 text-yellow-200'}`;
-    logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
+    const entryData = { message, type, day: gameState.day, hour: gameState.hour };
+
+    logEntry.className = getLogEntryClass(type);
+    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
+
     logContent.insertBefore(logEntry, logContent.firstChild);
 
     // Limit log entries to 100
@@ -152,20 +156,38 @@ function addLogEntry(message, type = 'info') {
         logContent.removeChild(logContent.lastChild);
     }
 
+    // Store the log entry in the gameState
+    if (!gameState.logEntries) {
+        gameState.logEntries = [];
+    }
+    gameState.logEntries.unshift(entryData);
+    if (gameState.logEntries.length > 100) {
+        gameState.logEntries.pop();
+    }
+
     // Scroll to the top of the log
     logContent.scrollTop = 0;
 }
 
+// Helper function to get the appropriate class for a log entry
+function getLogEntryClass(type) {
+    switch (type) {
+        case 'info':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
+        case 'error':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
+        case 'success':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
+        default:
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
+    }
+}
+
 // Add these functions at the beginning of the file
 function saveGame() {
-    // Get the last 25 log entries
-    const logContent = document.getElementById('log-content');
-    const logEntries = Array.from(logContent.children).slice(0, 25).map(entry => entry.textContent);
-
     // Create a save object
     const saveObject = {
-        gameState: gameState,
-        logEntries: logEntries
+        gameState: gameState
     };
 
     localStorage.setItem('societyFailSave', JSON.stringify(saveObject));
@@ -180,7 +202,7 @@ function loadGame() {
         document.getElementById('game-over-screen').classList.add('hidden');
         document.getElementById('game-ui').classList.remove('hidden');
         updateUI();
-        loadActivityLog(saveObject.logEntries);
+        loadActivityLog();
         startGameLoop();
 
         // Reinitialize hunting if the upgrade is unlocked
@@ -249,16 +271,18 @@ function resetGame(fromGameOver = false) {
 }
 
 // Add this new function
-function loadActivityLog(logEntries) {
+function loadActivityLog() {
     const logContent = document.getElementById('log-content');
     logContent.innerHTML = ''; // Clear existing log entries
 
-    logEntries.forEach(entry => {
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
-        logEntry.textContent = entry;
-        logContent.appendChild(logEntry);
-    });
+    if (gameState.logEntries && gameState.logEntries.length > 0) {
+        gameState.logEntries.forEach(entry => {
+            const logEntry = document.createElement('div');
+            logEntry.className = getLogEntryClass(entry.type);
+            logEntry.textContent = `Day ${entry.day}, Hour ${entry.hour}: ${entry.message}`;
+            logContent.appendChild(logEntry);
+        });
+    }
 }
 
 // Modify the startGame function
@@ -634,12 +658,11 @@ function checkForRandomEvent() {
 function addLogEntry(message, type = 'info') {
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
-    logEntry.className = `log-entry mb-1 p-1 rounded transition-colors duration-300 ${type === 'info' ? 'bg-blue-900 text-blue-200' :
-        type === 'error' ? 'bg-red-900 text-red-200 font-bold' :
-            type === 'success' ? 'bg-green-900 text-green-200' :
-                'bg-yellow-900 text-yellow-200'
-        }`;
-    logEntry.textContent = `Day ${gameState.day}, Hour ${gameState.hour}: ${message}`;
+    const entryData = { message, type, day: gameState.day, hour: gameState.hour };
+
+    logEntry.className = getLogEntryClass(type);
+    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
+
     logContent.insertBefore(logEntry, logContent.firstChild);
 
     // Limit log entries to 100
@@ -647,8 +670,31 @@ function addLogEntry(message, type = 'info') {
         logContent.removeChild(logContent.lastChild);
     }
 
+    // Store the log entry in the gameState
+    if (!gameState.logEntries) {
+        gameState.logEntries = [];
+    }
+    gameState.logEntries.unshift(entryData);
+    if (gameState.logEntries.length > 100) {
+        gameState.logEntries.pop();
+    }
+
     // Scroll to the top of the log
     logContent.scrollTop = 0;
+}
+
+// Helper function to get the appropriate class for a log entry
+function getLogEntryClass(type) {
+    switch (type) {
+        case 'info':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
+        case 'error':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
+        case 'success':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
+        default:
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
+    }
 }
 
 // Add these constants at the top of the file
