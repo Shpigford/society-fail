@@ -734,7 +734,7 @@ function getLogEntryClass(type) {
         case 'success':
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
         case 'whisper':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200';
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
         default:
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
     }
@@ -881,38 +881,38 @@ function updateUI() {
         partyElement.innerHTML += `
             <div class="person rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : 'border border-white'} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
                 <h3 class="text-sm border-b border-neutral-600 pb-1 mb-1">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
+                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold z-10">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
                 <div class="stat flex items-center mb-1 ${getCriticalClass(person.health)}">
                     <label class="w-12 text-right mr-1">Health:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
                         <div class="h-full ${getProgressBarColor(person.health)}" style="width: ${person.health}%"></div>
                     </div>
                     <span class="w-8 text-left ml-1">${Math.floor(person.health)}%</span>
                 </div>
                 <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.hunger)}">
                     <label class="w-12 text-right mr-1">Hunger:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
                         <div class="h-full ${getProgressBarColor(100 - person.hunger)}" style="width: ${100 - person.hunger}%"></div>
                     </div>
                     <span class="w-8 text-left ml-1">${Math.floor(100 - person.hunger)}%</span>
                 </div>
                 <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.thirst)}">
                     <label class="w-12 text-right mr-1">Thirst:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
                         <div class="h-full ${getProgressBarColor(100 - person.thirst)}" style="width: ${100 - person.thirst}%"></div>
                     </div>
                     <span class="w-8 text-left ml-1">${Math.floor(100 - person.thirst)}%</span>
                 </div>
                 <div class="stat flex items-center mb-1 ${getCriticalClass(person.energy)}">
                     <label class="w-12 text-right mr-1">Energy:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
                         <div class="h-full ${getProgressBarColor(person.energy)}" style="width: ${person.energy}%"></div>
                     </div>
                     <span class="w-8 text-left ml-1">${Math.floor(person.energy)}%</span>
                 </div>
                 <div class="stat flex items-center mb-1 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
                     <label class="w-12 text-right mr-1">Stamina:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden">
+                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
                         <div class="h-full ${getProgressBarColor((person.stamina / person.traits.maxStamina) * 100)}" style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div>
                     </div>
                     <span class="w-8 text-left ml-1">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
