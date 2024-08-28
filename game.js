@@ -41,7 +41,13 @@ function initializeGameState() {
         huntingTarget: null,
         huntingInterval: null,
         moveInterval: null,
-        debug: false // Added debug flag
+        debug: false, // Added debug flag
+        achievements: {},
+        totalActions: 0,
+        totalPlayTime: 0,
+        totalCropsHarvested: 0,
+        totalAnimalsHunted: 0,
+        totalWellWaterCollected: 0
     };
 }
 
@@ -186,6 +192,14 @@ function loadGame() {
         if (gameState.debug) {
             setDebugMode(true);
         }
+
+        // Ensure all achievement-related properties exist
+        if (!gameState.achievements) gameState.achievements = {};
+        if (!gameState.totalActions) gameState.totalActions = 0;
+        if (!gameState.totalPlayTime) gameState.totalPlayTime = 0;
+        if (!gameState.totalCropsHarvested) gameState.totalCropsHarvested = 0;
+        if (!gameState.totalAnimalsHunted) gameState.totalAnimalsHunted = 0;
+        if (!gameState.totalWellWaterCollected) gameState.totalWellWaterCollected = 0;
     } else {
         document.getElementById('start-screen').classList.remove('hidden');
         document.getElementById('game-ui').classList.add('hidden');
@@ -312,6 +326,13 @@ function startGame(difficulty) {
     }
 
     updateActionButtons();
+
+    gameState.achievements = {};
+    gameState.totalActions = 0;
+    gameState.totalPlayTime = 0;
+    gameState.totalCropsHarvested = 0;
+    gameState.totalAnimalsHunted = 0;
+    gameState.totalWellWaterCollected = 0;
 }
 
 // Add this new function
@@ -426,6 +447,9 @@ function gameLoop() {
     if (gameState.upgrades.well) {
         gameState.well.current = Math.min(gameState.well.capacity, gameState.well.current + gameState.well.fillRate);
     }
+
+    gameState.totalPlayTime += 2; // 2 seconds per game loop iteration
+    checkAchievements();
 
     updateUI();
     saveGame();
@@ -632,6 +656,111 @@ const WILDLIFE = ['🦌', '🐗', '🐇', '🦃', '🦆'];
 const HUNT_INTERVAL = 5000; // 5 seconds
 const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
 
+// Add this constant at the top of the file with other constants
+const ACHIEVEMENTS = [
+    { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
+    { id: 'wellFed', name: 'Well Fed', description: 'Accumulate 1000 food', condition: () => gameState.totalResourcesGathered.food >= 1000 },
+    { id: 'hydrated', name: 'Hydrated', description: 'Accumulate 1000 water', condition: () => gameState.totalResourcesGathered.water >= 1000 },
+    { id: 'lumberjack', name: 'Lumberjack', description: 'Accumulate 1000 wood', condition: () => gameState.totalResourcesGathered.wood >= 1000 },
+    { id: 'farmer', name: 'Farmer', description: 'Plant your first crop', condition: () => gameState.upgrades.farming },
+    { id: 'hunter', name: 'Hunter', description: 'Build the Hunting Lodge', condition: () => gameState.upgrades.huntingLodge },
+    { id: 'wellDriller', name: 'Well Driller', description: 'Build the Well', condition: () => gameState.upgrades.well },
+    { id: 'doctor', name: 'Doctor', description: 'Build the Medical Tent', condition: () => gameState.upgrades.medicalTent },
+    { id: 'toolMaker', name: 'Tool Maker', description: 'Build the Tool Workshop', condition: () => gameState.upgrades.toolWorkshop },
+    { id: 'waterPurifier', name: 'Water Purifier', description: 'Build the Water Purification System', condition: () => gameState.upgrades.waterPurification },
+    { id: 'masterFarmer', name: 'Master Farmer', description: 'Unlock Advanced Farming Techniques', condition: () => gameState.upgrades.advancedFarming },
+    { id: 'bigFamily', name: 'Big Family', description: 'Have 10 people in your party', condition: () => gameState.party.length >= 10 },
+    { id: 'efficient', name: 'Efficient', description: 'Perform 100 actions', condition: () => gameState.totalActions >= 100 },
+    { id: 'wellStocked', name: 'Well Stocked', description: 'Have 500 of each resource at once', condition: () => gameState.food >= 500 && gameState.water >= 500 && gameState.wood >= 500 },
+    { id: 'marathon', name: 'Marathon', description: 'Play for 24 hours', condition: () => gameState.totalPlayTime >= 24 * 60 * 60 },
+    { id: 'cropMaster', name: 'Crop Master', description: 'Harvest 100 crops', condition: () => gameState.totalCropsHarvested >= 100 },
+    { id: 'bigGame', name: 'Big Game Hunter', description: 'Successfully hunt 50 animals', condition: () => gameState.totalAnimalsHunted >= 50 },
+    { id: 'waterWizard', name: 'Water Wizard', description: 'Collect 1000 water from the well', condition: () => gameState.totalWellWaterCollected >= 1000 },
+    { id: 'survivor30', name: 'Long-term Survivor', description: 'Survive for 30 days', condition: () => gameState.day >= 30 },
+    { id: 'jackOfAllTrades', name: 'Jack of All Trades', description: 'Unlock all upgrades', condition: () => Object.values(gameState.upgrades).every(upgrade => upgrade) },
+];
+
+// Add this function to check and update achievements
+function checkAchievements() {
+    ACHIEVEMENTS.forEach(achievement => {
+        if (!gameState.achievements[achievement.id] && achievement.condition()) {
+            gameState.achievements[achievement.id] = true;
+            addLogEntry(`Achievement Unlocked: ${achievement.name}!`, 'success');
+            updateAchievementsUI();
+        }
+    });
+}
+
+// Add this function to update the achievements UI
+function updateAchievementsUI() {
+    const achievementsContainer = document.getElementById('achievements');
+    achievementsContainer.innerHTML = '';
+
+    ACHIEVEMENTS.forEach(achievement => {
+        const achievementElement = document.createElement('div');
+        achievementElement.className = `achievement p-2 rounded ${gameState.achievements[achievement.id] ? 'bg-green-900' : 'bg-neutral-800'} transition-colors duration-300`;
+        achievementElement.innerHTML = `
+            <div class="font-bold ${gameState.achievements[achievement.id] ? 'text-green-300' : 'text-neutral-400'}">${achievement.name}</div>
+            <div class="text-xs ${gameState.achievements[achievement.id] ? 'text-green-200' : 'text-neutral-500'}">${achievement.description}</div>
+        `;
+        achievementsContainer.appendChild(achievementElement);
+    });
+}
+
+// Modify the performAction function to update total actions
+function performAction(personIndex, action, actionName) {
+    // ... existing code ...
+
+    if (!['eat', 'drink', 'sleep'].includes(actionName)) {
+        gameState.totalActions++;
+    }
+
+    // ... rest of the existing code ...
+}
+
+// Modify the harvestCrop function to update total crops harvested
+function harvestCrop(row, col) {
+    // ... existing code ...
+
+    if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime && plot.watered) {
+        // ... existing code ...
+
+        gameState.totalCropsHarvested++;
+        checkAchievements();
+    }
+
+    // ... rest of the existing code ...
+}
+
+// Modify the huntAnimal function to update total animals hunted
+function huntAnimal(animal) {
+    // ... existing code ...
+
+    gameState.totalAnimalsHunted++;
+    checkAchievements();
+
+    // ... rest of the existing code ...
+}
+
+// Modify the collectWellWater function to update total well water collected
+function collectWellWater() {
+    // ... existing code ...
+
+    gameState.totalWellWaterCollected += collected;
+    checkAchievements();
+
+    // ... rest of the existing code ...
+}
+
+// Modify the updateUI function to include updating achievements
+function updateUI() {
+    // ... existing code ...
+
+    updateAchievementsUI();
+
+    // ... rest of the existing code ...
+}
+
 // Replace the existing updateUI function with this updated version
 function updateUI() {
     document.getElementById('time').textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
@@ -831,6 +960,7 @@ function updateUI() {
 
     updateUpgradeButtons();
     updateActionButtons();
+    updateAchievementsUI();
 
     // Show/hide debug button
     // const debugButton = document.getElementById('debug-toggle');
@@ -924,6 +1054,8 @@ function huntAnimal(animal) {
 
     gameState.food += foodGained;
     gameState.totalResourcesGathered.food += foodGained;
+    gameState.totalAnimalsHunted++;
+    checkAchievements();
     addLogEntry(`Successfully hunted ${animal}! Gained ${foodGained} food.`, 'success');
     updateUI();
 }
@@ -969,6 +1101,7 @@ function performAction(personIndex, action, actionName) {
         if (!['eat', 'drink', 'sleep'].includes(actionName)) {
             person.stamina -= gameState.staminaPerAction;
             person.energy = Math.max(0, person.energy - energyDrain);
+            gameState.totalActions++;
         }
         setBusy(personIndex, ACTION_DURATIONS[actionName]);
         updateUI();
@@ -1160,6 +1293,8 @@ function harvestCrop(row, col) {
         gameState.food += yield;
         gameState.totalResourcesGathered.food += yield;
         gameState.farming.grid[row][col] = null;
+        gameState.totalCropsHarvested++;
+        checkAchievements();
         updateUI();
         addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${yield} food.`);
     } else {
@@ -1259,6 +1394,8 @@ function collectWellWater() {
     gameState.water += collected;
     gameState.totalResourcesGathered.water += collected;
     gameState.well.current = 0;
+    gameState.totalWellWaterCollected += collected;
+    checkAchievements();
     addLogEntry(`Collected ${collected} water from the well.`);
     updateUI();
     updateWellVisual();
