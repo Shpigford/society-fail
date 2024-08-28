@@ -218,7 +218,7 @@ function startGameLoop() {
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
     }
-    window.gameInterval = setInterval(gameLoop, 1000);
+    window.gameInterval = setInterval(gameLoop, 2000); // Change this to 2000 milliseconds (2 seconds)
 }
 
 // Add this new function
@@ -885,16 +885,5 @@ window.addEventListener('focus', function () {
 window.addEventListener('blur', function () {
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
-    }
-});
-
-// Add this at the end of your game.js file
-window.addEventListener('load', function () {
-    const resetButton = document.querySelector('#prestige-module button:nth-child(2)');
-    if (resetButton) {
-        resetButton.addEventListener('click', resetGame);
-        console.log("Reset button listener added");
-    } else {
-        console.log("Reset button not found");
     }
 });
