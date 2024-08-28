@@ -9,8 +9,7 @@ function initializeGameState() {
         wood: 0,
         upgrades: {
             farming: false,
-            waterCollection: 0,
-            woodChopping: 0
+            well: false
         },
         maxStamina: 100,
         staminaPerAction: 10,
@@ -21,7 +20,12 @@ function initializeGameState() {
             grid: Array(5).fill().map(() => Array(5).fill(null)),
             maxCrops: 25
         },
-        plantingCrop: 'wheat' // Default to wheat
+        plantingCrop: 'wheat', // Default to wheat
+        well: {
+            capacity: 100,
+            current: 0,
+            fillRate: 10
+        }
     };
 }
 
@@ -307,6 +311,10 @@ function gameLoop() {
     // Comment out or remove this line to disable random events
     // checkForRandomEvent();
 
+    if (gameState.upgrades.well) {
+        gameState.well.current = Math.min(gameState.well.capacity, gameState.well.current + gameState.well.fillRate);
+    }
+
     updateUI();
     saveGame();
 }
@@ -483,6 +491,26 @@ function updateUI() {
         farmingModule.classList.add('hidden');
     }
 
+    // Update well module
+    const wellModule = document.getElementById('well-module');
+    if (gameState.upgrades.well) {
+        wellModule.classList.remove('hidden');
+        wellModule.innerHTML = `
+            <h2 class="text-2xl mb-4 font-black">Well</h2>
+            <div class="mb-4">
+                <div class="flex justify-between items-center">
+                    <span>Water: ${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
+                    <button onclick="collectWellWater()" class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect Water</button>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${(gameState.well.current / gameState.well.capacity) * 100}%"></div>
+                </div>
+            </div>
+        `;
+    } else {
+        wellModule.classList.add('hidden');
+    }
+
     updateUpgradeButtons();
     updateActionButtons();
 }
@@ -535,7 +563,7 @@ function gatherFood() {
 
 function collectWater() {
     performAction(gameState.selectedPerson, () => {
-        const amount = 10 * (1 + gameState.upgrades.waterCollection * 0.5);
+        const amount = 10;
         gameState.water += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
@@ -543,7 +571,7 @@ function collectWater() {
 
 function chopWood() {
     performAction(gameState.selectedPerson, () => {
-        const amount = 3 * (1 + gameState.upgrades.woodChopping * 0.5);
+        const amount = 3;
         gameState.wood += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} chopped ${amount} wood.`);
     }, "chopWood");
@@ -701,8 +729,7 @@ function updateDayNightIndicator() {
 function updateUpgradeButtons() {
     const upgrades = [
         { id: 'farming', cost: 100, resource: 'food', unlocked: true },
-        { id: 'waterCollection', cost: 50, resource: 'water', unlocked: gameState.upgrades.farming },
-        { id: 'woodChopping', cost: 50, resource: 'wood', unlocked: gameState.upgrades.farming }
+        { id: 'well', cost: 200, resource: 'wood', unlocked: gameState.upgrades.farming }
     ];
 
     upgrades.forEach(upgrade => {
@@ -742,25 +769,51 @@ function updateUpgradeButtons() {
             farmingButton.classList.toggle('hover:bg-green-700', canAfford);
         }
     }
+
+    // Update well upgrade button
+    const wellUpgradeButton = document.querySelector('button[onclick="buyWellUpgrade()"]');
+    if (wellUpgradeButton) {
+        if (gameState.upgrades.well) {
+            wellUpgradeButton.innerHTML = 'Well Built ✅';
+            wellUpgradeButton.disabled = true;
+            wellUpgradeButton.classList.add('bg-green-800', 'cursor-default');
+            wellUpgradeButton.classList.remove('hover:bg-green-700');
+        } else {
+            const canAfford = gameState.wood >= 200;
+            wellUpgradeButton.disabled = !canAfford;
+            wellUpgradeButton.classList.toggle('opacity-50', !canAfford);
+            wellUpgradeButton.classList.toggle('cursor-not-allowed', !canAfford);
+            wellUpgradeButton.classList.toggle('hover:bg-green-700', canAfford);
+        }
+    }
 }
 
-function buyUpgrade(upgradeType) {
-    const upgradeCosts = {
-        waterCollection: 50,
-        woodChopping: 50
-    };
+function collectWellWater() {
+    const collected = gameState.well.current;
+    gameState.water += collected;
+    gameState.well.current = 0;
+    addLogEntry(`Collected ${collected} water from the well.`);
+    updateUI();
+}
 
-    const cost = upgradeCosts[upgradeType];
-    const resource = upgradeType === 'waterCollection' ? 'water' : 'wood';
-
-    if (gameState[resource] >= cost) {
-        gameState[resource] -= cost;
-        gameState.upgrades[upgradeType]++;
+function buyWellUpgrade() {
+    const cost = 200;
+    if (gameState.wood >= cost) {
+        gameState.wood -= cost;
+        gameState.upgrades.well = true;
+        addLogEntry("You've built a well! It will collect water hourly.", 'success');
         updateUI();
-        addLogEntry(`${upgradeType} upgrade purchased!`, 'success');
     } else {
-        addLogEntry(`Not enough ${resource} to purchase ${upgradeType} upgrade.`, 'error');
+        addLogEntry("Not enough wood to build a well.", 'error');
     }
+}
+
+function collectWellWater() {
+    const collected = gameState.well.current;
+    gameState.water += collected;
+    gameState.well.current = 0;
+    addLogEntry(`Collected ${collected} water from the well.`);
+    updateUI();
 }
 
 function updateActionButtons() {
@@ -771,8 +824,8 @@ function updateActionButtons() {
 
     const actions = [
         { id: 'gatherFoodBtn', resource: 'food', amount: 5 },
-        { id: 'collectWaterBtn', resource: 'water', amount: 10 * (1 + gameState.upgrades.waterCollection * 0.5) },
-        { id: 'chopWoodBtn', resource: 'wood', amount: 3 * (1 + gameState.upgrades.woodChopping * 0.5) }
+        { id: 'collectWaterBtn', resource: 'water', amount: 10 },
+        { id: 'chopWoodBtn', resource: 'wood', amount: 3 }
     ];
 
     actions.forEach(action => {

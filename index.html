@@ -113,17 +113,15 @@
                         <button onclick="unlockFarming()"
                             class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Unlock
                             Farming (100 🍖)</button>
-                        <button onclick="buyUpgrade('waterCollection')"
-                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Upgrade
-                            Water Collection</button>
-                        <button onclick="buyUpgrade('woodChopping')"
-                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Upgrade Wood
-                            Chopping</button>
+                        <button onclick="buyWellUpgrade()"
+                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Build Well
+                            (200 🪵)</button>
                     </div>
                 </div>
                 <div id="farming-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden">
                     <!-- This will be populated by JavaScript -->
                 </div>
+                <div id="well-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden"></div>
             </div>
         </div>
         <div id="game-over-screen" class="hidden flex flex-col items-center justify-center text-center m-12">
