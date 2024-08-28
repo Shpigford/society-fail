@@ -31,7 +31,8 @@ function initializeGameState() {
             water: 0,
             wood: 0
         },
-        lastEventDay: 0
+        lastEventDay: 0,
+        todaysEventHour: null
     };
 }
 
@@ -274,6 +275,9 @@ function gameLoop() {
         addLogEntry(`Day ${gameState.day} has begun.`);
     }
 
+    // Check for random events every hour
+    checkForRandomEvent();
+
     gameState.party.forEach((person, index) => {
         person.hunger = Math.min(100, person.hunger + 1 * person.traits.hungerRate);
         person.thirst = Math.min(100, person.thirst + 1.5 * person.traits.thirstRate);
@@ -332,11 +336,6 @@ function gameLoop() {
         clearInterval(window.gameInterval);
         showGameOverScreen();
         return; // Exit the game loop
-    }
-
-    // Only check for random events at the start of each day
-    if (gameState.hour === 1) {
-        checkForRandomEvent();
     }
 
     if (gameState.upgrades.well) {
@@ -421,17 +420,18 @@ const RANDOM_EVENTS = [
 
 // Replace the existing checkForRandomEvent function with this one
 function checkForRandomEvent() {
-    // Check if an event has already occurred today
-    if (gameState.day <= gameState.lastEventDay) {
-        return;
+    // If it's a new day, schedule today's event
+    if (gameState.day > gameState.lastEventDay) {
+        gameState.lastEventDay = gameState.day;
+        gameState.todaysEventHour = Math.floor(Math.random() * 24) + 1; // Random hour between 1 and 24
     }
 
-    // 5% chance of a random event occurring each hour (adjusted for rarity)
-    if (Math.random() < 0.05) {
+    // If it's time for today's event, trigger it
+    if (gameState.hour === gameState.todaysEventHour) {
         const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
         const message = event.effect(gameState);
         addLogEntry(`Random Event: ${event.name}. ${message}`, event.type === 'positive' ? 'success' : 'error');
-        gameState.lastEventDay = gameState.day; // Update the last event day
+        gameState.todaysEventHour = null; // Reset for the next day
         updateUI();
     }
 }
@@ -549,7 +549,7 @@ function updateUI() {
                 Plant: 
                 <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
                 <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
-                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 ���)">🥔 15💧</button>
+                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
             </div>
             <div id="farming-grid" class="grid grid-cols-5 gap-2 mb-4"></div>
             <div class="mt-4">
