@@ -178,6 +178,8 @@ function getLogEntryClass(type) {
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
         case 'success':
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
+        case 'whisper':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
         default:
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
     }
@@ -636,6 +638,39 @@ const RANDOM_EVENTS = [
     }
 ];
 
+const WHISPERS = [
+    "The shadows grow longer...",
+    "They're watching...",
+    "The ground hungers...",
+    "The air carries whispers of forgotten names...",
+    "The trees remember...",
+    "The water reflects faces that aren't there...",
+    "Time is running out...",
+    "The old ones stir in their slumber...",
+    "The stars are not right...",
+    "Something ancient awakens...",
+    "The void beckons...",
+    "Echoes of the past resonate...",
+    "The moon weeps blood...",
+    "Forgotten rituals yearn to be performed...",
+    "The wind carries the scent of decay...",
+    "Shadows dance without light...",
+    "The earth trembles with anticipation...",
+    "Whispers of madness grow louder...",
+    "The veil between worlds thins...",
+    "Ancient symbols appear in the dust...",
+    "The silence screams...",
+    "Time flows backwards...",
+    "Reality bends and warps...",
+    "The abyss gazes back...",
+    "Nightmares seep into waking hours...",
+    "The boundaries of sanity blur...",
+    "Forgotten gods demand tribute...",
+    "The air grows thick with dread...",
+    "Unseen eyes watch from every corner...",
+    "The fabric of existence unravels..."
+];
+
 // Replace the existing checkForRandomEvent function with this one
 function checkForRandomEvent() {
     // If it's a new day, schedule today's event
@@ -646,9 +681,15 @@ function checkForRandomEvent() {
 
     // If it's time for today's event, trigger it
     if (gameState.hour === gameState.todaysEventHour) {
-        const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
-        const message = event.effect(gameState);
-        addLogEntry(`Random Event: ${event.name}. ${message}`, event.type === 'positive' ? 'success' : 'error');
+        // 10% chance for a whisper instead of a regular event
+        if (Math.random() < 0.25) {
+            const whisper = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
+            addLogEntry(`The Whispers: "${whisper}"`, 'whisper');
+        } else {
+            const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+            const message = event.effect(gameState);
+            addLogEntry(`Random Event: ${event.name}. ${message}`, event.type === 'positive' ? 'success' : 'error');
+        }
         gameState.todaysEventHour = null; // Reset for the next day
         updateUI();
     }
@@ -692,6 +733,8 @@ function getLogEntryClass(type) {
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
         case 'success':
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
+        case 'whisper':
+            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200';
         default:
             return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
     }
