@@ -9,7 +9,12 @@ function initializeGameState() {
         wood: 0,
         upgrades: {
             farming: false,
-            well: false
+            well: false,
+            advancedFarming: false,
+            waterPurification: false,
+            toolWorkshop: false,
+            medicalTent: false,
+            huntingLodge: false
         },
         maxStamina: 100,
         staminaPerAction: 10,
@@ -32,14 +37,71 @@ function initializeGameState() {
             wood: 0
         },
         lastEventDay: 0,
-        todaysEventHour: null
+        todaysEventHour: null,
+        huntingTarget: null,
+        huntingInterval: null,
+        moveInterval: null,
+        debug: false // Added debug flag
     };
 }
 
 // Initialize gameState at the beginning of the file
 let gameState = initializeGameState();
 
-const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia"];
+const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Penny", "Quinn", "Ryan", "Sophia", "Thomas", "Uma", "Victor", "Wendy", "Xavier", "Yara", "Zack", "Abby", "Ben", "Chloe", "Dylan", "Emma", "Finn", "Gina", "Hugo", "Isla"];
+
+// Add this new object to define all upgrades
+const UPGRADES = {
+    farming: {
+        id: 'farming',
+        name: 'Farming',
+        cost: { food: 100 },
+        effect: 'Allows you to grow your own food',
+        unlocked: true
+    },
+    well: {
+        id: 'well',
+        name: 'Well',
+        cost: { wood: 200 },
+        effect: 'Generates water over time',
+        prerequisite: 'farming'
+    },
+    advancedFarming: {
+        id: 'advancedFarming',
+        name: 'Advanced Farming Techniques',
+        cost: { food: 300 },
+        effect: 'Increases crop yield by 50% and reduces growth time by 25%',
+        prerequisite: 'farming'
+    },
+    waterPurification: {
+        id: 'waterPurification',
+        name: 'Water Purification System',
+        cost: { water: 250, wood: 100 },
+        effect: 'Reduces water consumption by 20% for all activities',
+        prerequisite: 'well'
+    },
+    toolWorkshop: {
+        id: 'toolWorkshop',
+        name: 'Tool Workshop',
+        cost: { wood: 400 },
+        effect: 'Increases resource gathering efficiency by 25% (more resources per action)',
+        unlocked: true
+    },
+    medicalTent: {
+        id: 'medicalTent',
+        name: 'Medical Tent',
+        cost: { food: 200, wood: 150 },
+        effect: 'Slowly heals injured party members over time and reduces the chance of illness',
+        unlocked: true
+    },
+    huntingLodge: {
+        id: 'huntingLodge',
+        name: 'Hunting Lodge',
+        cost: { wood: 300, food: 100 },
+        effect: 'Unlocks a new "Hunt" action that has a chance to provide a large amount of food',
+        unlocked: true
+    }
+};
 
 const ACTION_DURATIONS = {
     gatherFood: 2,
@@ -114,6 +176,16 @@ function loadGame() {
         updateUI();
         loadActivityLog(saveObject.logEntries);
         startGameLoop();
+
+        // Reinitialize hunting if the upgrade is unlocked
+        if (gameState.upgrades.huntingLodge) {
+            startHunting();
+        }
+
+        // Reapply debug mode if it was enabled
+        if (gameState.debug) {
+            setDebugMode(true);
+        }
     } else {
         document.getElementById('start-screen').classList.remove('hidden');
         document.getElementById('game-ui').classList.add('hidden');
@@ -132,6 +204,9 @@ function resetGame(fromGameOver = false) {
 
     // Reset the game state
     gameState = initializeGameState();
+
+    // Ensure selectedPerson is set to 0 (or -1 if there are no party members)
+    gameState.selectedPerson = gameState.party.length > 0 ? 0 : -1;
 
     // Clear the log content
     const logContent = document.getElementById('log-content');
@@ -154,6 +229,9 @@ function resetGame(fromGameOver = false) {
 
     // Add a log entry about the game reset
     addLogEntry("Game has been reset. All progress has been cleared.");
+
+    // Reset debug mode
+    gameState.debug = false;
 }
 
 // Add this new function
@@ -196,6 +274,9 @@ function startGame(difficulty) {
             }
         };
     });
+
+    // Set the selected person to the first party member
+    gameState.selectedPerson = 0;
 
     gameState.busyUntil = {};
     gameState.party.forEach((person, index) => {
@@ -312,6 +393,10 @@ function gameLoop() {
             addLogEntry(`${person.name} has died!`, 'error');
             gameState.party.splice(index, 1);
             delete gameState.busyUntil[index];
+        }
+
+        if (gameState.upgrades.medicalTent) {
+            person.health = Math.min(100, person.health + 1); // Heal 1 health per hour
         }
     });
 
@@ -542,6 +627,12 @@ function addLogEntry(message, type = 'info') {
     logContent.scrollTop = 0;
 }
 
+// Add these constants at the top of the file
+const WILDLIFE = ['🦌', '🐗', '🐇', '🦃', '🦆'];
+const HUNT_INTERVAL = 5000; // 5 seconds
+const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
+
+// Replace the existing updateUI function with this updated version
 function updateUI() {
     document.getElementById('time').textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
     document.getElementById('food').textContent = Math.floor(gameState.food);
@@ -624,7 +715,7 @@ function updateUI() {
         `;
     });
 
-    // Update farming UI
+    // Update farming module
     const farmingModule = document.getElementById('farming-module');
     if (gameState.upgrades.farming) {
         farmingModule.classList.remove('hidden');
@@ -689,31 +780,171 @@ function updateUI() {
             });
         });
     } else {
-        farmingModule.classList.add('hidden');
+        farmingModule.classList.remove('hidden');
+        farmingModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">❓</div>
+                <div class="text-xl">Mysterious Plot of Land</div>
+                <div class="text-sm text-neutral-400">What could grow here?</div>
+            </div>
+        `;
     }
 
     // Update well module
     const wellModule = document.getElementById('well-module');
     if (gameState.upgrades.well) {
         wellModule.classList.remove('hidden');
+        updateWellVisual();
+    } else {
+        wellModule.classList.remove('hidden');
         wellModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Well</h2>
-            <div class="mb-4">
-                <div class="flex justify-between items-center">
-                    <span>Water: ${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
-                    <button onclick="collectWellWater()" class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect Water</button>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${(gameState.well.current / gameState.well.capacity) * 100}%"></div>
-                </div>
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">❓</div>
+                <div class="text-xl">Mysterious Hole</div>
+                <div class="text-sm text-neutral-400">Could this provide water?</div>
             </div>
         `;
+    }
+
+    // Update hunting module
+    const huntingModule = document.getElementById('hunting-module');
+    if (gameState.upgrades.huntingLodge) {
+        huntingModule.classList.remove('hidden');
+        if (!gameState.huntingInterval) {
+            startHunting();
+        }
     } else {
-        wellModule.classList.add('hidden');
+        huntingModule.classList.remove('hidden');
+        huntingModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">❓</div>
+                <div class="text-xl">Mysterious Tracks</div>
+                <div class="text-sm text-neutral-400">What creatures roam these lands?</div>
+            </div>
+        `;
     }
 
     updateUpgradeButtons();
     updateActionButtons();
+
+    // Show/hide debug button
+    // const debugButton = document.getElementById('debug-toggle');
+    // if (debugButton) {
+    //     debugButton.style.display = gameState.party.length > 0 ? 'inline-block' : 'none';
+    // }
+}
+
+// Add these new functions for hunting mechanics
+function startHunting() {
+    if (gameState.huntingInterval) {
+        clearInterval(gameState.huntingInterval);
+    }
+    gameState.huntingInterval = setInterval(spawnWildlife, HUNT_INTERVAL);
+}
+
+function stopHunting() {
+    clearInterval(gameState.huntingInterval);
+    clearInterval(gameState.moveInterval);
+    gameState.huntingInterval = null;
+    gameState.moveInterval = null;
+    const huntingArea = document.getElementById('hunting-area');
+    huntingArea.innerHTML = '';
+}
+
+function spawnWildlife() {
+    const huntingArea = document.getElementById('hunting-area');
+    huntingArea.innerHTML = '';
+
+    const animal = WILDLIFE[Math.floor(Math.random() * WILDLIFE.length)];
+    const target = document.createElement('div');
+    target.textContent = animal;
+    target.className = 'absolute text-4xl cursor-pointer transition-all duration-200';
+    target.style.left = `${Math.random() * 80}%`;
+    target.style.top = `${Math.random() * 80}%`;
+
+    target.onclick = () => huntAnimal(animal);
+
+    huntingArea.appendChild(target);
+    gameState.huntingTarget = target;
+
+    clearInterval(gameState.moveInterval);
+    gameState.moveInterval = setInterval(moveWildlife, MOVE_INTERVAL);
+
+    // Animal escapes after 4 seconds
+    setTimeout(() => {
+        if (gameState.huntingTarget === target) {
+            huntingArea.innerHTML = '';
+            clearInterval(gameState.moveInterval);
+        }
+    }, 4000);
+}
+
+function moveWildlife() {
+    if (gameState.huntingTarget) {
+        const currentLeft = parseFloat(gameState.huntingTarget.style.left);
+        const currentTop = parseFloat(gameState.huntingTarget.style.top);
+
+        // Increase movement range
+        const moveRange = Math.floor(Math.random() * 51) + 25; // Random value between 25 and 75
+        // Increase movement speed by reducing the divisor
+        const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange));
+        const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange));
+
+        gameState.huntingTarget.style.left = `${newLeft}%`;
+        gameState.huntingTarget.style.top = `${newTop}%`;
+
+        // Add a smoother transition for faster movement
+        gameState.huntingTarget.style.transition = 'left 0.2s, top 0.2s';
+    }
+}
+
+function huntAnimal(animal) {
+    const huntingArea = document.getElementById('hunting-area');
+    huntingArea.innerHTML = '';
+    clearInterval(gameState.moveInterval);
+
+    let foodGained;
+    switch (animal) {
+        case '🦌': foodGained = 50; break;
+        case '🐗': foodGained = 40; break;
+        case '🐇': foodGained = 15; break;
+        case '🦃': foodGained = 25; break;
+        case '🦆': foodGained = 20; break;
+        default: foodGained = 30;
+    }
+
+    gameState.food += foodGained;
+    gameState.totalResourcesGathered.food += foodGained;
+    addLogEntry(`Successfully hunted ${animal}! Gained ${foodGained} food.`, 'success');
+    updateUI();
+}
+
+// Modify the buyUpgrade function to start hunting when the lodge is built
+function buyUpgrade(upgradeId) {
+    const upgrade = UPGRADES[upgradeId];
+    let canAfford = true;
+    for (const [resource, amount] of Object.entries(upgrade.cost)) {
+        if (gameState[resource] < amount) {
+            canAfford = false;
+            break;
+        }
+    }
+
+    if (canAfford) {
+        for (const [resource, amount] of Object.entries(upgrade.cost)) {
+            gameState[resource] -= amount;
+        }
+        gameState.upgrades[upgradeId] = true;
+        addLogEntry(`Unlocked ${upgrade.name}!`, 'success');
+
+        if (upgradeId === 'huntingLodge') {
+            startHunting();
+        }
+
+        updateUI();
+    } else {
+        addLogEntry("Not enough resources for this upgrade.", 'error');
+    }
 }
 
 function performAction(personIndex, action, actionName) {
@@ -759,7 +990,12 @@ function gatherFood() {
     performAction(gameState.selectedPerson, () => {
         const baseAmount = 5;
         const randomAmount = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
-        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 food is gathered
+        let amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 food is gathered
+
+        if (gameState.upgrades.toolWorkshop) {
+            amount = Math.floor(amount * 1.25); // 25% increase from Tool Workshop
+        }
+
         gameState.food += amount;
         gameState.totalResourcesGathered.food += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} gathered ${amount} food.`);
@@ -770,7 +1006,16 @@ function collectWater() {
     performAction(gameState.selectedPerson, () => {
         const baseAmount = 10;
         const randomAmount = Math.floor(Math.random() * 5) - 2; // -2, -1, 0, 1, or 2
-        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 water is collected
+        let amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 water is collected
+
+        if (gameState.upgrades.toolWorkshop) {
+            amount = Math.floor(amount * 1.25); // 25% increase from Tool Workshop
+        }
+
+        if (gameState.upgrades.waterPurification) {
+            amount = Math.floor(amount * 1.2); // 20% more efficient water collection
+        }
+
         gameState.water += amount;
         gameState.totalResourcesGathered.water += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
@@ -781,7 +1026,12 @@ function chopWood() {
     performAction(gameState.selectedPerson, () => {
         const baseAmount = 3;
         const randomAmount = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
-        const amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 wood is chopped
+        let amount = Math.max(1, baseAmount + randomAmount); // Ensure at least 1 wood is chopped
+
+        if (gameState.upgrades.toolWorkshop) {
+            amount = Math.floor(amount * 1.25); // 25% increase from Tool Workshop
+        }
+
         gameState.wood += amount;
         gameState.totalResourcesGathered.wood += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} chopped ${amount} wood.`);
@@ -945,64 +1195,53 @@ function updateDayNightIndicator() {
 }
 
 function updateUpgradeButtons() {
-    const upgrades = [
-        { id: 'farming', cost: 100, resource: 'food', unlocked: true },
-        { id: 'well', cost: 200, resource: 'wood', unlocked: gameState.upgrades.farming }
-    ];
+    const upgradesContainer = document.getElementById('upgrades');
+    upgradesContainer.innerHTML = ''; // Clear existing buttons
 
-    upgrades.forEach(upgrade => {
-        const button = document.querySelector(`button[onclick="buyUpgrade('${upgrade.id}')"]`);
-        if (button) {
-            if (gameState.upgrades[upgrade.id]) {
-                button.innerHTML = `${upgrade.id} ✅`;
+    for (const [upgradeId, upgrade] of Object.entries(UPGRADES)) {
+        if (!upgrade.unlocked && !gameState.upgrades[upgrade.prerequisite]) continue;
+
+        const button = document.createElement('button');
+        button.className = 'bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition mb-2 w-full text-left';
+
+        let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
+
+        button.innerHTML = `
+            <div class="font-bold">${upgrade.name} (${costText})</div>
+            <div class="text-xs">${upgrade.effect}</div>
+        `;
+
+        if (gameState.upgrades[upgradeId]) {
+            button.disabled = true;
+            button.classList.add('bg-green-800', 'cursor-default');
+            button.classList.remove('hover:bg-green-700');
+            button.innerHTML += '<div class="text-xs font-bold mt-1">Unlocked ✅</div>';
+        } else {
+            button.onclick = () => buyUpgrade(upgradeId);
+            let canAfford = true;
+            for (const [resource, amount] of Object.entries(upgrade.cost)) {
+                if (gameState[resource] < amount) {
+                    canAfford = false;
+                    break;
+                }
+            }
+            if (!canAfford) {
                 button.disabled = true;
-                button.classList.add('bg-green-800', 'cursor-default');
-                button.classList.remove('hover:bg-green-700');
-            } else if (!upgrade.unlocked) {
-                button.disabled = true;
-                button.classList.add('opacity-30', 'cursor-not-allowed');
-            } else {
-                const canAfford = gameState[upgrade.resource] >= upgrade.cost;
-                button.disabled = !canAfford;
-                button.classList.toggle('opacity-50', !canAfford);
-                button.classList.toggle('cursor-not-allowed', !canAfford);
-                button.classList.toggle('hover:bg-green-700', canAfford);
+                button.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
-    });
 
-    // Update farming button separately
-    const farmingButton = document.querySelector('button[onclick="unlockFarming()"]');
-    if (farmingButton) {
-        if (gameState.upgrades.farming) {
-            farmingButton.innerHTML = 'Farming Unlocked ✅';
-            farmingButton.disabled = true;
-            farmingButton.classList.add('bg-green-800', 'cursor-default');
-            farmingButton.classList.remove('hover:bg-green-700');
-        } else {
-            const canAfford = gameState.food >= 100;
-            farmingButton.disabled = !canAfford;
-            farmingButton.classList.toggle('opacity-50', !canAfford);
-            farmingButton.classList.toggle('cursor-not-allowed', !canAfford);
-            farmingButton.classList.toggle('hover:bg-green-700', canAfford);
-        }
+        upgradesContainer.appendChild(button);
     }
+}
 
-    // Update well upgrade button
-    const wellUpgradeButton = document.querySelector('button[onclick="buyWellUpgrade()"]');
-    if (wellUpgradeButton) {
-        if (gameState.upgrades.well) {
-            wellUpgradeButton.innerHTML = 'Well Built ✅';
-            wellUpgradeButton.disabled = true;
-            wellUpgradeButton.classList.add('bg-green-800', 'cursor-default');
-            wellUpgradeButton.classList.remove('hover:bg-green-700');
-        } else {
-            const canAfford = gameState.wood >= 200;
-            wellUpgradeButton.disabled = !canAfford;
-            wellUpgradeButton.classList.toggle('opacity-50', !canAfford);
-            wellUpgradeButton.classList.toggle('cursor-not-allowed', !canAfford);
-            wellUpgradeButton.classList.toggle('hover:bg-green-700', canAfford);
-        }
+// Helper function to get resource emoji
+function getResourceEmoji(resource) {
+    switch (resource) {
+        case 'food': return '🍖';
+        case 'water': return '💧';
+        case 'wood': return '🪵';
+        default: return '';
     }
 }
 
@@ -1013,6 +1252,7 @@ function collectWellWater() {
     gameState.well.current = 0;
     addLogEntry(`Collected ${collected} water from the well.`);
     updateUI();
+    updateWellVisual();
 }
 
 function buyWellUpgrade() {
@@ -1027,17 +1267,24 @@ function buyWellUpgrade() {
     }
 }
 
-function collectWellWater() {
-    const collected = gameState.well.current;
-    gameState.water += collected;
-    gameState.totalResourcesGathered.water += collected;
-    gameState.well.current = 0;
-    addLogEntry(`Collected ${collected} water from the well.`);
-    updateUI();
-}
-
 function updateActionButtons() {
     const selectedPerson = gameState.party[gameState.selectedPerson];
+
+    // Check if selectedPerson exists
+    if (!selectedPerson) {
+        // If no person is selected, disable all action buttons
+        const actions = ['gatherFoodBtn', 'collectWaterBtn', 'chopWoodBtn'];
+        actions.forEach(actionId => {
+            const button = document.getElementById(actionId);
+            if (button) {
+                button.disabled = true;
+                button.classList.add('opacity-50', 'cursor-not-allowed');
+                button.title = 'No person selected';
+            }
+        });
+        return;
+    }
+
     const isBusy = isPersonBusy(gameState.selectedPerson);
     const hasEnoughStamina = selectedPerson.stamina >= gameState.staminaPerAction;
     const hasEnoughEnergy = selectedPerson.energy > 0;
@@ -1065,14 +1312,69 @@ function updateActionButtons() {
             button.title = tooltip;
         }
     });
+
+    const huntButton = document.getElementById('huntBtn');
+    if (huntButton) {
+        if (gameState.upgrades.huntingLodge) {
+            huntButton.classList.remove('hidden');
+        } else {
+            huntButton.classList.add('hidden');
+        }
+    }
+}
+
+function setDebugMode(enabled) {
+    gameState.debug = enabled;
+    if (gameState.debug) {
+        // Enable all upgrades
+        for (const upgradeId in UPGRADES) {
+            gameState.upgrades[upgradeId] = true;
+        }
+        // Add resources
+        gameState.food = 1000;
+        gameState.water = 1000;
+        gameState.wood = 1000;
+        // Ensure there's at least one person in the party
+        if (gameState.party.length === 0) {
+            gameState.party.push({
+                name: "Debug Person",
+                health: 100,
+                hunger: 0,
+                thirst: 0,
+                energy: 100,
+                stamina: 100,
+                traits: {
+                    hungerRate: 1,
+                    thirstRate: 1,
+                    energyRate: 1,
+                    maxStamina: 100,
+                    staminaRecoveryRate: 1
+                }
+            });
+        }
+        // Initialize hunting if it's not already started
+        if (gameState.upgrades.huntingLodge && !gameState.huntingInterval) {
+            startHunting();
+        }
+    }
+    updateUI();
+    addLogEntry(`Debug mode ${gameState.debug ? 'enabled' : 'disabled'}.`, 'info');
 }
 
 // Add these event listeners at the end of the file
-window.addEventListener('load', loadGame);
+window.addEventListener('load', () => {
+    loadGame();
+    if (gameState.upgrades.huntingLodge) {
+        startHunting();
+    }
+});
 
 window.addEventListener('focus', function () {
     if (gameState.party.length > 0) {
         startGameLoop();
+        if (gameState.upgrades.huntingLodge) {
+            startHunting();
+        }
     }
 });
 
@@ -1080,4 +1382,27 @@ window.addEventListener('blur', function () {
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
     }
+    stopHunting();
 });
+
+// Add this new function to update the well visual
+function updateWellVisual() {
+    const wellWater = document.getElementById('well-water');
+    const wellLevel = document.getElementById('well-level');
+    const percentage = (gameState.well.current / gameState.well.capacity) * 100;
+
+    wellWater.style.height = `${percentage}%`;
+    wellLevel.textContent = `${Math.floor(gameState.well.current)}/${gameState.well.capacity}`;
+
+    // Update water color based on level
+    if (percentage > 75) {
+        wellWater.classList.remove('bg-blue-300', 'bg-blue-400');
+        wellWater.classList.add('bg-blue-500');
+    } else if (percentage > 25) {
+        wellWater.classList.remove('bg-blue-300', 'bg-blue-500');
+        wellWater.classList.add('bg-blue-400');
+    } else {
+        wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
+        wellWater.classList.add('bg-blue-300');
+    }
+}

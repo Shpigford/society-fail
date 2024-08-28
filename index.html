@@ -95,33 +95,59 @@
                     <button id="chopWoodBtn" onclick="chopWood()"
                         class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Chop
                         Wood 🪵</button>
+                    <!-- Removed: Hunt button -->
                 </div>
             </div>
             <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
                 <h2 class="text-lg mb-2 font-black">Your Party</h2>
                 <div id="party" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2"></div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
-                <div id="log-module"
-                    class="p-4 rounded-lg border border-neutral-800 bg-neutral-900 max-h-[300px] overflow-y-auto">
-                    <h2 class="text-xl mb-4 font-black">Activity Log</h2>
-                    <div id="log-content" class="text-sm"></div>
-                </div>
-                <div id="upgrades-module" class="p-4 rounded-lg border border-neutral-800 bg-neutral-900">
-                    <h2 class="text-xl mb-4 font-black">Upgrades</h2>
-                    <div id="upgrades" class="flex flex-wrap gap-2">
-                        <button onclick="unlockFarming()"
-                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Unlock
-                            Farming (100 🍖)</button>
-                        <button onclick="buyWellUpgrade()"
-                            class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">Build Well
-                            (200 🪵)</button>
+            <div class="grid grid-cols-3 gap-5 px-4">
+                <div class="col-span-1">
+                    <div id="log-module"
+                        class="p-4 rounded-lg border border-neutral-800 bg-neutral-900 max-h-[300px] overflow-y-auto mb-5">
+                        <h2 class="text-xl mb-4 font-black">Activity Log</h2>
+                        <div id="log-content" class="text-sm"></div>
+                    </div>
+                    <div id="upgrades-module" class="p-4 rounded-lg border border-neutral-800 bg-neutral-900">
+                        <h2 class="text-xl mb-4 font-black">Upgrades</h2>
+                        <div id="upgrades" class="flex flex-col gap-2">
+                            <!-- Upgrade buttons will be dynamically inserted here -->
+                        </div>
                     </div>
                 </div>
-                <div id="farming-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden">
-                    <!-- This will be populated by JavaScript -->
+                <div class="col-span-1">
+                    <div id="farming-module"
+                        class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden mb-5">
+                        <!-- This will be populated by JavaScript -->
+                    </div>
+                    <div id="well-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden">
+                        <h2 class="text-2xl mb-4 font-black">Well</h2>
+                        <div class="flex items-center justify-between">
+                            <div id="well-container"
+                                class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
+                                <div id="well-water"
+                                    class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500">
+                                </div>
+                            </div>
+                            <div class="ml-4 flex flex-col items-start">
+                                <span id="well-level" class="text-xl mb-2">0/100</span>
+                                <button onclick="collectWellWater()"
+                                    class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
+                                    Water</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="well-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden"></div>
+                <div class="col-span-1">
+                    <div id="hunting-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden">
+                        <h2 class="text-2xl mb-4 font-black">Hunting Lodge</h2>
+                        <div id="hunting-area" class="w-full h-64 bg-green-900/30 relative overflow-hidden rounded-lg">
+                            <!-- The wildlife emoji will be added here dynamically -->
+                        </div>
+                        <p class="mt-2 text-sm">Click on the animal to hunt it before it escapes!</p>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="game-over-screen" class="hidden flex flex-col items-center justify-center text-center m-12">
@@ -138,5 +164,7 @@
     </div>
     <script src="game.js"></script>
 </body>
+
+</html>
 
 </html>
