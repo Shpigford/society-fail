@@ -68,7 +68,7 @@ function initializeGameState() {
 // Initialize gameState at the beginning of the file
 let gameState = initializeGameState();
 
-const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Penny", "Quinn", "Ryan", "Sophia", "Thomas", "Uma", "Victor", "Wendy", "Xavier", "Yara", "Zack", "Abby", "Ben", "Chloe", "Dylan", "Emma", "Finn", "Gina", "Hugo", "Isla"];
+const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Penny", "Quinn", "Ryan", "Sophia", "Thomas", "Uma", "Victor", "Wendy", "Xavier", "Yara", "Zack", "Abby", "Ben", "Chloe", "Dylan", "Emma", "Finn", "Gina", "Hugo", "Isla", "Adam", "Bella", "Caleb", "Daisy", "Ethan", "Fiona", "George", "Hannah", "Isaac", "Julia", "Kyle", "Luna", "Max", "Nora", "Oscar", "Poppy", "Quentin", "Rose", "Sam", "Tessa"];
 
 const ACHIEVEMENTS = [
     { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
@@ -697,6 +697,85 @@ const RANDOM_EVENTS = [
             });
             return "A mysterious illness affects everyone in the group! (-5 health, -10 stamina for all)";
         }, type: "negative"
+    },
+    {
+        name: "Solar Flare", effect: (state) => {
+            state.party.forEach(person => {
+                person.energy = Math.max(0, person.energy - 20);
+            });
+            return "A solar flare disrupts sleep patterns! (-20 energy for all)";
+        }, type: "negative"
+    },
+    {
+        name: "Meteor Shower", effect: (state) => {
+            const resourceGain = Math.floor(Math.random() * 20) + 10;
+            state.wood += resourceGain;
+            state.food += resourceGain;
+            return `A meteor shower brings rare minerals! (+${resourceGain} 🪵, +${resourceGain} 🍖)`;
+        }, type: "positive"
+    },
+    {
+        name: "Locust Swarm", effect: (state) => {
+            if (state.upgrades.farming) {
+                const foodLoss = Math.floor(state.food * 0.25);
+                state.food -= foodLoss;
+                return `A locust swarm devours your crops! (-${foodLoss} 🍖)`;
+            }
+            return "A locust swarm passes through the area.";
+        }, type: "negative"
+    },
+    {
+        name: "Inspiring Dream", effect: (state) => {
+            const luckyPerson = state.party[Math.floor(Math.random() * state.party.length)];
+            luckyPerson.traits.maxStamina += 20;
+            return `${luckyPerson.name} had an inspiring dream! (+20 max stamina)`;
+        }, type: "positive"
+    },
+    {
+        name: "Earthquake", effect: (state) => {
+            const woodLoss = Math.floor(state.wood * 0.2);
+            state.wood -= woodLoss;
+            return `An earthquake damages some structures! (-${woodLoss} 🪵)`;
+        }, type: "negative"
+    },
+    {
+        name: "Shooting Star", effect: (state) => {
+            state.party.forEach(person => {
+                person.health = Math.min(100, person.health + 10);
+            });
+            return "A shooting star boosts everyone's spirits! (+10 health for all)";
+        }, type: "positive"
+    },
+    {
+        name: "Time Anomaly", effect: (state) => {
+            const timeJump = Math.floor(Math.random() * 12) + 1;
+            state.hour = (state.hour + timeJump) % 24;
+            return `A strange time anomaly occurs! (${timeJump} hours pass instantly)`;
+        }, type: "neutral"
+    },
+    {
+        name: "Alien Artifact", effect: (state) => {
+            const randomPerson = state.party[Math.floor(Math.random() * state.party.length)];
+            randomPerson.traits.maxStamina += 30;
+            randomPerson.health = 100;
+            return `${randomPerson.name} found an alien artifact! (+30 max stamina, full health)`;
+        }, type: "positive"
+    },
+    {
+        name: "Cosmic Ray", effect: (state) => {
+            const unluckyPerson = state.party[Math.floor(Math.random() * state.party.length)];
+            unluckyPerson.health = Math.max(1, unluckyPerson.health - 30);
+            return `${unluckyPerson.name} was hit by a cosmic ray! (-30 health)`;
+        }, type: "negative"
+    },
+    {
+        name: "Quantum Fluctuation", effect: (state) => {
+            const resourceChange = Math.floor(Math.random() * 50) - 25; // -25 to +25
+            state.food += resourceChange;
+            state.water += resourceChange;
+            state.wood += resourceChange;
+            return `A quantum fluctuation alters reality! (${resourceChange > 0 ? '+' : ''}${resourceChange} to all resources)`;
+        }, type: "neutral"
     }
 ];
 
@@ -726,7 +805,17 @@ const WHISPERS = [
     "Forgotten gods demand tribute...",
     "The air grows thick with dread...",
     "Unseen eyes watch from every corner...",
-    "The fabric of existence unravels..."
+    "The fabric of existence unravels...",
+    "Echoes of unspoken words resonate...",
+    "The stars align in impossible patterns...",
+    "Memories of places never visited surface...",
+    "The void between thoughts expands...",
+    "Reflections move independently...",
+    "Time becomes a tangible substance...",
+    "The world breathes with malevolent intent...",
+    "Shadows cast by nothing multiply...",
+    "Reality's seams become visible...",
+    "The weight of eternity presses down..."
 ];
 
 // Replace the existing checkForRandomEvent function with this one
