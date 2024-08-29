@@ -60,7 +60,8 @@ function initializeGameState() {
             harvestAmountVariance: 5 // +/- 5 wood variance
         },
         rescueMissionAvailable: false,
-        lastRescueMissionDay: 0
+        lastRescueMissionDay: 0,
+        rescueMission: null
     };
 }
 
@@ -515,6 +516,8 @@ function gameLoop() {
         gameState.day - gameState.lastRescueMissionDay >= RESCUE_MISSION_INTERVAL) {
         gameState.rescueMissionAvailable = true;
     }
+
+    checkRescueMission();
 }
 
 // Add this constant near the top of the file
@@ -780,10 +783,70 @@ const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
 // Add this constant at the top of the file with other constants
 const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
 const RESCUE_MISSION_TYPES = {
-    easy: { risk: 0.1, resourceCost: { food: 20, water: 20 } },
-    medium: { risk: 0.3, resourceCost: { food: 40, water: 40 } },
-    hard: { risk: 0.5, resourceCost: { food: 60, water: 60 } }
+    easy: { risk: 0.1, resourceCost: { food: 20, water: 20 }, duration: 6 }, // 6 hours
+    medium: { risk: 0.3, resourceCost: { food: 40, water: 40 }, duration: 12 }, // 12 hours
+    hard: { risk: 0.5, resourceCost: { food: 60, water: 60 }, duration: 24 } // 24 hours
 };
+
+// Add this function to check and complete rescue missions
+function checkRescueMission() {
+    if (gameState.rescueMission) {
+        const currentTime = gameState.hour + (gameState.day - 1) * 24;
+        if (currentTime >= gameState.rescueMission.endTime) {
+            completeRescueMission();
+        }
+    }
+}
+
+
+function updateWatchtowerModule() {
+    const watchtowerModule = document.getElementById('watchtower-module');
+    if (!watchtowerModule) return;
+
+    if (gameState.upgrades.watchtower) {
+        watchtowerModule.classList.remove('hidden');
+
+        if (gameState.rescueMission) {
+            const currentTime = gameState.hour + (gameState.day - 1) * 24;
+            const remainingTime = gameState.rescueMission.endTime - currentTime;
+            const remainingHours = remainingTime % 24;
+            const remainingDays = Math.floor(remainingTime / 24);
+
+            watchtowerModule.innerHTML = `
+                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
+                <p class="mb-4">Rescue mission in progress:</p>
+                <p class="text-xl mb-2">${gameState.rescueMission.difficulty.charAt(0).toUpperCase() + gameState.rescueMission.difficulty.slice(1)} Mission</p>
+                <p>Time remaining: ${remainingDays}d ${remainingHours}h</p>
+            `;
+        } else if (gameState.rescueMissionAvailable) {
+            watchtowerModule.innerHTML = `
+                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
+                <p class="mb-4">A rescue mission is available!</p>
+                <div class="flex flex-col gap-2">
+                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (6h, Low Risk, Cost: 20 🍖, 20 💧)</button>
+                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (12h, Moderate Risk, Cost: 40 🍖, 40 💧)</button>
+                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (24h, High Risk, Cost: 60 🍖, 60 💧)</button>
+                </div>
+            `;
+        } else {
+            const daysUntilNextMission = RESCUE_MISSION_INTERVAL - (gameState.day - gameState.lastRescueMissionDay);
+            const hoursUntilNextMission = 24 - gameState.hour;
+            watchtowerModule.innerHTML = `
+                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
+                <p>Next rescue mission available in ${daysUntilNextMission} ${daysUntilNextMission === 1 ? 'day' : 'days'} and ${hoursUntilNextMission} ${hoursUntilNextMission === 1 ? 'hour' : 'hours'}.</p>
+            `;
+        }
+    } else {
+        watchtowerModule.classList.remove('hidden');
+        watchtowerModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">🗼</div>
+                <div class="text-xl">Mysterious Tower</div>
+                <div class="text-sm text-neutral-400">What could we see from up there?</div>
+            </div>
+        `;
+    }
+}
 
 // Add this function near the top of the file, with other helper functions
 function generateSurvivor() {
@@ -805,56 +868,6 @@ function generateSurvivor() {
             staminaRecoveryRate: getRandomTrait('staminaRecoveryRate')
         }
     };
-}
-
-// Modify the initiateRescueMission function to use the new generateSurvivor function
-function initiateRescueMission(difficulty) {
-    const mission = RESCUE_MISSION_TYPES[difficulty];
-
-    // Check if player has enough resources
-    if (gameState.food < mission.resourceCost.food || gameState.water < mission.resourceCost.water) {
-        addLogEntry("Not enough resources for this rescue mission.", 'error');
-        return;
-    }
-
-    // Deduct resources
-    gameState.food -= mission.resourceCost.food;
-    gameState.water -= mission.resourceCost.water;
-
-    // Determine outcome
-    const success = Math.random() > mission.risk;
-
-    if (success) {
-        // Generate a new survivor
-        const newSurvivor = generateSurvivor();
-        gameState.party.push(newSurvivor);
-
-        // Add some bonus resources
-        const bonusResources = {
-            food: Math.floor(Math.random() * 50) + 10,
-            water: Math.floor(Math.random() * 50) + 10,
-            wood: Math.floor(Math.random() * 30) + 5
-        };
-        gameState.food += bonusResources.food;
-        gameState.water += bonusResources.water;
-        gameState.wood += bonusResources.wood;
-
-        addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
-    } else {
-        // Failed mission
-        if (Math.random() < 0.5) {
-            // Injury to a random party member
-            const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
-            injuredPerson.health = Math.max(10, injuredPerson.health - 40);
-            addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
-        } else {
-            addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
-        }
-    }
-
-    gameState.rescueMissionAvailable = false;
-    gameState.lastRescueMissionDay = gameState.day;
-    updateUI();
 }
 
 // Add this function to handle rescue missions
@@ -902,42 +915,19 @@ function initiateRescueMission(difficulty) {
         }
     }
 
+    // Set up the rescue mission
+    gameState.rescueMission = {
+        difficulty: difficulty,
+        startTime: gameState.hour + (gameState.day - 1) * 24,
+        endTime: gameState.hour + (gameState.day - 1) * 24 + mission.duration
+    };
+
+    addLogEntry(`A ${difficulty} rescue mission has been initiated. It will take ${mission.duration} hours.`, 'info');
     gameState.rescueMissionAvailable = false;
     gameState.lastRescueMissionDay = gameState.day;
     updateUI();
 }
 
-// Add this function to update the Watchtower module
-function updateWatchtowerModule() {
-    const watchtowerModule = document.getElementById('watchtower-module');
-    if (!watchtowerModule) return;
-
-    if (gameState.upgrades.watchtower) {
-        watchtowerModule.classList.remove('hidden');
-        watchtowerModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-            ${gameState.rescueMissionAvailable ? `
-                <p class="mb-4">A rescue mission is available!</p>
-                <div class="flex flex-col gap-2">
-                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (Low Risk)</button>
-                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (Moderate Risk)</button>
-                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (High Risk)</button>
-                </div>
-            ` : `
-                <p>Next rescue mission available in ${RESCUE_MISSION_INTERVAL - (gameState.day - gameState.lastRescueMissionDay)} days.</p>
-            `}
-        `;
-    } else {
-        watchtowerModule.classList.remove('hidden');
-        watchtowerModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">🗼</div>
-                <div class="text-xl">Mysterious Tower</div>
-                <div class="text-sm text-neutral-400">What could we see from up there?</div>
-            </div>
-        `;
-    }
-}
 
 const ACHIEVEMENTS = [
     { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
@@ -994,51 +984,6 @@ function updateAchievementsUI() {
         `;
         achievementsContainer.appendChild(achievementElement);
     });
-}
-
-// Modify the performAction function to update total actions
-function performAction(personIndex, action, actionName) {
-    // ... existing code ...
-
-    if (!['eat', 'drink', 'sleep'].includes(actionName)) {
-        gameState.totalActions++;
-    }
-
-    // ... rest of the existing code ...
-}
-
-// Modify the harvestCrop function to update total crops harvested
-function harvestCrop(row, col) {
-    // ... existing code ...
-
-    if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime && plot.watered) {
-        // ... existing code ...
-
-        gameState.totalCropsHarvested++;
-        checkAchievements();
-    }
-
-    // ... rest of the existing code ...
-}
-
-// Modify the huntAnimal function to update total animals hunted
-function huntAnimal(animal) {
-    // ... existing code ...
-
-    gameState.totalAnimalsHunted++;
-    checkAchievements();
-
-    // ... rest of the existing code ...
-}
-
-// Modify the collectWellWater function to update total well water collected
-function collectWellWater() {
-    // ... existing code ...
-
-    gameState.totalWellWaterCollected += collected;
-    checkAchievements();
-
-    // ... rest of the existing code ...
 }
 
 // Merge the two updateUI functions
@@ -1438,6 +1383,9 @@ function collectWater() {
         gameState.totalResourcesGathered.water += amount;
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
+
+    gameState.totalWellWaterCollected += collected;
+    checkAchievements();
 }
 
 function chopWood() {
