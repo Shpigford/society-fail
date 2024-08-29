@@ -430,6 +430,9 @@ function showGameOverScreen() {
     const hoursPlayed = Math.floor(timePlayed);
     const daysPlayed = Math.floor(hoursPlayed / 24);
 
+    // Get achieved achievements
+    const achievedAchievements = ACHIEVEMENTS.filter(achievement => gameState.achievements[achievement.id]);
+
     gameStats.innerHTML = `
         <p>Time Survived: ${daysPlayed} days, ${hoursPlayed % 24} hours</p>
         <p>Total Resources Gathered:</p>
@@ -438,6 +441,15 @@ function showGameOverScreen() {
             <li>💧 Water: ${Math.floor(gameState.totalResourcesGathered.water)}</li>
             <li>🪵 Wood: ${Math.floor(gameState.totalResourcesGathered.wood)}</li>
         </ul>
+        <p class="mt-4 font-bold">Achievements Unlocked:</p>
+        <ul class="list-none">
+            ${achievedAchievements.map(achievement => `
+                <li class="mb-1">
+                    <span class="text-green-400">✅ ${achievement.name}</span>: ${achievement.description}
+                </li>
+            `).join('')}
+        </ul>
+        ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
     `;
 }
 
@@ -1216,7 +1228,7 @@ function updateUI() {
             <h2 class="text-2xl mb-4 font-black">Farming</h2>
             <div class="mb-4">
                 Plant: 
-                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5</button>
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
                 <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
                 <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
             </div>
