@@ -1713,7 +1713,7 @@ function updateUpgradeButtons() {
         if (!upgrade.unlocked && !gameState.upgrades[upgrade.prerequisite]) continue;
 
         const button = document.createElement('button');
-        button.className = 'bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition mb-2 w-full text-left';
+        button.className = 'text-white py-2 px-4 rounded transition mb-2 w-full text-left';
 
         let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
 
@@ -1738,7 +1738,10 @@ function updateUpgradeButtons() {
             }
             if (!canAfford) {
                 button.disabled = true;
-                button.classList.add('opacity-50', 'cursor-not-allowed');
+                button.classList.add('opacity-50', 'cursor-not-allowed', 'bg-neutral-700');
+            } else {
+                button.classList.remove('bg-green-200', 'opacity-50', 'cursor-not-allowed');
+                button.classList.add('bg-green-600', 'hover:bg-green-700');
             }
         }
 
