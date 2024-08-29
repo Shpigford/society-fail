@@ -783,12 +783,36 @@ const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
 // Add this constant at the top of the file with other constants
 const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
 const RESCUE_MISSION_TYPES = {
-    easy: { risk: 0.1, resourceCost: { food: 20, water: 20 }, duration: 6 }, // 6 hours
-    medium: { risk: 0.3, resourceCost: { food: 40, water: 40 }, duration: 12 }, // 12 hours
-    hard: { risk: 0.5, resourceCost: { food: 60, water: 60 }, duration: 24 } // 24 hours
+    easy: { risk: 0.1, resourceCost: { food: 20, water: 20 }, duration: 24 }, // 1 day
+    medium: { risk: 0.3, resourceCost: { food: 40, water: 40 }, duration: 48 }, // 2 days
+    hard: { risk: 0.5, resourceCost: { food: 60, water: 60 }, duration: 72 } // 3 days
 };
 
-// Add this function to check and complete rescue missions
+function initiateRescueMission(difficulty) {
+    const mission = RESCUE_MISSION_TYPES[difficulty];
+
+    // Check if player has enough resources
+    if (gameState.food < mission.resourceCost.food || gameState.water < mission.resourceCost.water) {
+        addLogEntry("Not enough resources for this rescue mission.", 'error');
+        return;
+    }
+
+    // Deduct resources
+    gameState.food -= mission.resourceCost.food;
+    gameState.water -= mission.resourceCost.water;
+
+    // Set up the rescue mission
+    gameState.rescueMission = {
+        difficulty: difficulty,
+        startTime: gameState.hour + (gameState.day - 1) * 24,
+        endTime: gameState.hour + (gameState.day - 1) * 24 + mission.duration
+    };
+
+    addLogEntry(`A ${difficulty} rescue mission has been initiated. It will take ${mission.duration} hours.`, 'info');
+    gameState.rescueMissionAvailable = false;
+    updateUI();
+}
+
 function checkRescueMission() {
     if (gameState.rescueMission) {
         const currentTime = gameState.hour + (gameState.day - 1) * 24;
@@ -798,6 +822,56 @@ function checkRescueMission() {
     }
 }
 
+function completeRescueMission() {
+    const mission = gameState.rescueMission;
+    const missionType = RESCUE_MISSION_TYPES[mission.difficulty];
+    const success = Math.random() > missionType.risk;
+
+    if (success) {
+        handleSuccessfulRescue();
+    } else {
+        handleFailedRescue();
+    }
+
+    // Reset rescue mission state
+    gameState.rescueMission = null;
+    gameState.rescueMissionAvailable = false;
+    gameState.lastRescueMissionDay = gameState.day;
+
+    updateUI();
+}
+
+function handleSuccessfulRescue() {
+    const bonusResources = {
+        food: Math.floor(Math.random() * 50) + 10,
+        water: Math.floor(Math.random() * 50) + 10,
+        wood: Math.floor(Math.random() * 30) + 5
+    };
+
+    Object.entries(bonusResources).forEach(([resource, amount]) => {
+        gameState[resource] += amount;
+        gameState.totalResourcesGathered[resource] += amount;
+    });
+
+    const newSurvivorChance = Math.random();
+    if (newSurvivorChance > 0.5) {
+        const newSurvivor = generateSurvivor();
+        gameState.party.push(newSurvivor);
+        addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+    } else {
+        addLogEntry(`Rescue mission successful! No survivors found, but the team recovered some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+    }
+}
+
+function handleFailedRescue() {
+    if (Math.random() < 0.5) {
+        const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
+        injuredPerson.health = Math.max(10, injuredPerson.health - 40);
+        addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
+    } else {
+        addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
+    }
+}
 
 function updateWatchtowerModule() {
     const watchtowerModule = document.getElementById('watchtower-module');
@@ -823,9 +897,9 @@ function updateWatchtowerModule() {
                 <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
                 <p class="mb-4">A rescue mission is available!</p>
                 <div class="flex flex-col gap-2">
-                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (6h, Low Risk, Cost: 20 🍖, 20 💧)</button>
-                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (12h, Moderate Risk, Cost: 40 🍖, 40 💧)</button>
-                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (24h, High Risk, Cost: 60 🍖, 60 💧)</button>
+                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (1d, Low Risk, Cost: 20 🍖, 20 💧)</button>
+                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (2d, Moderate Risk, Cost: 40 🍖, 40 💧)</button>
+                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (3d, High Risk, Cost: 60 🍖, 60 💧)</button>
                 </div>
             `;
         } else {
@@ -840,7 +914,7 @@ function updateWatchtowerModule() {
         watchtowerModule.classList.remove('hidden');
         watchtowerModule.innerHTML = `
             <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">🗼</div>
+                <div class="text-6xl mb-2">❓</div>
                 <div class="text-xl">Mysterious Tower</div>
                 <div class="text-sm text-neutral-400">What could we see from up there?</div>
             </div>
@@ -848,109 +922,62 @@ function updateWatchtowerModule() {
     }
 }
 
-// Add this function near the top of the file, with other helper functions
-function generateSurvivor() {
-    const availableNames = names.filter(name => !gameState.party.some(person => person.name === name));
-    const name = availableNames[Math.floor(Math.random() * availableNames.length)];
-
-    return {
-        name: name,
-        health: 100,
-        hunger: 0,
-        thirst: 0,
-        energy: 100,
-        stamina: gameState.maxStamina,
-        traits: {
-            hungerRate: getRandomTrait('hungerRate'),
-            thirstRate: getRandomTrait('thirstRate'),
-            energyRate: getRandomTrait('energyRate'),
-            maxStamina: Math.round(getRandomTrait('maxStamina')),
-            staminaRecoveryRate: getRandomTrait('staminaRecoveryRate')
+// Add this function to check and complete rescue missions
+function checkRescueMission() {
+    if (gameState.rescueMission) {
+        const currentTime = gameState.hour + (gameState.day - 1) * 24;
+        if (currentTime >= gameState.rescueMission.endTime) {
+            completeRescueMission();
         }
-    };
+    }
 }
 
-// Add this function to handle rescue missions
-function initiateRescueMission(difficulty) {
-    const mission = RESCUE_MISSION_TYPES[difficulty];
-
-    // Check if player has enough resources
-    if (gameState.food < mission.resourceCost.food || gameState.water < mission.resourceCost.water) {
-        addLogEntry("Not enough resources for this rescue mission.", 'error');
-        return;
-    }
-
-    // Deduct resources
-    gameState.food -= mission.resourceCost.food;
-    gameState.water -= mission.resourceCost.water;
-
-    // Determine outcome
-    const success = Math.random() > mission.risk;
+function completeRescueMission() {
+    const mission = gameState.rescueMission;
+    const missionType = RESCUE_MISSION_TYPES[mission.difficulty];
+    const success = Math.random() > missionType.risk;
 
     if (success) {
-        // Generate a new survivor
-        const newSurvivor = generateSurvivor();
-        gameState.party.push(newSurvivor);
-
-        // Add some bonus resources
-        const bonusResources = {
-            food: Math.floor(Math.random() * 50) + 10,
-            water: Math.floor(Math.random() * 50) + 10,
-            wood: Math.floor(Math.random() * 30) + 5
-        };
-        gameState.food += bonusResources.food;
-        gameState.water += bonusResources.water;
-        gameState.wood += bonusResources.wood;
-
-        addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+        handleSuccessfulRescue();
     } else {
-        // Failed mission
-        if (Math.random() < 0.5) {
-            // Injury to a random party member
-            const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
-            injuredPerson.health = Math.max(10, injuredPerson.health - 40);
-            addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
-        } else {
-            addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
-        }
+        handleFailedRescue();
     }
 
-    // Set up the rescue mission
-    gameState.rescueMission = {
-        difficulty: difficulty,
-        startTime: gameState.hour + (gameState.day - 1) * 24,
-        endTime: gameState.hour + (gameState.day - 1) * 24 + mission.duration
-    };
-
-    addLogEntry(`A ${difficulty} rescue mission has been initiated. It will take ${mission.duration} hours.`, 'info');
+    // Reset rescue mission state
+    gameState.rescueMission = null;
     gameState.rescueMissionAvailable = false;
     gameState.lastRescueMissionDay = gameState.day;
+
     updateUI();
 }
 
+function handleSuccessfulRescue() {
+    const newSurvivor = generateSurvivor();
+    gameState.party.push(newSurvivor);
 
-const ACHIEVEMENTS = [
-    { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
-    { id: 'wellFed', name: 'Well Fed', description: 'Accumulate 1000 food', condition: () => gameState.totalResourcesGathered.food >= 1000 },
-    { id: 'hydrated', name: 'Hydrated', description: 'Accumulate 1000 water', condition: () => gameState.totalResourcesGathered.water >= 1000 },
-    { id: 'lumberjack', name: 'Lumberjack', description: 'Accumulate 1000 wood', condition: () => gameState.totalResourcesGathered.wood >= 1000 },
-    { id: 'farmer', name: 'Farmer', description: 'Plant your first crop', condition: () => gameState.upgrades.farming },
-    { id: 'hunter', name: 'Hunter', description: 'Build the Hunting Lodge', condition: () => gameState.upgrades.huntingLodge },
-    { id: 'wellDriller', name: 'Well Driller', description: 'Build the Well', condition: () => gameState.upgrades.well },
-    { id: 'doctor', name: 'Doctor', description: 'Build the Medical Tent', condition: () => gameState.upgrades.medicalTent },
-    { id: 'toolMaker', name: 'Tool Maker', description: 'Build the Tool Workshop', condition: () => gameState.upgrades.toolWorkshop },
-    { id: 'waterPurifier', name: 'Water Purifier', description: 'Build the Water Purification System', condition: () => gameState.upgrades.waterPurification },
-    { id: 'masterFarmer', name: 'Master Farmer', description: 'Unlock Advanced Farming Techniques', condition: () => gameState.upgrades.advancedFarming },
-    { id: 'bigFamily', name: 'Big Family', description: 'Have 10 people in your party', condition: () => gameState.party.length >= 10 },
-    { id: 'efficient', name: 'Efficient', description: 'Perform 100 actions', condition: () => gameState.totalActions >= 100 },
-    { id: 'wellStocked', name: 'Well Stocked', description: 'Have 500 of each resource at once', condition: () => gameState.food >= 500 && gameState.water >= 500 && gameState.wood >= 500 },
-    { id: 'marathon', name: 'Marathon', description: 'Play for 24 hours', condition: () => gameState.totalPlayTime >= 24 * 60 * 60 },
-    { id: 'cropMaster', name: 'Crop Master', description: 'Harvest 100 crops', condition: () => gameState.totalCropsHarvested >= 100 },
-    { id: 'bigGame', name: 'Big Game Hunter', description: 'Successfully hunt 50 animals', condition: () => gameState.totalAnimalsHunted >= 50 },
-    { id: 'waterWizard', name: 'Water Wizard', description: 'Collect 1000 water from the well', condition: () => gameState.totalWellWaterCollected >= 1000 },
-    { id: 'survivor30', name: 'Long-term Survivor', description: 'Survive for 30 days', condition: () => gameState.day >= 30 },
-    { id: 'jackOfAllTrades', name: 'Jack of All Trades', description: 'Unlock all upgrades', condition: () => Object.values(gameState.upgrades).every(upgrade => upgrade) },
-];
+    const bonusResources = {
+        food: Math.floor(Math.random() * 50) + 10,
+        water: Math.floor(Math.random() * 50) + 10,
+        wood: Math.floor(Math.random() * 30) + 5
+    };
+
+    Object.entries(bonusResources).forEach(([resource, amount]) => {
+        gameState[resource] += amount;
+        gameState.totalResourcesGathered[resource] += amount;
+    });
+
+    addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+}
+
+function handleFailedRescue() {
+    if (Math.random() < 0.5) {
+        const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
+        injuredPerson.health = Math.max(10, injuredPerson.health - 40);
+        addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
+    } else {
+        addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
+    }
+}
 
 // Add this function to check and update achievements
 function checkAchievements() {
