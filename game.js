@@ -14,7 +14,8 @@ function initializeGameState() {
             waterPurification: false,
             toolWorkshop: false,
             medicalTent: false,
-            huntingLodge: false
+            huntingLodge: false,
+            lumberMill: false
         },
         maxStamina: 100,
         staminaPerAction: 10,
@@ -48,7 +49,15 @@ function initializeGameState() {
         totalCropsHarvested: 0,
         totalAnimalsHunted: 0,
         totalWellWaterCollected: 0,
-        logEntries: []
+        logEntries: [],
+        lumberMill: {
+            trees: [],
+            maxTrees: 5,
+            baseGrowthTime: 24, // 24 hours base growth time
+            growthTimeVariance: 12, // +/- 12 hours variance
+            baseHarvestAmount: 10,
+            harvestAmountVariance: 5 // +/- 5 wood variance
+        }
     };
 }
 
@@ -107,6 +116,13 @@ const UPGRADES = {
         cost: { wood: 300, food: 100 },
         effect: 'Unlocks a new "Hunt" action that has a chance to provide a large amount of food',
         unlocked: true
+    },
+    lumberMill: {
+        id: 'lumberMill',
+        name: 'Lumber Mill',
+        cost: { wood: 300, food: 100 },
+        effect: 'Increases wood gathering efficiency by 50% and generates 1 wood per hour',
+        prerequisite: 'toolWorkshop'
     }
 };
 
@@ -479,6 +495,11 @@ function gameLoop() {
 
     updateUI();
     saveGame();
+
+    if (gameState.upgrades.lumberMill) {
+        generateLumberMillWood();
+        growLumberMillTrees();
+    }
 }
 
 // Add this constant near the top of the file
@@ -780,6 +801,13 @@ function checkAchievements() {
     });
 }
 
+function generateLumberMillWood() {
+    if (gameState.upgrades.lumberMill) {
+        gameState.wood += 1;
+        gameState.totalResourcesGathered.wood += 1;
+    }
+}
+
 // Add this function to update the achievements UI
 function updateAchievementsUI() {
     const achievementsContainer = document.getElementById('achievements');
@@ -846,6 +874,7 @@ function updateUI() {
     // ... existing code ...
 
     updateAchievementsUI();
+    updateLumberMillModule();
 
     // ... rest of the existing code ...
 }
@@ -941,7 +970,7 @@ function updateUI() {
             <h2 class="text-2xl mb-4 font-black">Farming</h2>
             <div class="mb-4">
                 Plant: 
-                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5</button>
                 <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
                 <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
             </div>
@@ -1050,6 +1079,7 @@ function updateUI() {
     updateUpgradeButtons();
     updateActionButtons();
     updateAchievementsUI();
+    updateLumberMillModule();
 
     // Show/hide debug button
     // const debugButton = document.getElementById('debug-toggle');
@@ -1113,7 +1143,7 @@ function moveWildlife() {
         const currentTop = parseFloat(gameState.huntingTarget.style.top);
 
         // Increase movement range
-        const moveRange = Math.floor(Math.random() * 51) + 25; // Random value between 25 and 75
+        const moveRange = Math.floor(Math.random() * 26) + 25; // Random value between 25 and 50
         // Increase movement speed by reducing the divisor
         const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange));
         const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange));
@@ -1261,6 +1291,10 @@ function chopWood() {
 
         if (gameState.upgrades.toolWorkshop) {
             amount = Math.floor(amount * 1.25); // 25% increase from Tool Workshop
+        }
+
+        if (gameState.upgrades.lumberMill) {
+            amount = Math.floor(amount * 1.5); // Additional 50% increase from Lumber Mill
         }
 
         gameState.wood += amount;
@@ -1558,6 +1592,94 @@ function updateActionButtons() {
     }
 }
 
+function generateLumberMillWood() {
+    if (gameState.upgrades.lumberMill) {
+        gameState.wood += 1;
+        gameState.totalResourcesGathered.wood += 1;
+    }
+}
+
+function growLumberMillTrees() {
+    if (gameState.upgrades.lumberMill) {
+        // Grow existing trees
+        gameState.lumberMill.trees = gameState.lumberMill.trees.map(tree => ({
+            ...tree,
+            growth: Math.min(1, tree.growth + (1 / tree.growthTime))
+        }));
+
+        // Add new tree if there's space
+        if (gameState.lumberMill.trees.length < gameState.lumberMill.maxTrees) {
+            const growthTime = gameState.lumberMill.baseGrowthTime +
+                (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance;
+            gameState.lumberMill.trees.push({
+                growth: 0,
+                growthTime: growthTime,
+                harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
+                    (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
+            });
+        }
+    }
+}
+
+function updateLumberMillModule() {
+    const lumberMillModule = document.getElementById('lumber-mill-module');
+    if (!lumberMillModule) return; // Exit if the module doesn't exist in the HTML
+
+    if (gameState.upgrades.lumberMill) {
+        lumberMillModule.classList.remove('hidden');
+        let treesHTML = gameState.lumberMill.trees.map((tree, index) => `
+            <div class="tree-container relative w-16 h-16 m-2 inline-block">
+                <div class="absolute bottom-0 left-0 right-0 bg-green-900 rounded-t-full transition-all duration-500" 
+                     style="height: ${tree.growth * 100}%;">
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center text-4xl ${tree.growth === 1 ? 'cursor-pointer' : 'pointer-events-none'}"
+                     onclick="${tree.growth === 1 ? `harvestTree(${index})` : ''}">
+                    ${tree.growth === 1 ? '🌳' : '🌱'}
+                </div>
+            </div>
+        `).join('');
+
+        lumberMillModule.innerHTML = `
+            <h2 class="text-2xl mb-4 font-black">Lumber Mill</h2>
+            <p>Your Lumber Mill is producing 1 wood per hour.</p>
+            <p>Wood chopping efficiency: +50%</p>
+            <div class="mt-4">
+                <h3 class="text-xl mb-2">Tree Farm</h3>
+                <div class="tree-farm flex flex-wrap justify-center">
+                    ${treesHTML}
+                </div>
+            </div>
+        `;
+    } else {
+        lumberMillModule.classList.remove('hidden');
+        lumberMillModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">❓</div>
+                <div class="text-xl">Mysterious Machinery</div>
+                <div class="text-sm text-neutral-400">Could this help with wood production?</div>
+            </div>
+        `;
+    }
+}
+
+function harvestTree(index) {
+    const tree = gameState.lumberMill.trees[index];
+    if (tree && tree.growth === 1) {
+        const woodGained = tree.harvestAmount;
+        gameState.wood += woodGained;
+        gameState.totalResourcesGathered.wood += woodGained;
+        gameState.lumberMill.trees[index] = {
+            growth: 0,
+            growthTime: gameState.lumberMill.baseGrowthTime +
+                (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
+            harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
+                (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
+        };
+        addLogEntry(`Harvested a fully grown tree for ${woodGained} wood.`);
+        updateUI();
+    }
+}
+
 function setDebugMode(enabled) {
     gameState.debug = enabled;
     if (gameState.debug) {
@@ -1595,13 +1717,74 @@ function setDebugMode(enabled) {
                 fillRate: 1
             };
         }
+        // Initialize Lumber Mill trees
+        gameState.lumberMill.trees = [];
+        for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
+            gameState.lumberMill.trees.push({
+                growth: Math.random(),
+                growthTime: gameState.lumberMill.baseGrowthTime +
+                    (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
+                harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
+                    (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
+            });
+        }
         // Initialize hunting if it's not already started
-        if (gameState.upgrades.huntingLodge && !gameState.huntingInterval) {
+        if (!gameState.huntingInterval) {
             startHunting();
         }
     }
     updateUI();
     addLogEntry(`Debug mode ${gameState.debug ? 'enabled' : 'disabled'}.`, 'info');
+}
+
+function updateWellVisual() {
+    const wellModule = document.getElementById('well-module');
+    if (!wellModule) return;
+
+    if (gameState.upgrades.well) {
+        wellModule.classList.remove('hidden');
+        const percentage = (gameState.well.current / gameState.well.capacity) * 100;
+
+        wellModule.innerHTML = `
+            <h2 class="text-2xl mb-4 font-black">Well</h2>
+            <div class="flex items-center justify-between">
+                <div id="well-container"
+                    class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
+                    <div id="well-water"
+                        class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500"
+                        style="height: ${percentage}%;">
+                    </div>
+                </div>
+                <div class="ml-4 flex flex-col items-start">
+                    <span id="well-level" class="text-xl mb-2">${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
+                    <button onclick="collectWellWater()"
+                        class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
+                        Water</button>
+                </div>
+            </div>
+        `;
+
+        const wellWater = document.getElementById('well-water');
+        if (percentage > 75) {
+            wellWater.classList.remove('bg-blue-300', 'bg-blue-400');
+            wellWater.classList.add('bg-blue-500');
+        } else if (percentage > 25) {
+            wellWater.classList.remove('bg-blue-300', 'bg-blue-500');
+            wellWater.classList.add('bg-blue-400');
+        } else {
+            wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
+            wellWater.classList.add('bg-blue-300');
+        }
+    } else {
+        wellModule.classList.remove('hidden');
+        wellModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">❓</div>
+                <div class="text-xl">Mysterious Hole</div>
+                <div class="text-sm text-neutral-400">Could this provide water?</div>
+            </div>
+        `;
+    }
 }
 
 // Add these event listeners at the end of the file
@@ -1627,56 +1810,3 @@ window.addEventListener('blur', function () {
     }
     stopHunting();
 });
-
-// Add this new function to update the well visual
-function updateWellVisual() {
-    const wellWater = document.getElementById('well-water');
-    const wellLevel = document.getElementById('well-level');
-
-    if (!wellWater || !wellLevel) {
-        // If the well elements don't exist, update the well module HTML
-        const wellModule = document.getElementById('well-module');
-        if (wellModule) {
-            wellModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Well</h2>
-                <div class="flex items-center justify-between">
-                    <div id="well-container"
-                        class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
-                        <div id="well-water"
-                            class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500">
-                        </div>
-                    </div>
-                    <div class="ml-4 flex flex-col items-start">
-                        <span id="well-level" class="text-xl mb-2">0/100</span>
-                        <button onclick="collectWellWater()"
-                            class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
-                            Water</button>
-                    </div>
-                </div>
-            `;
-        }
-        // Try to get the elements again after updating the HTML
-        wellWater = document.getElementById('well-water');
-        wellLevel = document.getElementById('well-level');
-
-        // If they still don't exist, exit the function
-        if (!wellWater || !wellLevel) return;
-    }
-
-    const percentage = (gameState.well.current / gameState.well.capacity) * 100;
-
-    wellWater.style.height = `${percentage}%`;
-    wellLevel.textContent = `${Math.floor(gameState.well.current)}/${gameState.well.capacity}`;
-
-    // Update water color based on level
-    if (percentage > 75) {
-        wellWater.classList.remove('bg-blue-300', 'bg-blue-400');
-        wellWater.classList.add('bg-blue-500');
-    } else if (percentage > 25) {
-        wellWater.classList.remove('bg-blue-300', 'bg-blue-500');
-        wellWater.classList.add('bg-blue-400');
-    } else {
-        wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
-        wellWater.classList.add('bg-blue-300');
-    }
-}
