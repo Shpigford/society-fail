@@ -70,6 +70,29 @@ let gameState = initializeGameState();
 
 const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Penny", "Quinn", "Ryan", "Sophia", "Thomas", "Uma", "Victor", "Wendy", "Xavier", "Yara", "Zack", "Abby", "Ben", "Chloe", "Dylan", "Emma", "Finn", "Gina", "Hugo", "Isla"];
 
+const ACHIEVEMENTS = [
+    { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
+    { id: 'wellFed', name: 'Well Fed', description: 'Accumulate 1000 food', condition: () => gameState.totalResourcesGathered.food >= 1000 },
+    { id: 'hydrated', name: 'Hydrated', description: 'Accumulate 1000 water', condition: () => gameState.totalResourcesGathered.water >= 1000 },
+    { id: 'lumberjack', name: 'Lumberjack', description: 'Accumulate 1000 wood', condition: () => gameState.totalResourcesGathered.wood >= 1000 },
+    { id: 'farmer', name: 'Farmer', description: 'Plant your first crop', condition: () => gameState.upgrades.farming },
+    { id: 'hunter', name: 'Hunter', description: 'Build the Hunting Lodge', condition: () => gameState.upgrades.huntingLodge },
+    { id: 'wellDriller', name: 'Well Driller', description: 'Build the Well', condition: () => gameState.upgrades.well },
+    { id: 'doctor', name: 'Doctor', description: 'Build the Medical Tent', condition: () => gameState.upgrades.medicalTent },
+    { id: 'toolMaker', name: 'Tool Maker', description: 'Build the Tool Workshop', condition: () => gameState.upgrades.toolWorkshop },
+    { id: 'waterPurifier', name: 'Water Purifier', description: 'Build the Water Purification System', condition: () => gameState.upgrades.waterPurification },
+    { id: 'masterFarmer', name: 'Master Farmer', description: 'Unlock Advanced Farming Techniques', condition: () => gameState.upgrades.advancedFarming },
+    { id: 'bigFamily', name: 'Big Family', description: 'Have 10 people in your party', condition: () => gameState.party.length >= 10 },
+    { id: 'efficient', name: 'Efficient', description: 'Perform 100 actions', condition: () => gameState.totalActions >= 100 },
+    { id: 'wellStocked', name: 'Well Stocked', description: 'Have 500 of each resource at once', condition: () => gameState.food >= 500 && gameState.water >= 500 && gameState.wood >= 500 },
+    { id: 'marathon', name: 'Marathon', description: 'Play for 24 hours', condition: () => gameState.totalPlayTime >= 24 * 60 * 60 },
+    { id: 'cropMaster', name: 'Crop Master', description: 'Harvest 100 crops', condition: () => gameState.totalCropsHarvested >= 100 },
+    { id: 'bigGame', name: 'Big Game Hunter', description: 'Successfully hunt 50 animals', condition: () => gameState.totalAnimalsHunted >= 50 },
+    { id: 'waterWizard', name: 'Water Wizard', description: 'Collect 1000 water from the well', condition: () => gameState.totalWellWaterCollected >= 1000 },
+    { id: 'survivor30', name: 'Long-term Survivor', description: 'Survive for 30 days', condition: () => gameState.day >= 30 },
+    { id: 'jackOfAllTrades', name: 'Jack of All Trades', description: 'Unlock all upgrades', condition: () => Object.values(gameState.upgrades).every(upgrade => upgrade) },
+];
+
 // Add this new object to define all upgrades
 const UPGRADES = {
     farming: {
