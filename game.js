@@ -245,10 +245,43 @@ function saveGame() {
     localStorage.setItem('societyFailSave', JSON.stringify(saveObject));
 }
 
+// Add this function near the top of the file, after the constants
+function checkSaveCompatibility(savedGame) {
+    const requiredKeys = [
+        'day', 'hour', 'party', 'food', 'water', 'wood', 'upgrades',
+        'farming', 'well', 'totalResourcesGathered', 'achievements',
+        'totalActions', 'totalPlayTime', 'totalCropsHarvested',
+        'totalAnimalsHunted', 'totalWellWaterCollected', 'logEntries',
+        'lumberMill', 'rescueMissionAvailable', 'lastRescueMissionDay'
+    ];
+
+    for (const key of requiredKeys) {
+        if (!(key in savedGame)) {
+            return false;
+        }
+    }
+
+    // Add more specific checks if needed, e.g.:
+    if (!Array.isArray(savedGame.party) || !savedGame.party.every(person => 'traits' in person)) {
+        return false;
+    }
+
+    return true;
+}
+
+// Modify the loadGame function
 function loadGame() {
     const savedGame = localStorage.getItem('societyFailSave');
     if (savedGame) {
         const saveObject = JSON.parse(savedGame);
+
+        if (!checkSaveCompatibility(saveObject.gameState)) {
+            // Save is incompatible, show message and return
+            alert("Your saved game is incompatible with the current version. The apocalypse has no mercy. Please start a new game.");
+            resetGame(true);
+            return;
+        }
+
         gameState = saveObject.gameState;
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
