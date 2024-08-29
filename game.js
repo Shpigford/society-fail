@@ -15,7 +15,8 @@ function initializeGameState() {
             toolWorkshop: false,
             medicalTent: false,
             huntingLodge: false,
-            lumberMill: false
+            lumberMill: false,
+            watchtower: false
         },
         maxStamina: 100,
         staminaPerAction: 10,
@@ -57,7 +58,9 @@ function initializeGameState() {
             growthTimeVariance: 12, // +/- 12 hours variance
             baseHarvestAmount: 10,
             harvestAmountVariance: 5 // +/- 5 wood variance
-        }
+        },
+        rescueMissionAvailable: false,
+        lastRescueMissionDay: 0
     };
 }
 
@@ -123,6 +126,13 @@ const UPGRADES = {
         cost: { wood: 300, food: 100 },
         effect: 'Increases wood gathering efficiency by 50% and generates 1 wood per hour',
         prerequisite: 'toolWorkshop'
+    },
+    watchtower: {
+        id: 'watchtower',
+        name: 'Watchtower',
+        cost: { wood: 500, food: 200 },
+        effect: 'Allows you to spot and rescue potential survivors',
+        prerequisite: 'huntingLodge'
     }
 };
 
@@ -500,6 +510,11 @@ function gameLoop() {
         generateLumberMillWood();
         growLumberMillTrees();
     }
+
+    if (gameState.upgrades.watchtower &&
+        gameState.day - gameState.lastRescueMissionDay >= RESCUE_MISSION_INTERVAL) {
+        gameState.rescueMissionAvailable = true;
+    }
 }
 
 // Add this constant near the top of the file
@@ -668,10 +683,6 @@ const WHISPERS = [
     "The water reflects faces that aren't there...",
     "Time is running out...",
     "The old ones stir in their slumber...",
-    "The stars are not right...",
-    "Something ancient awakens...",
-    "The void beckons...",
-    "Echoes of the past resonate...",
     "The moon weeps blood...",
     "Forgotten rituals yearn to be performed...",
     "The wind carries the scent of decay...",
@@ -767,6 +778,167 @@ const HUNT_INTERVAL = 5000; // 5 seconds
 const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
 
 // Add this constant at the top of the file with other constants
+const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
+const RESCUE_MISSION_TYPES = {
+    easy: { risk: 0.1, resourceCost: { food: 20, water: 20 } },
+    medium: { risk: 0.3, resourceCost: { food: 40, water: 40 } },
+    hard: { risk: 0.5, resourceCost: { food: 60, water: 60 } }
+};
+
+// Add this function near the top of the file, with other helper functions
+function generateSurvivor() {
+    const availableNames = names.filter(name => !gameState.party.some(person => person.name === name));
+    const name = availableNames[Math.floor(Math.random() * availableNames.length)];
+
+    return {
+        name: name,
+        health: 100,
+        hunger: 0,
+        thirst: 0,
+        energy: 100,
+        stamina: gameState.maxStamina,
+        traits: {
+            hungerRate: getRandomTrait('hungerRate'),
+            thirstRate: getRandomTrait('thirstRate'),
+            energyRate: getRandomTrait('energyRate'),
+            maxStamina: Math.round(getRandomTrait('maxStamina')),
+            staminaRecoveryRate: getRandomTrait('staminaRecoveryRate')
+        }
+    };
+}
+
+// Modify the initiateRescueMission function to use the new generateSurvivor function
+function initiateRescueMission(difficulty) {
+    const mission = RESCUE_MISSION_TYPES[difficulty];
+
+    // Check if player has enough resources
+    if (gameState.food < mission.resourceCost.food || gameState.water < mission.resourceCost.water) {
+        addLogEntry("Not enough resources for this rescue mission.", 'error');
+        return;
+    }
+
+    // Deduct resources
+    gameState.food -= mission.resourceCost.food;
+    gameState.water -= mission.resourceCost.water;
+
+    // Determine outcome
+    const success = Math.random() > mission.risk;
+
+    if (success) {
+        // Generate a new survivor
+        const newSurvivor = generateSurvivor();
+        gameState.party.push(newSurvivor);
+
+        // Add some bonus resources
+        const bonusResources = {
+            food: Math.floor(Math.random() * 50) + 10,
+            water: Math.floor(Math.random() * 50) + 10,
+            wood: Math.floor(Math.random() * 30) + 5
+        };
+        gameState.food += bonusResources.food;
+        gameState.water += bonusResources.water;
+        gameState.wood += bonusResources.wood;
+
+        addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+    } else {
+        // Failed mission
+        if (Math.random() < 0.5) {
+            // Injury to a random party member
+            const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
+            injuredPerson.health = Math.max(10, injuredPerson.health - 40);
+            addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
+        } else {
+            addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
+        }
+    }
+
+    gameState.rescueMissionAvailable = false;
+    gameState.lastRescueMissionDay = gameState.day;
+    updateUI();
+}
+
+// Add this function to handle rescue missions
+function initiateRescueMission(difficulty) {
+    const mission = RESCUE_MISSION_TYPES[difficulty];
+
+    // Check if player has enough resources
+    if (gameState.food < mission.resourceCost.food || gameState.water < mission.resourceCost.water) {
+        addLogEntry("Not enough resources for this rescue mission.", 'error');
+        return;
+    }
+
+    // Deduct resources
+    gameState.food -= mission.resourceCost.food;
+    gameState.water -= mission.resourceCost.water;
+
+    // Determine outcome
+    const success = Math.random() > mission.risk;
+
+    if (success) {
+        // Generate a new survivor
+        const newSurvivor = generateSurvivor();
+        gameState.party.push(newSurvivor);
+
+        // Add some bonus resources
+        const bonusResources = {
+            food: Math.floor(Math.random() * 50) + 10,
+            water: Math.floor(Math.random() * 50) + 10,
+            wood: Math.floor(Math.random() * 30) + 5
+        };
+        gameState.food += bonusResources.food;
+        gameState.water += bonusResources.water;
+        gameState.wood += bonusResources.wood;
+
+        addLogEntry(`Rescue mission successful! ${newSurvivor.name} has joined your party. They brought some supplies: ${bonusResources.food} food, ${bonusResources.water} water, and ${bonusResources.wood} wood.`, 'success');
+    } else {
+        // Failed mission
+        if (Math.random() < 0.5) {
+            // Injury to a random party member
+            const injuredPerson = gameState.party[Math.floor(Math.random() * gameState.party.length)];
+            injuredPerson.health = Math.max(10, injuredPerson.health - 40);
+            addLogEntry(`Rescue mission failed. ${injuredPerson.name} was injured during the attempt.`, 'error');
+        } else {
+            addLogEntry("Rescue mission failed. The team returned empty-handed.", 'error');
+        }
+    }
+
+    gameState.rescueMissionAvailable = false;
+    gameState.lastRescueMissionDay = gameState.day;
+    updateUI();
+}
+
+// Add this function to update the Watchtower module
+function updateWatchtowerModule() {
+    const watchtowerModule = document.getElementById('watchtower-module');
+    if (!watchtowerModule) return;
+
+    if (gameState.upgrades.watchtower) {
+        watchtowerModule.classList.remove('hidden');
+        watchtowerModule.innerHTML = `
+            <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
+            ${gameState.rescueMissionAvailable ? `
+                <p class="mb-4">A rescue mission is available!</p>
+                <div class="flex flex-col gap-2">
+                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (Low Risk)</button>
+                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (Moderate Risk)</button>
+                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (High Risk)</button>
+                </div>
+            ` : `
+                <p>Next rescue mission available in ${RESCUE_MISSION_INTERVAL - (gameState.day - gameState.lastRescueMissionDay)} days.</p>
+            `}
+        `;
+    } else {
+        watchtowerModule.classList.remove('hidden');
+        watchtowerModule.innerHTML = `
+            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
+                <div class="text-6xl mb-2">🗼</div>
+                <div class="text-xl">Mysterious Tower</div>
+                <div class="text-sm text-neutral-400">What could we see from up there?</div>
+            </div>
+        `;
+    }
+}
+
 const ACHIEVEMENTS = [
     { id: 'survivor', name: 'Survivor', description: 'Survive for 7 days', condition: () => gameState.day >= 7 },
     { id: 'wellFed', name: 'Well Fed', description: 'Accumulate 1000 food', condition: () => gameState.totalResourcesGathered.food >= 1000 },
@@ -869,17 +1041,7 @@ function collectWellWater() {
     // ... rest of the existing code ...
 }
 
-// Modify the updateUI function to include updating achievements
-function updateUI() {
-    // ... existing code ...
-
-    updateAchievementsUI();
-    updateLumberMillModule();
-
-    // ... rest of the existing code ...
-}
-
-// Replace the existing updateUI function with this updated version
+// Merge the two updateUI functions
 function updateUI() {
     document.getElementById('time').textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
     document.getElementById('food').textContent = Math.floor(gameState.food);
@@ -1080,12 +1242,7 @@ function updateUI() {
     updateActionButtons();
     updateAchievementsUI();
     updateLumberMillModule();
-
-    // Show/hide debug button
-    // const debugButton = document.getElementById('debug-toggle');
-    // if (debugButton) {
-    //     debugButton.style.display = gameState.party.length > 0 ? 'inline-block' : 'none';
-    // }
+    updateWatchtowerModule();
 }
 
 // Add these new functions for hunting mechanics
