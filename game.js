@@ -105,7 +105,7 @@ const UPGRADES = {
     well: {
         id: 'well',
         name: 'Well',
-        cost: { wood: 200 },
+        cost: { wood: 100 },
         effect: 'Generates water over time',
         prerequisite: 'farming'
     },
@@ -1817,7 +1817,7 @@ function collectWellWater() {
 }
 
 function buyWellUpgrade() {
-    const cost = 200;
+    const cost = 100;
     if (gameState.wood >= cost) {
         gameState.wood -= cost;
         gameState.upgrades.well = true;
