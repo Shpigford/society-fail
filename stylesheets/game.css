@@ -779,4 +779,65 @@
       font-size: 0.8em;
     }
   }
+
+  #lumber-mill-module {
+    #lumber-mill-grid {
+      margin: 1rem;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border: var(--border-thickness) solid var(--text-color);
+
+      .tree-cell {
+        aspect-ratio: 1 / 1;
+        border-right: 1px solid white;
+        border-bottom: 1px solid white;
+        cursor: default;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+
+        &:nth-child(5n) {
+          border-right: none;
+        }
+
+        &:nth-last-child(-n+5) {
+          border-bottom: none;
+        }
+
+        .growth-indicator {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: var(--green);
+          transition: height 0.3s ease;
+        }
+
+        .lucide {
+          width: 2em;
+          height: 2em;
+          position: relative;
+          z-index: 1;
+        }
+
+
+        &.ready-to-harvest {
+          .growth-indicator {
+            background-color: var(--green);
+          }
+
+          &:hover {
+            background-color: var(--green);
+            cursor: pointer;
+
+            .lucide {
+              color: black;
+            }
+          }
+        }
+      }
+    }
+  }
 }

@@ -1820,8 +1820,8 @@ function growLumberMillTrees() {
             growth: Math.min(1, tree.growth + (1 / tree.growthTime))
         }));
 
-        // Add new tree if there's space
-        if (gameState.lumberMill.trees.length < gameState.lumberMill.maxTrees) {
+        // Ensure we always have 5 trees
+        while (gameState.lumberMill.trees.length < gameState.lumberMill.maxTrees) {
             const growthTime = gameState.lumberMill.baseGrowthTime +
                 (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance;
             gameState.lumberMill.trees.push({
@@ -1831,36 +1831,40 @@ function growLumberMillTrees() {
                     (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
             });
         }
+
+        // Trim excess trees if any
+        gameState.lumberMill.trees = gameState.lumberMill.trees.slice(0, gameState.lumberMill.maxTrees);
     }
 }
 
 function updateLumberMillModule() {
     const lumberMillModule = document.getElementById('lumber-mill-module');
-    if (!lumberMillModule) return; // Exit if the module doesn't exist in the HTML
+    if (!lumberMillModule) return;
 
     if (gameState.upgrades.lumberMill) {
         lumberMillModule.classList.remove('hidden');
-        let treesHTML = gameState.lumberMill.trees.map((tree, index) => `
-            <div class="tree-container relative w-16 h-16 m-2 inline-block">
-                <div class="absolute bottom-0 left-0 right-0 bg-green-900 rounded-t-full transition-all duration-500" 
-                     style="height: ${tree.growth * 100}%;">
+        let treesHTML = '';
+
+        for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
+            const tree = gameState.lumberMill.trees[i] || { growth: 0 };
+            const growthPercentage = tree.growth * 100;
+            const isFullyGrown = growthPercentage === 100;
+
+            treesHTML += `
+                <div class="tree-cell ${isFullyGrown ? 'ready-to-harvest' : ''}" 
+                     onclick="${isFullyGrown ? `harvestTree(${i})` : ''}"
+                     title="${isFullyGrown ? 'Click to harvest' : `Growth: ${growthPercentage.toFixed(0)}%`}">
+                    <div class="growth-indicator" style="height: ${growthPercentage}%;"></div>
+                    <i data-lucide="${isFullyGrown ? 'tree-pine' : 'sprout'}" 
+                       class="icon-${isFullyGrown ? 'dark-green' : 'light-green'}"></i>
                 </div>
-                <div class="absolute inset-0 flex items-center justify-center text-4xl ${tree.growth === 1 ? 'cursor-pointer' : 'pointer-events-none'}"
-                     onclick="${tree.growth === 1 ? `harvestTree(${index})` : ''}">
-                    ${tree.growth === 1 ? '🌳' : '🌱'}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }
 
         lumberMillModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Lumber Mill</h2>
-            <p>Your Lumber Mill is producing 1 wood per hour.</p>
-            <p>Wood chopping efficiency: +50%</p>
-            <div class="mt-4">
-                <h3 class="text-xl mb-2">Tree Farm</h3>
-                <div class="tree-farm flex flex-wrap justify-center">
-                    ${treesHTML}
-                </div>
+            <h2><i data-lucide="tree-pine" class="icon-dark"></i> Lumber Mill</h2>
+            <div id="lumber-mill-grid">
+                ${treesHTML}
             </div>
         `;
     } else {
@@ -1873,6 +1877,8 @@ function updateLumberMillModule() {
             </div>
         `;
     }
+
+    lucide.createIcons();
 }
 
 function harvestTree(index) {
@@ -1930,15 +1936,17 @@ function setDebugMode(enabled) {
             };
         }
         // Initialize Lumber Mill trees
-        gameState.lumberMill.trees = [];
-        for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
-            gameState.lumberMill.trees.push({
-                growth: Math.random(),
-                growthTime: gameState.lumberMill.baseGrowthTime +
-                    (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
-                harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
-                    (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
-            });
+        if (!gameState.lumberMill.trees || gameState.lumberMill.trees.length === 0) {
+            gameState.lumberMill.trees = [];
+            for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
+                gameState.lumberMill.trees.push({
+                    growth: Math.random(),
+                    growthTime: gameState.lumberMill.baseGrowthTime +
+                        (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
+                    harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
+                        (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
+                });
+            }
         }
         // Initialize hunting if it's not already started
         if (!gameState.huntingInterval) {
