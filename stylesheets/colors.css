@@ -1,0 +1,18 @@
+:root {
+  --text-color: #fff;
+  --text-color-alt: #aaa;
+  --link-color: var(--blue);
+  --background-color: #000;
+  --background-color-alt: #111;
+  --accent-color: #4a4a4a;
+  --light-red: #e06c75;
+  --dark-red: #be5046;
+  --green: #98c379;
+  --light-yellow: #e5c07b;
+  --dark-yellow: #d19a66;
+  --blue: #61afef;
+  --magenta: #c678dd;
+  --cyan: #56b6c2;
+  --gutter-grey: #4b5263;
+  --comment-grey: #5c6370;
+}

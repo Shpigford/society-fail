@@ -1,204 +1,116 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Society Fail</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'geist-mono': ['GeistMono', 'monospace'],
-                    },
-                    animation: {
-                        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        pulse: {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: .5 },
-                        }
-                    }
-                },
-            },
-        }
-    </script>
-    <style>
-        @font-face {
-            font-family: 'GeistMono';
-            src: url('assets/fonts/GeistMonoVF.ttf') format('truetype-variations');
-            font-weight: 100 900;
-            font-style: normal;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Society Fail</title>
+  <link rel="stylesheet" href="stylesheets/application.css">
 </head>
 
-<body class="font-geist-mono bg-black text-white min-h-screen flex flex-col">
-    <div id="game-container" class="max-w-full overflow-x-hidden flex-grow flex flex-col w-full">
-        <div id="start-screen" class="flex flex-col items-center justify-center text-center m-12">
-            <h1 class="text-5xl mb-5 font-black">💀 Society Fail</h1>
-            <p class="text-xl mb-8">Can you survive the apocalypse &amp; rebuild society?</p>
-
-            <div class="w-full h-px bg-neutral-800 my-8"></div>
-
-            <div id="difficulty-selection" class="flex flex-col gap-4">
-                <h2 class="text-2xl mb-4">How much pain can you take?</h2>
-                <button onclick="startGame('easy')"
-                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Easy (1 person)
-                    👤<br>Start with: 50 🍖, 50 💧, 30 🪵</button>
-                <button onclick="startGame('medium')"
-                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Medium (3
-                    people)
-                    👥<br>Start with: 30 🍖, 30 💧, 20 🪵</button>
-                <button onclick="startGame('hard')"
-                    class="bg-neutral-800 hover:bg-neutral-700 text-white py-3 px-6 rounded transition">Hard (5 people)
-                    👥👥<br>Start with: No resources</button>
-            </div>
+<body>
+  <div id="start-screen">
+    <div class="splash-screen">
+      <div class="splash-header">
+        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
+        <div>
+          <h1>Society Fail</h1>
+          <p>Can you survive the apocalypse & rebuild society?</p>
         </div>
-        <div id="game-over-screen" class="hidden flex flex-col items-center justify-center text-center m-12">
-            <h1 class="text-5xl mb-5 font-black">💀 Society Failed</h1>
-            <p class="text-xl mb-8">Your society has collapsed.</p>
-            <div id="game-stats" class="mb-8">
-                <!-- Stats will be populated here -->
+      </div>
+      <div id="difficulty-selection">
+        <div class="difficulty-options">
+          <button onclick="startGame('easy')">
+            <b>Easy</b>
+            <div>
+              <span>50 <i data-lucide="beef" class="icon-dark-yellow"></i></span>
+              <span>50 <i data-lucide="droplet" class="icon-blue"></i></span>
+              <span>30 <i data-lucide="tree-pine" class="icon-green"></i></span>
             </div>
-            <button onclick="resetGame(true)"
-                class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded transition">
-                Try Again
-            </button>
+          </button>
+          <button onclick="startGame('medium')">
+            <b>Medium</b>
+            <div>
+              <span>30 <i data-lucide="beef" class="icon-dark-yellow"></i></span>
+              <span>30 <i data-lucide="droplet" class="icon-blue"></i></span>
+              <span>20 <i data-lucide="tree-pine" class="icon-green"></i></span>
+            </div>
+          </button>
+          <button onclick="startGame('hard')">
+            <b>Hard</b>
+            <div>
+              <span>No resources <i data-lucide="circle-slash-2" class="icon-dark-red"></i></span>
+            </div>
+          </button>
         </div>
+      </div>
     </div>
-    <div id="game-ui" class="hidden flex flex-col h-full">
-        <header
-            class="flex flex-col sm:flex-row justify-between items-center p-4 bg-neutral-900 sticky top-0 z-50 shadow-md">
-            <h1 class="text-2xl font-black mb-4 sm:mb-0">💀 Society Fail</h1>
-            <div id="resources"
-                class="flex gap-4 sm:gap-8 bg-black bg-opacity-50 px-4 sm:px-8 py-2 rounded-full mb-4 sm:mb-0">
-                <div class="resource flex items-center gap-1">
-                    <span class="text-xl sm:text-2xl">🍖</span>
-                    <span id="food" class="text-lg sm:text-xl font-bold min-w-[30px] text-left">0</span>
-                </div>
-                <div class="resource flex items-center gap-1">
-                    <span class="text-xl sm:text-2xl">💧</span>
-                    <span id="water" class="text-lg sm:text-xl font-bold min-w-[30px] text-left">0</span>
-                </div>
-                <div class="resource flex items-center gap-1">
-                    <span class="text-xl sm:text-2xl">🪵</span>
-                    <span id="wood" class="text-lg sm:text-xl font-bold min-w-[30px] text-left">0</span>
-                </div>
-            </div>
-            <div id="time-module" class="flex items-center gap-4">
-                <div id="time-display" class="flex items-center gap-2">
-                    <span id="time" class="text-sm sm:text-base">Day 1, Hour 1</span>
-                    <div id="day-night-indicator" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full"></div>
-                </div>
-                <button id="reset-game" onclick="resetGame(false)"
-                    class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-1 px-2 sm:px-3 rounded transition text-sm sm:text-base">Restart</button>
-            </div>
-        </header>
-        <div class="flex-grow overflow-y-auto">
-            <div class="px-4 pb-4">
-                <div id="actions-module" class="mt-4 rounded-lg border border-neutral-800 bg-neutral-900 text-center">
-                    <div id="actions" class="flex gap-2 justify-between">
-                        <button id="gatherFoodBtn" onclick="gatherFood()"
-                            class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Gather
-                            Food 🍖</button>
-                        <button id="collectWaterBtn" onclick="collectWater()"
-                            class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Collect
-                            Water 💧</button>
-                        <button id="chopWoodBtn" onclick="chopWood()"
-                            class="flex-1 border border-blue-600 bg-blue-600/50 text-xl hover:bg-blue-700 text-white py-3 px-4 rounded transition">Chop
-                            Wood 🪵</button>
-                        <!-- Removed: Hunt button -->
-                    </div>
-                </div>
-                <div id="party-module" class="p-4 m-4 rounded-lg border border-neutral-800 bg-neutral-900">
-                    <h2 class="text-lg mb-2 font-black">Your Party</h2>
-                    <div id="party" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
-                    <div class="col-span-1">
-                        <div id="log-module"
-                            class="p-4 rounded-lg border border-neutral-800 bg-neutral-900 max-h-[300px] overflow-y-auto mb-5">
-                            <h2 class="text-xl mb-4 font-black">Activity Log</h2>
-                            <div id="log-content" class="text-sm"></div>
-                        </div>
-                        <div id="upgrades-module" class="p-4 rounded-lg border border-neutral-800 bg-neutral-900">
-                            <h2 class="text-xl mb-4 font-black">Upgrades</h2>
-                            <div id="upgrades" class="flex flex-col gap-2">
-                                <!-- Upgrade buttons will be dynamically inserted here -->
-                            </div>
-                        </div>
-                        <div id="achievements-module"
-                            class="p-4 mt-4 rounded-lg border border-neutral-800 bg-neutral-900">
-                            <h2 class="text-xl mb-4 font-black">Achievements</h2>
-                            <div id="achievements" class="grid grid-cols-2 gap-2">
-                                <!-- Achievements will be dynamically inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-span-1">
-                        <div id="farming-module"
-                            class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden mb-5">
-                            <!-- This will be populated by JavaScript -->
-                        </div>
-                        <div id="well-module" class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden">
-                            <h2 class="text-2xl mb-4 font-black">Well</h2>
-                            <div class="flex items-center justify-between">
-                                <div id="well-container"
-                                    class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
-                                    <div id="well-water"
-                                        class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500">
-                                    </div>
-                                </div>
-                                <div class="ml-4 flex flex-col items-start">
-                                    <span id="well-level" class="text-xl mb-2">0/100</span>
-                                    <button onclick="collectWellWater()"
-                                        class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
-                                        Water</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-span-1">
-                        <div id="hunting-module"
-                            class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden mb-5">
-                            <h2 class="text-2xl mb-4 font-black">Hunting Lodge</h2>
-                            <div id="hunting-area"
-                                class="w-full h-64 bg-green-900/30 relative overflow-hidden rounded-lg">
-                                <!-- The wildlife emoji will be added here dynamically -->
-                            </div>
-                            <p class="mt-2 text-sm">Click on the animal to hunt it before it escapes!</p>
-                        </div>
-                        <div id="lumber-mill-module"
-                            class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg hidden mt-5">
-                            <!-- This will be populated by JavaScript -->
-                        </div>
-                        <div id="watchtower-module"
-                            class="p-4 border border-neutral-800 mt-4 bg-neutral-900 rounded-lg hidden mb-5">
-                            <!-- This will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <footer class="bg-neutral-900 text-neutral-400 py-4 text-center mt-8">
-        <p>
-            <a href="https://github.com/Shpigford/society-fail" target="_blank" rel="noopener noreferrer"
-                class="hover:text-white transition">
-                Society Fail is open source!
-            </a>
-            |
-            <a href="https://x.com/shpigford" target="_blank" rel="noopener noreferrer"
-                class="hover:text-white transition">
-                Made by @shpigford
-            </a>
-        </p>
+    <footer>
+      <p>
+        Society Fail is <a href="https://github.com/Shpigford/society-fail" target="_blank">open source</a> and made by
+        <a href="https://x.com/shpigford" target="_blank">@shpigford</a>!
+      </p>
     </footer>
-    <script src="game.js"></script>
+  </div>
+  <div id="game-over-screen" class="hidden">
+    <h1>💀 Society Failed</h1>
+    <p>Your society has collapsed.</p>
+    <div id="game-stats"></div>
+    <button onclick="resetGame(true)">Try Again</button>
+  </div>
+  <div id="game-ui" class="hidden">
+    <header>
+      <h1>💀 Society Fail</h1>
+      <div id="resources">
+        <div class="resource"><span>🍖</span><span id="food">0</span></div>
+        <div class="resource"><span>💧</span><span id="water">0</span></div>
+        <div class="resource"><span>🪵</span><span id="wood">0</span></div>
+      </div>
+      <div id="time-module">
+        <div id="time-display">
+          <span id="time">Day 1, Hour 1</span>
+          <div id="day-night-indicator"></div>
+        </div>
+        <button id="reset-game" onclick="resetGame(false)">Restart</button>
+      </div>
+    </header>
+    <main>
+      <div id="actions-module">
+        <button id="gatherFoodBtn" onclick="gatherFood()">Gather Food 🍖</button>
+        <button id="collectWaterBtn" onclick="collectWater()">Collect Water 💧</button>
+        <button id="chopWoodBtn" onclick="chopWood()">Chop Wood 🪵</button>
+      </div>
+      <div id="party-module">
+        <h2>Your Party</h2>
+        <div id="party"></div>
+      </div>
+      <div id="game-modules">
+        <div id="log-module">
+          <h2>Activity Log</h2>
+          <div id="log-content"></div>
+        </div>
+        <div id="upgrades-module">
+          <h2>Upgrades</h2>
+          <div id="upgrades"></div>
+        </div>
+        <div id="achievements-module">
+          <h2>Achievements</h2>
+          <div id="achievements"></div>
+        </div>
+        <div id="farming-module" class="hidden"></div>
+        <div id="well-module" class="hidden"></div>
+        <div id="hunting-module" class="hidden"></div>
+        <div id="lumber-mill-module" class="hidden"></div>
+        <div id="watchtower-module" class="hidden"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="game.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 
 </html>

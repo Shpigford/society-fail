@@ -1,0 +1,20 @@
+.icon-large {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.icon-dark-red {
+  color: var(--dark-red);
+}
+
+.icon-blue {
+  color: var(--blue);
+}
+
+.icon-dark-yellow {
+  color: var(--dark-yellow);
+}
+
+.icon-green {
+  color: var(--green);
+}

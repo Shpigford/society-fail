@@ -196,7 +196,7 @@ function addLogEntry(message, type = 'info') {
     const logEntry = document.createElement('div');
     const entryData = { message, type, day: gameState.day, hour: gameState.hour };
 
-    logEntry.className = getLogEntryClass(type);
+    logEntry.className = `log-entry ${type}`;
     logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
 
     logContent.insertBefore(logEntry, logContent.firstChild);
@@ -217,22 +217,6 @@ function addLogEntry(message, type = 'info') {
 
     // Scroll to the top of the log
     logContent.scrollTop = 0;
-}
-
-// Helper function to get the appropriate class for a log entry
-function getLogEntryClass(type) {
-    switch (type) {
-        case 'info':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
-        case 'error':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
-        case 'success':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
-        case 'whisper':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
-        default:
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
-    }
 }
 
 // Add these functions at the beginning of the file
@@ -363,7 +347,7 @@ function loadActivityLog() {
     if (gameState.logEntries && gameState.logEntries.length > 0) {
         gameState.logEntries.forEach(entry => {
             const logEntry = document.createElement('div');
-            logEntry.className = getLogEntryClass(entry.type);
+            logEntry.className = `log-entry ${entry.type}`;
             logEntry.textContent = `Day ${entry.day}, Hour ${entry.hour}: ${entry.message}`;
             logContent.appendChild(logEntry);
         });
@@ -893,7 +877,7 @@ function addLogEntry(message, type = 'info') {
     const logEntry = document.createElement('div');
     const entryData = { message, type, day: gameState.day, hour: gameState.hour };
 
-    logEntry.className = getLogEntryClass(type);
+    logEntry.className = `log-entry ${type}`;
     logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
 
     logContent.insertBefore(logEntry, logContent.firstChild);
@@ -914,22 +898,6 @@ function addLogEntry(message, type = 'info') {
 
     // Scroll to the top of the log
     logContent.scrollTop = 0;
-}
-
-// Helper function to get the appropriate class for a log entry
-function getLogEntryClass(type) {
-    switch (type) {
-        case 'info':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
-        case 'error':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
-        case 'success':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
-        case 'whisper':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
-        default:
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
-    }
 }
 
 // Add these constants at the top of the file
@@ -1187,70 +1155,53 @@ function updateUI() {
         const busyTimeLeft = isBusy && !isResting ?
             gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
 
-        const getProgressBarColor = (value) => {
-            if (value > 75) return 'bg-green-500';
-            if (value > 50) return 'bg-yellow-500';
-            if (value > 25) return 'bg-orange-500';
-            return 'bg-red-500';
-        };
+        const personElement = document.createElement('div');
+        personElement.className = `person ${index === gameState.selectedPerson ? 'selected' : ''} ${isBusy ? 'busy' : ''}`;
+        personElement.onclick = () => selectPerson(index);
 
-        const getCriticalClass = (value) => {
-            return value === 0 ? 'text-red-500 animate-pulse font-bold' : '';
-        };
-
-        partyElement.innerHTML += `
-            <div class="person rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : 'border border-white'} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
-                <h3 class="text-sm border-b border-neutral-600 pb-1 mb-1">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold z-10">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-                <div class="stat flex items-center mb-1 ${getCriticalClass(person.health)}">
-                    <label class="w-12 text-right mr-1">Health:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(person.health)}" style="width: ${person.health}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(person.health)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.hunger)}">
-                    <label class="w-12 text-right mr-1">Hunger:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(100 - person.hunger)}" style="width: ${100 - person.hunger}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.hunger)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.thirst)}">
-                    <label class="w-12 text-right mr-1">Thirst:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(100 - person.thirst)}" style="width: ${100 - person.thirst}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.thirst)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(person.energy)}">
-                    <label class="w-12 text-right mr-1">Energy:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(person.energy)}" style="width: ${person.energy}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(person.energy)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
-                    <label class="w-12 text-right mr-1">Stamina:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor((person.stamina / person.traits.maxStamina) * 100)}" style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
-                </div>
-                <div class="traits flex flex-wrap justify-around text-xs mt-2">
-                    <span title="Hunger Rate" class="cursor-help">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
-                    <span title="Thirst Rate" class="cursor-help">💧: ${person.traits.thirstRate.toFixed(2)}</span>
-                    <span title="Energy Rate" class="cursor-help">⚡: ${person.traits.energyRate.toFixed(2)}</span>
-                    <span title="Max Stamina" class="cursor-help">💪: ${person.traits.maxStamina}</span>
-                    <span title="Stamina Recovery Rate" class="cursor-help">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
-                </div>
-                <div class="person-actions flex flex-wrap justify-around mt-2 gap-1">
-                    <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.food < 10 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
-                    <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.water < 5 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
-                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
-                </div>
+        personElement.innerHTML = `
+            <h3>${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
+            ${isBusy ? `<div class="busy-label">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
+            <div class="stat">
+                <label>Health:</label>
+                <div class="progress-bar"><div style="width: ${person.health}%"></div></div>
+                <span>${Math.floor(person.health)}%</span>
+            </div>
+            <div class="stat">
+                <label>Hunger:</label>
+                <div class="progress-bar"><div style="width: ${100 - person.hunger}%"></div></div>
+                <span>${Math.floor(100 - person.hunger)}%</span>
+            </div>
+            <div class="stat">
+                <label>Thirst:</label>
+                <div class="progress-bar"><div style="width: ${100 - person.thirst}%"></div></div>
+                <span>${Math.floor(100 - person.thirst)}%</span>
+            </div>
+            <div class="stat">
+                <label>Energy:</label>
+                <div class="progress-bar"><div style="width: ${person.energy}%"></div></div>
+                <span>${Math.floor(person.energy)}%</span>
+            </div>
+            <div class="stat">
+                <label>Stamina:</label>
+                <div class="progress-bar"><div style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div></div>
+                <span>${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
+            </div>
+            <div class="traits">
+                <span title="Hunger Rate">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
+                <span title="Thirst Rate">💧: ${person.traits.thirstRate.toFixed(2)}</span>
+                <span title="Energy Rate">⚡: ${person.traits.energyRate.toFixed(2)}</span>
+                <span title="Max Stamina">💪: ${person.traits.maxStamina}</span>
+                <span title="Stamina Recovery Rate">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
+            </div>
+            <div class="person-actions">
+                <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''}>Eat (10 🍖)</button>
+                <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''}>Drink (5 💧)</button>
+                <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''}>Rest 💤</button>
             </div>
         `;
+
+        partyElement.appendChild(personElement);
     });
 
     // Update farming module
@@ -1758,20 +1709,19 @@ function updateUpgradeButtons() {
         if (!upgrade.unlocked && !gameState.upgrades[upgrade.prerequisite]) continue;
 
         const button = document.createElement('button');
-        button.className = 'text-white py-2 px-4 rounded transition mb-2 w-full text-left';
+        button.className = 'upgrade-button';
 
         let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
 
         button.innerHTML = `
-            <div class="font-bold">${upgrade.name} (${costText})</div>
-            <div class="text-xs">${upgrade.effect}</div>
+            <div class="upgrade-name">${upgrade.name} (${costText})</div>
+            <div class="upgrade-effect">${upgrade.effect}</div>
         `;
 
         if (gameState.upgrades[upgradeId]) {
             button.disabled = true;
-            button.classList.add('bg-green-800', 'cursor-default');
-            button.classList.remove('hover:bg-green-700');
-            button.innerHTML += '<div class="text-xs font-bold mt-1">Unlocked ✅</div>';
+            button.classList.add('unlocked');
+            button.innerHTML += '<div class="upgrade-status">Unlocked ✅</div>';
         } else {
             button.onclick = () => buyUpgrade(upgradeId);
             let canAfford = true;
@@ -1783,10 +1733,7 @@ function updateUpgradeButtons() {
             }
             if (!canAfford) {
                 button.disabled = true;
-                button.classList.add('opacity-50', 'cursor-not-allowed', 'bg-neutral-700');
-            } else {
-                button.classList.remove('bg-green-200', 'opacity-50', 'cursor-not-allowed');
-                button.classList.add('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('cannot-afford');
             }
         }
 
