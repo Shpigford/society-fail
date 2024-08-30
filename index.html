@@ -94,32 +94,44 @@
         </button>
       </div>
       <div id="party-module">
-        <h2>Your Party</h2>
+        <h2><i data-lucide="users" class="icon-dark"></i> Your Party</h2>
         <div id="party"></div>
       </div>
       <div id="game-modules">
-        <div id="log-module">
-          <h2>Activity Log</h2>
-          <div id="log-content"></div>
+        <div id="main-modules">
+          <div id="log-module">
+            <h2 class="collapsible"><i data-lucide="cctv" class="icon-dark"></i> Activity Log <i
+                data-lucide="chevron-up" class="toggle-icon"></i></h2>
+            <div class="module-content">
+              <div id="log-content"></div>
+            </div>
+          </div>
+          <div id="upgrades-module">
+            <h2 class="collapsible">Upgrades <i data-lucide="chevron-up" class="toggle-icon"></i></h2>
+            <div class="module-content">
+              <div id="upgrades"></div>
+            </div>
+          </div>
+          <div id="achievements-module">
+            <h2 class="collapsible">Achievements <i data-lucide="chevron-up" class="toggle-icon"></i></h2>
+            <div class="module-content">
+              <div id="achievements"></div>
+            </div>
+          </div>
         </div>
-        <div id="upgrades-module">
-          <h2>Upgrades</h2>
-          <div id="upgrades"></div>
+        <div id="secondary-modules">
+          <div id="farming-module" class="hidden"></div>
+          <div id="well-module" class="hidden"></div>
+          <div id="hunting-module" class="hidden"></div>
+          <div id="lumber-mill-module" class="hidden"></div>
+          <div id="watchtower-module" class="hidden"></div>
         </div>
-        <div id="achievements-module">
-          <h2>Achievements</h2>
-          <div id="achievements"></div>
-        </div>
-        <div id="farming-module" class="hidden"></div>
-        <div id="well-module" class="hidden"></div>
-        <div id="hunting-module" class="hidden"></div>
-        <div id="lumber-mill-module" class="hidden"></div>
-        <div id="watchtower-module" class="hidden"></div>
       </div>
     </main>
   </div>
 
-  <script src="game.js"></script>
+  <script src="javascript/ui.js"></script>
+  <script src="javascript/game.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     lucide.createIcons();

@@ -3,6 +3,10 @@
   height: 1.2em;
 }
 
+.icon-dark {
+  color: var(--background-color-alt);
+}
+
 .icon-dark-red {
   color: var(--dark-red);
 }

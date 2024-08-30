@@ -114,6 +114,14 @@
       padding: 0.2em 0.5em;
       font-size: 0.8em;
       border-bottom: var(--border-thickness) solid var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+
+      .lucide {
+        width: 1.2em;
+        height: 1.2em;
+      }
     }
 
     #party {
@@ -258,6 +266,84 @@
           }
         }
       }
+    }
+  }
+
+  #game-modules {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 2fr;
+    }
+
+    #main-modules,
+    #secondary-modules {
+      display: grid;
+      gap: 1rem;
+    }
+
+    #main-modules {
+      @media (min-width: 768px) and (max-width: 1023px) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      h2 {
+        background-color: white;
+        color: black;
+        text-transform: uppercase;
+        font-weight: 900;
+        padding: 0.2em 0.5em;
+        font-size: 0.8em;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+
+        .lucide {
+          width: 1.2em;
+          height: 1.2em;
+        }
+      }
+
+      h2.collapsible {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .toggle-icon {
+          transition: transform 0.3s ease;
+        }
+
+        &.collapsed .toggle-icon {
+          transform: rotate(180deg);
+        }
+      }
+
+      .module-content {
+        transition: max-height 0.3s ease;
+        overflow: hidden;
+        max-height: 1000px;
+        /* Adjust this value based on your content */
+      }
+
+      .module-content.collapsed {
+        max-height: 0;
+      }
+    }
+
+    #secondary-modules {
+      @media (min-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    >div>div {
+      border: var(--border-thickness) solid var(--text-color);
+      border-radius: var(--border-radius);
     }
   }
 }
