@@ -1,0 +1,151 @@
+#game-over-screen {
+  text-align: left;
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 600px;
+}
+
+#game-over-screen .splash-screen {
+  border: var(--border-thickness) solid var(--text-color);
+}
+
+#game-over-screen .splash-header {
+  border-bottom: var(--border-thickness) solid var(--text-color);
+  display: flex;
+  align-items: center;
+  font-size: 3rem;
+}
+
+#game-over-screen .splash-header .icon-large {
+  padding: 1rem;
+  font-size: 2em;
+  border-right: var(--border-thickness) solid var(--text-color);
+}
+
+#game-over-screen .splash-header div {
+  padding-left: 1.5rem;
+}
+
+#game-over-screen .splash-header h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1em;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+#game-over-screen .splash-header p {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+#game-over-screen #game-stats {
+  .numbers {
+    border-bottom: var(--border-thickness) solid var(--text-color);
+    display: flex;
+
+    p {
+      padding: 1rem;
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      border-right: var(--border-thickness) solid var(--text-color);
+    }
+
+    .resource-list {
+      display: flex;
+      gap: 1.5em;
+      font-size: 1.5em;
+      font-weight: 900;
+      margin-left: 1rem;
+
+      .resource {
+        display: flex;
+        align-items: center;
+        gap: 0.2em;
+      }
+    }
+  }
+
+  .achievements {
+    .achievement-list {
+      display: grid;
+      grid-template-columns: 1fr;
+
+      @media (min-width: 768px) {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .achievement-item {
+        padding: 0.75rem;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+
+        &:nth-child(even) {
+          border-left: var(--border-thickness) solid var(--text-color);
+        }
+
+        &:nth-child(1),
+        &:nth-child(2) {
+          border-top: none;
+        }
+
+        &:last-child,
+        &:nth-last-child(2):nth-child(odd) {
+          border-bottom: none;
+        }
+
+        .achievement-name {
+          font-weight: 900;
+        }
+
+        .achievement-description {
+          font-size: 0.8em;
+        }
+      }
+    }
+  }
+
+  h2 {
+    display: flex;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    font-weight: 900;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+
+    b {
+      padding: 1rem;
+      border-right: var(--border-thickness) solid var(--text-color);
+    }
+
+    .time {
+      padding: 1rem;
+      color: var(--dark-red);
+    }
+  }
+}
+
+#game-over-screen button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  border: none;
+  margin: 0;
+  background-color: var(--dark-red);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-top: var(--border-thickness) solid var(--text-color);
+}
+
+#game-over-screen button:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}

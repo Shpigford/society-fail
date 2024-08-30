@@ -1,0 +1,15 @@
+button {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: var(--border-thickness) solid var(--text-color);
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}

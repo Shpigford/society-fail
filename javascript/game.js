@@ -18,9 +18,9 @@ function initializeGameState() {
             lumberMill: false,
             watchtower: false
         },
-        maxStamina: 100,
-        staminaPerAction: 10,
-        staminaRecoveryPerHour: 5,
+        maxEnergy: 100,
+        energyPerAction: 10,
+        energyRecoveryPerHour: 5,
         selectedPerson: 0,
         busyUntil: {},
         farming: {
@@ -170,9 +170,9 @@ const ACTION_DURATIONS = {
 };
 
 const CROP_TYPES = {
-    wheat: { emoji: '🌾', growthTime: 24, waterNeeded: 5, yield: 20 },
-    corn: { emoji: '🌽', growthTime: 48, waterNeeded: 10, yield: 40 },
-    potato: { emoji: '🥔', growthTime: 72, waterNeeded: 15, yield: 60 }
+    wheat: { growthTime: 24, waterNeeded: 5, yield: 20 },
+    carrot: { growthTime: 48, waterNeeded: 10, yield: 40 },
+    bean: { growthTime: 72, waterNeeded: 15, yield: 60 }
 };
 
 // Add this constant for trait ranges
@@ -180,8 +180,8 @@ const TRAIT_RANGES = {
     hungerRate: { min: 0.8, max: 1.2 },
     thirstRate: { min: 0.8, max: 1.2 },
     energyRate: { min: 0.8, max: 1.2 },
-    maxStamina: { min: 80, max: 120 },
-    staminaRecoveryRate: { min: 0.8, max: 1.2 }
+    maxEnergy: { min: 80, max: 120 },
+    energyRecoveryRate: { min: 0.8, max: 1.2 }
 };
 
 // Add this helper function to generate a random trait value
@@ -196,8 +196,8 @@ function addLogEntry(message, type = 'info') {
     const logEntry = document.createElement('div');
     const entryData = { message, type, day: gameState.day, hour: gameState.hour };
 
-    logEntry.className = getLogEntryClass(type);
-    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
+    logEntry.className = `log-entry ${type}`;
+    logEntry.innerHTML = `<b>${entryData.day}.${entryData.hour}</b> <span>${entryData.message}</span>`;
 
     logContent.insertBefore(logEntry, logContent.firstChild);
 
@@ -217,22 +217,6 @@ function addLogEntry(message, type = 'info') {
 
     // Scroll to the top of the log
     logContent.scrollTop = 0;
-}
-
-// Helper function to get the appropriate class for a log entry
-function getLogEntryClass(type) {
-    switch (type) {
-        case 'info':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
-        case 'error':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
-        case 'success':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
-        case 'whisper':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
-        default:
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
-    }
 }
 
 // Add these functions at the beginning of the file
@@ -363,8 +347,8 @@ function loadActivityLog() {
     if (gameState.logEntries && gameState.logEntries.length > 0) {
         gameState.logEntries.forEach(entry => {
             const logEntry = document.createElement('div');
-            logEntry.className = getLogEntryClass(entry.type);
-            logEntry.textContent = `Day ${entry.day}, Hour ${entry.hour}: ${entry.message}`;
+            logEntry.className = `log-entry ${entry.type}`;
+            logEntry.innerHTML = `<b>${entry.day}.${entry.hour}</b> <span>${entry.message}</span>`;
             logContent.appendChild(logEntry);
         });
     }
@@ -387,13 +371,12 @@ function startGame(difficulty) {
             hunger: 0,
             thirst: 0,
             energy: 100,
-            stamina: gameState.maxStamina,
             traits: {
                 hungerRate: getRandomTrait('hungerRate'),
                 thirstRate: getRandomTrait('thirstRate'),
                 energyRate: getRandomTrait('energyRate'),
-                maxStamina: Math.round(getRandomTrait('maxStamina')),
-                staminaRecoveryRate: getRandomTrait('staminaRecoveryRate')
+                maxEnergy: Math.round(getRandomTrait('maxEnergy')),
+                energyRecoveryRate: getRandomTrait('energyRecoveryRate')
             }
         };
     });
@@ -467,23 +450,31 @@ function showGameOverScreen() {
     const achievedAchievements = ACHIEVEMENTS.filter(achievement => gameState.achievements[achievement.id]);
 
     gameStats.innerHTML = `
-        <p>Time Survived: ${daysPlayed} days, ${hoursPlayed % 24} hours</p>
-        <p>Total Resources Gathered:</p>
-        <ul class="list-none">
-            <li>🍖 Food: ${Math.floor(gameState.totalResourcesGathered.food)}</li>
-            <li>💧 Water: ${Math.floor(gameState.totalResourcesGathered.water)}</li>
-            <li>🪵 Wood: ${Math.floor(gameState.totalResourcesGathered.wood)}</li>
-        </ul>
-        <p class="mt-4 font-bold">Achievements Unlocked:</p>
-        <ul class="list-none">
-            ${achievedAchievements.map(achievement => `
-                <li class="mb-1">
-                    <span class="text-green-400">✅ ${achievement.name}</span>: ${achievement.description}
-                </li>
-            `).join('')}
-        </ul>
-        ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
+        <h2>
+            <b>Time Survived</b>
+            <span class="time">${daysPlayed} days, ${hoursPlayed % 24} hours</span>
+        </h2>
+        <div class="numbers">
+            <p>Resources</p>
+            <div class="resource-list">
+                <div class="resource"><i data-lucide="beef" class="icon-dark-yellow"></i><span>${Math.floor(gameState.totalResourcesGathered.food)}</span></div>
+                <div class="resource"><i data-lucide="droplet" class="icon-blue"></i><span>${Math.floor(gameState.totalResourcesGathered.water)}</span></div>
+                <div class="resource"><i data-lucide="tree-pine" class="icon-green"></i><span>${Math.floor(gameState.totalResourcesGathered.wood)}</span></div>
+            </div>
+        </div>
+        <div class="achievements">
+            <div class="achievement-list">
+                ${achievedAchievements.map(achievement => `
+                    <div class="achievement-item">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-description">${achievement.description}</div>
+                    </div>
+                `).join('')}
+            </div>
+            ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
+        </div>
     `;
+    lucide.createIcons();
 }
 
 // Modify the gameLoop function
@@ -507,16 +498,14 @@ function gameLoop() {
 
         if (gameState.busyUntil[index] === -1) {
             // Person is resting
-            person.energy = Math.min(100, person.energy + 10);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10 * person.traits.staminaRecoveryRate);
+            person.energy = Math.min(100, person.energy + 10 * person.traits.energyRecoveryRate);
 
             // Check if rest is complete
-            if (person.energy === 100 && person.stamina === person.traits.maxStamina) {
+            if (person.energy === 100) {
                 gameState.busyUntil[index] = 0;
             }
         } else {
             person.energy = Math.max(0, Math.min(100, person.energy - 0.5 * person.traits.energyRate));
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + gameState.staminaRecoveryPerHour * person.traits.staminaRecoveryRate);
         }
 
         if (person.hunger >= 100 || person.thirst >= 100 || person.energy <= 0) {
@@ -528,7 +517,6 @@ function gameLoop() {
         person.hunger = Math.min(100, person.hunger);
         person.thirst = Math.min(100, person.thirst);
         person.energy = Math.min(100, person.energy);
-        person.stamina = Math.min(person.traits.maxStamina, person.stamina);
 
         // Check if person has died
         if (person.health <= 0) {
@@ -624,17 +612,15 @@ const RANDOM_EVENTS = [
         name: "Illness", effect: (state) => {
             const victim = state.party[Math.floor(Math.random() * state.party.length)];
             victim.health -= 10;
-            victim.stamina = Math.max(0, victim.stamina - 30);
-            return `${victim.name} has fallen ill! (-10 health, -30 stamina)`;
+            return `${victim.name} has fallen ill! (-10 health)`;
         }, type: "negative"
     },
     {
         name: "Morale Boost", effect: (state) => {
             state.party.forEach(person => {
-                person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
-                person.energy = Math.min(100, person.energy + 20);
+                person.energy = Math.min(person.traits.maxEnergy, person.energy + 20);
             });
-            return "A surge of hope boosts everyone's morale! (+20 stamina, +20 energy for all)";
+            return "A surge of hope boosts everyone's morale! (+20 energy for all)";
         }, type: "positive"
     },
     {
@@ -670,17 +656,17 @@ const RANDOM_EVENTS = [
     {
         name: "Tool Upgrade", effect: (state) => {
             state.party.forEach(person => {
-                person.traits.maxStamina += 10;
+                person.traits.maxEnergy += 10;
             });
-            return "You've found ways to improve your tools! (+10 max stamina for all)";
+            return "You've found ways to improve your tools! (+10 max energy for all)";
         }, type: "positive"
     },
     {
         name: "Harsh Weather", effect: (state) => {
             state.party.forEach(person => {
-                person.stamina = Math.max(0, person.stamina - 15);
+                person.energy = Math.max(0, person.energy - 15);
             });
-            return "A spell of harsh weather has drained everyone's energy! (-15 stamina for all)";
+            return "A spell of harsh weather has drained everyone's energy! (-15 energy for all)";
         }, type: "negative"
     },
     {
@@ -721,11 +707,11 @@ const RANDOM_EVENTS = [
     },
     {
         name: "Community Spirit", effect: (state) => {
-            const staminaGain = 25;
+            const energyGain = 25;
             state.party.forEach(person => {
-                person.stamina = Math.min(person.traits.maxStamina, person.stamina + staminaGain);
+                person.energy = Math.min(person.traits.maxEnergy, person.energy + energyGain);
             });
-            return `A wave of community spirit energizes everyone! (+${staminaGain} stamina for all)`;
+            return `A wave of community spirit energizes everyone! (+${energyGain} energy for all)`;
         }, type: "positive"
     },
     {
@@ -738,9 +724,9 @@ const RANDOM_EVENTS = [
         name: "Mysterious Illness", effect: (state) => {
             state.party.forEach(person => {
                 person.health = Math.max(0, person.health - 5);
-                person.stamina = Math.max(0, person.stamina - 10);
+                person.energy = Math.max(0, person.energy - 10);
             });
-            return "A mysterious illness affects everyone in the group! (-5 health, -10 stamina for all)";
+            return "A mysterious illness affects everyone in the group! (-5 health, -10 energy for all)";
         }, type: "negative"
     },
     {
@@ -772,8 +758,8 @@ const RANDOM_EVENTS = [
     {
         name: "Inspiring Dream", effect: (state) => {
             const luckyPerson = state.party[Math.floor(Math.random() * state.party.length)];
-            luckyPerson.traits.maxStamina += 20;
-            return `${luckyPerson.name} had an inspiring dream! (+20 max stamina)`;
+            luckyPerson.traits.maxEnergy += 20;
+            return `${luckyPerson.name} had an inspiring dream! (+20 max energy)`;
         }, type: "positive"
     },
     {
@@ -801,9 +787,9 @@ const RANDOM_EVENTS = [
     {
         name: "Alien Artifact", effect: (state) => {
             const randomPerson = state.party[Math.floor(Math.random() * state.party.length)];
-            randomPerson.traits.maxStamina += 30;
+            randomPerson.traits.maxEnergy += 30;
             randomPerson.health = 100;
-            return `${randomPerson.name} found an alien artifact! (+30 max stamina, full health)`;
+            return `${randomPerson.name} found an alien artifact! (+30 max energy, full health)`;
         }, type: "positive"
     },
     {
@@ -887,58 +873,12 @@ function checkForRandomEvent() {
     }
 }
 
-// Update the addLogEntry function to handle different types of events
-function addLogEntry(message, type = 'info') {
-    const logContent = document.getElementById('log-content');
-    const logEntry = document.createElement('div');
-    const entryData = { message, type, day: gameState.day, hour: gameState.hour };
-
-    logEntry.className = getLogEntryClass(type);
-    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
-
-    logContent.insertBefore(logEntry, logContent.firstChild);
-
-    // Limit log entries to 100
-    while (logContent.children.length > 100) {
-        logContent.removeChild(logContent.lastChild);
-    }
-
-    // Store the log entry in the gameState
-    if (!gameState.logEntries) {
-        gameState.logEntries = [];
-    }
-    gameState.logEntries.unshift(entryData);
-    if (gameState.logEntries.length > 100) {
-        gameState.logEntries.pop();
-    }
-
-    // Scroll to the top of the log
-    logContent.scrollTop = 0;
-}
-
-// Helper function to get the appropriate class for a log entry
-function getLogEntryClass(type) {
-    switch (type) {
-        case 'info':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-blue-900 text-blue-200';
-        case 'error':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-red-900 text-red-200 font-bold';
-        case 'success':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-green-900 text-green-200';
-        case 'whisper':
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-purple-900 text-purple-200 italic';
-        default:
-            return 'log-entry mb-1 p-1 rounded transition-colors duration-300 bg-yellow-900 text-yellow-200';
-    }
-}
-
-// Add these constants at the top of the file
-const WILDLIFE = ['🦌', '🐗', '🐇', '🦃', '🦆'];
+const WILDLIFE = ['bird', 'rabbit', 'rat', 'snail', 'squirrel', 'turtle'];
 const HUNT_INTERVAL = 5000; // 5 seconds
-const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
+const MOVE_INTERVAL = 500;
 
 // Add this constant at the top of the file with other constants
-const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
+const RESCUE_MISSION_INTERVAL = 1; // Days between rescue missions
 const RESCUE_MISSION_TYPES = {
     easy: { risk: 0.1, resourceCost: { food: 20, water: 20 }, duration: 24 }, // 1 day
     medium: { risk: 0.3, resourceCost: { food: 40, water: 40 }, duration: 48 }, // 2 days
@@ -1044,36 +984,47 @@ function updateWatchtowerModule() {
             const remainingDays = Math.floor(remainingTime / 24);
 
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p class="mb-4">Rescue mission in progress:</p>
-                <p class="text-xl mb-2">${gameState.rescueMission.difficulty.charAt(0).toUpperCase() + gameState.rescueMission.difficulty.slice(1)} Mission</p>
-                <p>Time remaining: ${remainingDays}d ${remainingHours}h</p>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <div class="mission-progress">
+                    <p class="mission-status">Rescue mission in progress:</p>
+                    <p class="mission-difficulty">${gameState.rescueMission.difficulty.charAt(0).toUpperCase() + gameState.rescueMission.difficulty.slice(1)} Mission</p>
+                    <p class="time-remaining">Time remaining: <span>${remainingDays}d ${remainingHours}h</span></p>
+                </div>
             `;
         } else if (gameState.rescueMissionAvailable) {
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p class="mb-4">A rescue mission is available!</p>
-                <div class="flex flex-col gap-2">
-                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (1d, Low Risk, Cost: 20 🍖, 20 💧)</button>
-                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (2d, Moderate Risk, Cost: 40 🍖, 40 💧)</button>
-                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (3d, High Risk, Cost: 60 🍖, 60 💧)</button>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <p class="mission-available">A rescue mission is available!</p>
+                <div class="mission-options">
+                    <button onclick="initiateRescueMission('easy')" class="easy-mission">
+                        <div>Easy</div>
+                        <span>(1d, Low Risk, Cost: 20 <i data-lucide="beef"></i>, 20 <i data-lucide="droplet"></i>)</span>
+                    </button>
+                    <button onclick="initiateRescueMission('medium')" class="medium-mission">
+                        <div>Medium</div>
+                        <span>(2d, Moderate Risk, Cost: 40 <i data-lucide="beef"></i>, 40 <i data-lucide="droplet"></i>)</span>
+                    </button>
+                    <button onclick="initiateRescueMission('hard')" class="hard-mission">
+                        <div>Hard</div>
+                        <span>(3d, High Risk, Cost: 60 <i data-lucide="beef"></i>, 60 <i data-lucide="droplet"></i>)</span>
+                    </button>
                 </div>
             `;
         } else {
             const daysUntilNextMission = RESCUE_MISSION_INTERVAL - (gameState.day - gameState.lastRescueMissionDay);
             const hoursUntilNextMission = 24 - gameState.hour;
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p>Next rescue mission available in ${daysUntilNextMission} ${daysUntilNextMission === 1 ? 'day' : 'days'} and ${hoursUntilNextMission} ${hoursUntilNextMission === 1 ? 'hour' : 'hours'}.</p>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <p class="countdown">${daysUntilNextMission} ${daysUntilNextMission === 1 ? 'day' : 'days'}, ${hoursUntilNextMission} ${hoursUntilNextMission === 1 ? 'hour' : 'hours'}</p>
             `;
         }
     } else {
         watchtowerModule.classList.remove('hidden');
         watchtowerModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Tower</div>
-                <div class="text-sm text-neutral-400">What could we see from up there?</div>
+            <div class="mystery mysterious-tower">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Tower</div>
+                <div class="description">What could we see from up there?</div>
             </div>
         `;
     }
@@ -1161,10 +1112,10 @@ function updateAchievementsUI() {
 
     ACHIEVEMENTS.forEach(achievement => {
         const achievementElement = document.createElement('div');
-        achievementElement.className = `achievement p-2 rounded ${gameState.achievements[achievement.id] ? 'bg-green-900' : 'bg-neutral-800'} transition-colors duration-300`;
+        achievementElement.className = `achievement-item ${gameState.achievements[achievement.id] ? 'achievement-unlocked' : 'achievement-locked'}`;
         achievementElement.innerHTML = `
-            <div class="font-bold ${gameState.achievements[achievement.id] ? 'text-green-300' : 'text-neutral-400'}">${achievement.name}</div>
-            <div class="text-xs ${gameState.achievements[achievement.id] ? 'text-green-200' : 'text-neutral-500'}">${achievement.description}</div>
+            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-description">${achievement.description}</div>
         `;
         achievementsContainer.appendChild(achievementElement);
     });
@@ -1187,70 +1138,54 @@ function updateUI() {
         const busyTimeLeft = isBusy && !isResting ?
             gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
 
-        const getProgressBarColor = (value) => {
-            if (value > 75) return 'bg-green-500';
-            if (value > 50) return 'bg-yellow-500';
-            if (value > 25) return 'bg-orange-500';
-            return 'bg-red-500';
-        };
+        const personElement = document.createElement('div');
+        personElement.className = `person ${index === gameState.selectedPerson ? 'selected' : ''} ${isBusy ? 'busy' : ''}`;
+        personElement.onclick = () => selectPerson(index);
 
-        const getCriticalClass = (value) => {
-            return value === 0 ? 'text-red-500 animate-pulse font-bold' : '';
-        };
-
-        partyElement.innerHTML += `
-            <div class="person rounded-lg p-2 bg-neutral-800 cursor-pointer transition-all duration-300 relative text-xs ${index === gameState.selectedPerson ? 'border-2 border-green-500 bg-green-900/20 ring-2 ring-green-500/20' : 'border border-white'} ${isBusy ? 'opacity-70' : ''}" onclick="selectPerson(${index})">
-                <h3 class="text-sm border-b border-neutral-600 pb-1 mb-1">${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-                ${isBusy ? `<div class="busy-label absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-30 text-sm rounded-md text-red-500 border border-red-500 py-1 px-2 pointer-events-none bg-black font-bold z-10">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-                <div class="stat flex items-center mb-1 ${getCriticalClass(person.health)}">
-                    <label class="w-12 text-right mr-1">Health:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(person.health)}" style="width: ${person.health}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(person.health)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.hunger)}">
-                    <label class="w-12 text-right mr-1">Hunger:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(100 - person.hunger)}" style="width: ${100 - person.hunger}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.hunger)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(100 - person.thirst)}">
-                    <label class="w-12 text-right mr-1">Thirst:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(100 - person.thirst)}" style="width: ${100 - person.thirst}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(100 - person.thirst)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass(person.energy)}">
-                    <label class="w-12 text-right mr-1">Energy:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor(person.energy)}" style="width: ${person.energy}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor(person.energy)}%</span>
-                </div>
-                <div class="stat flex items-center mb-1 ${getCriticalClass((person.stamina / person.traits.maxStamina) * 100)}">
-                    <label class="w-12 text-right mr-1">Stamina:</label>
-                    <div class="flex-grow h-3 bg-neutral-700 rounded-full overflow-hidden z-0">
-                        <div class="h-full ${getProgressBarColor((person.stamina / person.traits.maxStamina) * 100)}" style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div>
-                    </div>
-                    <span class="w-8 text-left ml-1">${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
-                </div>
-                <div class="traits flex flex-wrap justify-around text-xs mt-2">
-                    <span title="Hunger Rate" class="cursor-help">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
-                    <span title="Thirst Rate" class="cursor-help">💧: ${person.traits.thirstRate.toFixed(2)}</span>
-                    <span title="Energy Rate" class="cursor-help">⚡: ${person.traits.energyRate.toFixed(2)}</span>
-                    <span title="Max Stamina" class="cursor-help">💪: ${person.traits.maxStamina}</span>
-                    <span title="Stamina Recovery Rate" class="cursor-help">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
-                </div>
-                <div class="person-actions flex flex-wrap justify-around mt-2 gap-1">
-                    <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''} class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.food < 10 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.eat}s;">Eat (10 🍖)</button>
-                    <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''} class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-1 px-2 rounded text-xs transition ${isBusy || gameState.water < 5 ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.drink}s;">Drink (5 💧)</button>
-                    <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''} class="border border-purple-600 bg-purple-900/50 hover:bg-purple-700 text-white py-1 px-2 rounded text-xs transition ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}" style="--cooldown-duration: ${ACTION_DURATIONS.sleep}s;">Rest 💤</button>
-                </div>
+        personElement.innerHTML = `
+            <div class="person-header">
+                <h3><i data-lucide="person-standing" class="icon-gutter-grey"></i> ${person.name}</h3>
+                <div class="busy-label ${isBusy ? (isResting ? 'resting' : 'busy') : 'idle'}">${isBusy ? `${isResting ? 'RESTING' : `BUSY [${busyTimeLeft}h]`}` : 'IDLE'}</div>
+            </div>
+            <div class="stats-container">
+            <table class="stats">
+                <tr>
+                    <td>Health</td>
+                    <td><div class="progress-bar"><div class="progress health-bar ${getProgressBarClass(person.health)}" style="width: ${person.health}%;"></div></div></td>
+                    <td>${Math.floor(person.health)}%</td>
+                </tr>
+                <tr>
+                    <td>Hunger</td>
+                    <td><div class="progress-bar"><div class="progress hunger-bar ${getProgressBarClass(100 - person.hunger)}" style="width: ${100 - person.hunger}%;"></div></div></td>
+                    <td>${Math.floor(100 - person.hunger)}%</td>
+                </tr>
+                <tr>
+                    <td>Thirst</td>
+                    <td><div class="progress-bar"><div class="progress thirst-bar ${getProgressBarClass(100 - person.thirst)}" style="width: ${100 - person.thirst}%;"></div></div></td>
+                    <td>${Math.floor(100 - person.thirst)}%</td>
+                </tr>
+                <tr>
+                    <td>Energy</td>
+                    <td><div class="progress-bar"><div class="progress energy-bar ${getProgressBarClass(person.energy)}" style="width: ${person.energy}%;"></div></div></td>
+                    <td>${Math.floor(person.energy)}%</td>
+                </tr>
+            </table>
+            </div>
+            <div class="traits">
+                <span title="Hunger Rate">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
+                <span title="Thirst Rate">💧: ${person.traits.thirstRate.toFixed(2)}</span>
+                <span title="Energy Rate">⚡: ${person.traits.energyRate.toFixed(2)}</span>
+                <span title="Max Energy">💪: ${person.traits.maxEnergy}</span>
+                <span title="Energy Recovery Rate">🔄: ${person.traits.energyRecoveryRate.toFixed(2)}</span>
+            </div>
+            <div class="person-actions">
+                <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''}>Eat <span>[10 <i data-lucide="beef" class="icon-dark-yellow"></i>]</span></button>
+                <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''}> Drink <span>[5 <i data-lucide="droplet" class="icon-blue"></i>]</span></button>
+                <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''}><i data-lucide="bed-single"></i> Rest</button>
             </div>
         `;
+
+        partyElement.appendChild(personElement);
     });
 
     // Update farming module
@@ -1258,33 +1193,35 @@ function updateUI() {
     if (gameState.upgrades.farming) {
         farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Farming</h2>
-            <div class="mb-4">
-                Plant: 
-                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
-                <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
-                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
+            <h2><i data-lucide="tractor" class="icon-dark"></i> Farming</h2>
+            <div class="crop-picker">
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="inactive"><i data-lucide="wheat" class="icon-wheat"></i> [5 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantCarrot" onclick="setPlantingCrop('carrot')" class="inactive"><i data-lucide="carrot" class="icon-carrot"></i> [10 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantBean" onclick="setPlantingCrop('bean')" class="inactive"><i data-lucide="bean" class="icon-bean"></i> [15 <i data-lucide="droplet" class="icon-blue"></i>]</button>
             </div>
-            <div id="farming-grid" class="grid grid-cols-5 gap-2 mb-4"></div>
-            <div class="mt-4">
-                <button onclick="waterCrops()" class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Water All Crops (5 💧 each)</button>
+            <div class="water-all-button">
+                <button onclick="waterCrops()">
+                    <div>Water all crops [5 <i data-lucide="droplet" class="icon-blue"></i>]</div>
+                    <span>Reduces crop growth time by 20%</span>
+                </button>
             </div>
+            <div id="farming-grid"></div>
         `;
 
         // Update active state for planting buttons
         const plantButtons = {
             wheat: document.getElementById('plantWheat'),
-            corn: document.getElementById('plantCorn'),
-            potato: document.getElementById('plantPotato')
+            carrot: document.getElementById('plantCarrot'),
+            bean: document.getElementById('plantBean')
         };
 
         for (const [crop, button] of Object.entries(plantButtons)) {
             if (gameState.plantingCrop === crop) {
-                button.classList.add('bg-yellow-700', 'border-yellow-400');
-                button.classList.remove('bg-yellow-900/50', 'hover:bg-yellow-700');
+                button.classList.add('active');
+                button.classList.remove('inactive');
             } else {
-                button.classList.remove('bg-yellow-700', 'border-yellow-400');
-                button.classList.add('bg-yellow-900/50', 'hover:bg-yellow-700');
+                button.classList.remove('active');
+                button.classList.add('inactive');
             }
         }
 
@@ -1292,25 +1229,32 @@ function updateUI() {
         gameState.farming.grid.forEach((row, rowIndex) => {
             row.forEach((plot, colIndex) => {
                 const plotElement = document.createElement('div');
-                plotElement.className = 'w-12 h-12 border border-neutral-600 flex justify-center items-center text-2xl cursor-pointer bg-neutral-800 rounded';
+                plotElement.className = 'plot-cell';
 
                 if (plot) {
                     const now = gameState.hour + (gameState.day - 1) * 24;
                     const growthProgress = Math.min(100, ((now - plot.plantedAt) / CROP_TYPES[plot.type].growthTime) * 100);
-                    const cropEmoji = CROP_TYPES[plot.type].emoji;
-                    plotElement.textContent = cropEmoji;
+                    plotElement.classList.add(`crop-${plot.type}`);
                     plotElement.title = `${plot.type}: ${growthProgress.toFixed(0)}% grown, ${plot.watered ? 'Watered' : 'Needs Water'}`;
 
+                    // Add Lucide icon based on crop type with specific color
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', plot.type);
+                    iconElement.classList.add(`icon-${plot.type}`);
+                    plotElement.appendChild(iconElement);
+
                     if (!plot.watered) {
-                        plotElement.classList.add('opacity-50');
+                        plotElement.classList.add('needs-water');
                     }
 
                     if (growthProgress === 100) {
                         plotElement.onclick = () => harvestCrop(rowIndex, colIndex);
-                        plotElement.classList.add('bg-green-900/50', 'border-green-600');
+                        plotElement.classList.add('ready-to-harvest');
+                    } else {
+                        plotElement.classList.add('growing');
                     }
                 } else {
-                    plotElement.textContent = '🟫';
+                    plotElement.classList.add('empty-plot');
                     plotElement.onclick = () => plantCrop(rowIndex, colIndex, gameState.plantingCrop);
                 }
 
@@ -1320,10 +1264,10 @@ function updateUI() {
     } else {
         farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Plot of Land</div>
-                <div class="text-sm text-neutral-400">What could grow here?</div>
+            <div class="mystery mysterious-plot">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Plot of Land</div>
+                <div class="description">What could grow here?</div>
             </div>
         `;
     }
@@ -1336,10 +1280,10 @@ function updateUI() {
     } else {
         wellModule.classList.remove('hidden');
         wellModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Hole</div>
-                <div class="text-sm text-neutral-400">Could this provide water?</div>
+            <div class="mystery mysterious-hole">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Hole</div>
+                <div class="description">Could this provide water?</div>
             </div>
         `;
     }
@@ -1349,9 +1293,9 @@ function updateUI() {
     if (gameState.upgrades.huntingLodge) {
         huntingModule.classList.remove('hidden');
         huntingModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Hunting Lodge</h2>
-            <div id="hunting-area" class="w-full h-64 bg-green-900/30 relative overflow-hidden rounded-lg"></div>
-            <p class="mt-2 text-sm">Click on the animal to hunt it before it escapes!</p>
+            <h2><i data-lucide="trees" class="icon-dark"></i> Hunting Lodge</h2>
+            <div id="hunting-area"></div>
+            <p class="instruction">Hunt the animal before it escapes!</p>
         `;
         if (!gameState.huntingInterval) {
             startHunting();
@@ -1359,10 +1303,10 @@ function updateUI() {
     } else {
         huntingModule.classList.remove('hidden');
         huntingModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Tracks</div>
-                <div class="text-sm text-neutral-400">What creatures roam these lands?</div>
+            <div class="mystery mysterious-tracks">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Tracks</div>
+                <div class="description">What creatures roam these lands?</div>
             </div>
         `;
     }
@@ -1372,6 +1316,8 @@ function updateUI() {
     updateAchievementsUI();
     updateLumberMillModule();
     updateWatchtowerModule();
+
+    lucide.createIcons();
 }
 
 // Add these new functions for hunting mechanics
@@ -1401,8 +1347,8 @@ function spawnWildlife() {
 
     const animal = WILDLIFE[Math.floor(Math.random() * WILDLIFE.length)];
     const target = document.createElement('div');
-    target.textContent = animal;
-    target.className = 'absolute text-4xl cursor-pointer transition-all duration-200';
+    target.innerHTML = `<i data-lucide="${animal}" class="icon-dark"></i>`;
+    target.className = 'wildlife';
     target.style.left = `${Math.random() * 80}%`;
     target.style.top = `${Math.random() * 80}%`;
 
@@ -1421,6 +1367,7 @@ function spawnWildlife() {
             clearInterval(gameState.moveInterval);
         }
     }, 4000);
+    lucide.createIcons();
 }
 
 function moveWildlife() {
@@ -1431,8 +1378,8 @@ function moveWildlife() {
         // Increase movement range
         const moveRange = Math.floor(Math.random() * 26) + 25; // Random value between 25 and 50
         // Increase movement speed by reducing the divisor
-        const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange));
-        const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange));
+        const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange / 2));
+        const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange / 2));
 
         gameState.huntingTarget.style.left = `${newLeft}%`;
         gameState.huntingTarget.style.top = `${newTop}%`;
@@ -1449,19 +1396,20 @@ function huntAnimal(animal) {
 
     let foodGained;
     switch (animal) {
-        case '🦌': foodGained = 50; break;
-        case '🐗': foodGained = 40; break;
-        case '🐇': foodGained = 15; break;
-        case '🦃': foodGained = 25; break;
-        case '🦆': foodGained = 20; break;
-        default: foodGained = 30;
+        case 'bird': foodGained = 20; break;
+        case 'rabbit': foodGained = 25; break;
+        case 'rat': foodGained = 15; break;
+        case 'snail': foodGained = 5; break;
+        case 'squirrel': foodGained = 20; break;
+        case 'turtle': foodGained = 30; break;
+        default: foodGained = 10;
     }
 
     gameState.food += foodGained;
     gameState.totalResourcesGathered.food += foodGained;
     gameState.totalAnimalsHunted++;
     checkAchievements();
-    addLogEntry(`Successfully hunted ${animal}! Gained ${foodGained} food.`, 'success');
+    addLogEntry(`Successfully hunted a ${animal}! Gained ${foodGained} food.`, 'success');
     updateUI();
 }
 
@@ -1499,12 +1447,11 @@ function performAction(personIndex, action, actionName) {
         addLogEntry(`${person.name} is busy and can't ${actionName} right now!`, 'warning');
     } else if (person.energy <= 0 && !['eat', 'drink', 'sleep'].includes(actionName)) {
         addLogEntry(`${person.name} is too exhausted to ${actionName}!`, 'warning');
-    } else if (person.stamina >= gameState.staminaPerAction || ['eat', 'drink', 'sleep'].includes(actionName)) {
+    } else {
         action();
         // Increase energy drain for gather, collect, and chop actions
         const energyDrain = ['gatherFood', 'collectWater', 'chopWood'].includes(actionName) ? 15 : 5;
         if (!['eat', 'drink', 'sleep'].includes(actionName)) {
-            person.stamina -= gameState.staminaPerAction;
             person.energy = Math.max(0, person.energy - energyDrain);
             gameState.totalActions++;
         }
@@ -1520,8 +1467,6 @@ function performAction(personIndex, action, actionName) {
                 button.classList.remove('cooldown');
             }, { once: true });
         }
-    } else {
-        addLogEntry(`${person.name} doesn't have enough stamina to ${actionName}!`, 'warning');
     }
 }
 
@@ -1565,11 +1510,10 @@ function collectWater() {
 
         gameState.water += amount;
         gameState.totalResourcesGathered.water += amount;
+        gameState.totalWellWaterCollected += amount; // Add this line to track well water collection
+        checkAchievements(); // Check achievements after collecting water
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
-
-    gameState.totalWellWaterCollected += collected;
-    checkAchievements();
 }
 
 function chopWood() {
@@ -1599,8 +1543,8 @@ function eat(personIndex) {
             gameState.food -= 10;
             person.hunger = Math.max(0, person.hunger - 30);
             person.health = Math.min(100, person.health + 5);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
-            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 stamina.`, 'success');
+            person.energy = Math.min(100, person.energy + 20);
+            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 energy.`, 'success');
         } else {
             addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`, 'error');
         }
@@ -1613,8 +1557,8 @@ function drink(personIndex) {
         if (gameState.water >= 5) {
             gameState.water -= 5;
             person.thirst = Math.max(0, person.thirst - 25);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10);
-            addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 stamina.`);
+            person.energy = Math.min(100, person.energy + 10);
+            addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 energy.`);
         } else {
             addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`, 'error');
         }
@@ -1758,20 +1702,21 @@ function updateUpgradeButtons() {
         if (!upgrade.unlocked && !gameState.upgrades[upgrade.prerequisite]) continue;
 
         const button = document.createElement('button');
-        button.className = 'text-white py-2 px-4 rounded transition mb-2 w-full text-left';
+        button.className = 'upgrade-button';
 
         let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
 
         button.innerHTML = `
-            <div class="font-bold">${upgrade.name} (${costText})</div>
-            <div class="text-xs">${upgrade.effect}</div>
+            <div class="upgrade-name">
+                <span class="name">${gameState.upgrades[upgradeId] ? ' <i data-lucide="book-check" class="icon-green"></i> ' : ''}${upgrade.name}</span>
+                <span class="cost">${costText}</span>
+            </div>
+            <div class="upgrade-effect">${upgrade.effect}</div>
         `;
 
         if (gameState.upgrades[upgradeId]) {
             button.disabled = true;
-            button.classList.add('bg-green-800', 'cursor-default');
-            button.classList.remove('hover:bg-green-700');
-            button.innerHTML += '<div class="text-xs font-bold mt-1">Unlocked ✅</div>';
+            button.classList.add('unlocked');
         } else {
             button.onclick = () => buyUpgrade(upgradeId);
             let canAfford = true;
@@ -1783,10 +1728,7 @@ function updateUpgradeButtons() {
             }
             if (!canAfford) {
                 button.disabled = true;
-                button.classList.add('opacity-50', 'cursor-not-allowed', 'bg-neutral-700');
-            } else {
-                button.classList.remove('bg-green-200', 'opacity-50', 'cursor-not-allowed');
-                button.classList.add('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('cannot-afford');
             }
         }
 
@@ -1797,9 +1739,9 @@ function updateUpgradeButtons() {
 // Helper function to get resource emoji
 function getResourceEmoji(resource) {
     switch (resource) {
-        case 'food': return '🍖';
-        case 'water': return '💧';
-        case 'wood': return '🪵';
+        case 'food': return '<i data-lucide="beef" class="icon-dark-yellow"></i>';
+        case 'water': return '<i data-lucide="droplet" class="icon-blue"></i>';
+        case 'wood': return '<i data-lucide="tree-pine" class="icon-green"></i>';
         default: return '';
     }
 }
@@ -1847,7 +1789,6 @@ function updateActionButtons() {
     }
 
     const isBusy = isPersonBusy(gameState.selectedPerson);
-    const hasEnoughStamina = selectedPerson.stamina >= gameState.staminaPerAction;
     const hasEnoughEnergy = selectedPerson.energy > 0;
 
     const actions = [
@@ -1859,14 +1800,13 @@ function updateActionButtons() {
     actions.forEach(action => {
         const button = document.getElementById(action.id);
         if (button) {
-            const isDisabled = isBusy || !hasEnoughStamina || !hasEnoughEnergy;
+            const isDisabled = isBusy || !hasEnoughEnergy;
             button.disabled = isDisabled;
             button.classList.toggle('opacity-50', isDisabled);
             button.classList.toggle('cursor-not-allowed', isDisabled);
 
             let tooltip = '';
             if (isBusy) tooltip = `${selectedPerson.name} is busy`;
-            else if (!hasEnoughStamina) tooltip = `Not enough stamina`;
             else if (!hasEnoughEnergy) tooltip = `Not enough energy`;
             else tooltip = `Gather ${action.amount} ${action.resource}`;
 
@@ -1899,8 +1839,8 @@ function growLumberMillTrees() {
             growth: Math.min(1, tree.growth + (1 / tree.growthTime))
         }));
 
-        // Add new tree if there's space
-        if (gameState.lumberMill.trees.length < gameState.lumberMill.maxTrees) {
+        // Ensure we always have 5 trees
+        while (gameState.lumberMill.trees.length < gameState.lumberMill.maxTrees) {
             const growthTime = gameState.lumberMill.baseGrowthTime +
                 (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance;
             gameState.lumberMill.trees.push({
@@ -1910,48 +1850,54 @@ function growLumberMillTrees() {
                     (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
             });
         }
+
+        // Trim excess trees if any
+        gameState.lumberMill.trees = gameState.lumberMill.trees.slice(0, gameState.lumberMill.maxTrees);
     }
 }
 
 function updateLumberMillModule() {
     const lumberMillModule = document.getElementById('lumber-mill-module');
-    if (!lumberMillModule) return; // Exit if the module doesn't exist in the HTML
+    if (!lumberMillModule) return;
 
     if (gameState.upgrades.lumberMill) {
         lumberMillModule.classList.remove('hidden');
-        let treesHTML = gameState.lumberMill.trees.map((tree, index) => `
-            <div class="tree-container relative w-16 h-16 m-2 inline-block">
-                <div class="absolute bottom-0 left-0 right-0 bg-green-900 rounded-t-full transition-all duration-500" 
-                     style="height: ${tree.growth * 100}%;">
+        let treesHTML = '';
+
+        for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
+            const tree = gameState.lumberMill.trees[i] || { growth: 0 };
+            const growthPercentage = tree.growth * 100;
+            const isFullyGrown = growthPercentage === 100;
+
+            treesHTML += `
+                <div class="tree-cell ${isFullyGrown ? 'ready-to-harvest' : ''}" 
+                     onclick="${isFullyGrown ? `harvestTree(${i})` : ''}"
+                     title="${isFullyGrown ? 'Click to harvest' : `Growth: ${growthPercentage.toFixed(0)}%`}">
+                    <div class="growth-indicator" style="height: ${growthPercentage}%;"></div>
+                    <i data-lucide="${isFullyGrown ? 'tree-pine' : 'sprout'}" 
+                       class="icon-${isFullyGrown ? 'dark-green' : 'light-green'}"></i>
                 </div>
-                <div class="absolute inset-0 flex items-center justify-center text-4xl ${tree.growth === 1 ? 'cursor-pointer' : 'pointer-events-none'}"
-                     onclick="${tree.growth === 1 ? `harvestTree(${index})` : ''}">
-                    ${tree.growth === 1 ? '🌳' : '🌱'}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }
 
         lumberMillModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Lumber Mill</h2>
-            <p>Your Lumber Mill is producing 1 wood per hour.</p>
-            <p>Wood chopping efficiency: +50%</p>
-            <div class="mt-4">
-                <h3 class="text-xl mb-2">Tree Farm</h3>
-                <div class="tree-farm flex flex-wrap justify-center">
-                    ${treesHTML}
-                </div>
+            <h2><i data-lucide="tree-pine" class="icon-dark"></i> Lumber Mill</h2>
+            <div id="lumber-mill-grid">
+                ${treesHTML}
             </div>
         `;
     } else {
         lumberMillModule.classList.remove('hidden');
         lumberMillModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Machinery</div>
-                <div class="text-sm text-neutral-400">Could this help with wood production?</div>
+            <div class="mystery mysterious-machinery">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Machinery</div>
+                <div class="description">Could this help with wood production?</div>
             </div>
         `;
     }
+
+    lucide.createIcons();
 }
 
 function harvestTree(index) {
@@ -1991,13 +1937,12 @@ function setDebugMode(enabled) {
                 hunger: 0,
                 thirst: 0,
                 energy: 100,
-                stamina: 100,
                 traits: {
                     hungerRate: 1,
                     thirstRate: 1,
                     energyRate: 1,
-                    maxStamina: 100,
-                    staminaRecoveryRate: 1
+                    maxEnergy: 100,
+                    energyRecoveryRate: 1
                 }
             });
         }
@@ -2010,15 +1955,17 @@ function setDebugMode(enabled) {
             };
         }
         // Initialize Lumber Mill trees
-        gameState.lumberMill.trees = [];
-        for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
-            gameState.lumberMill.trees.push({
-                growth: Math.random(),
-                growthTime: gameState.lumberMill.baseGrowthTime +
-                    (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
-                harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
-                    (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
-            });
+        if (!gameState.lumberMill.trees || gameState.lumberMill.trees.length === 0) {
+            gameState.lumberMill.trees = [];
+            for (let i = 0; i < gameState.lumberMill.maxTrees; i++) {
+                gameState.lumberMill.trees.push({
+                    growth: Math.random(),
+                    growthTime: gameState.lumberMill.baseGrowthTime +
+                        (Math.random() * 2 - 1) * gameState.lumberMill.growthTimeVariance,
+                    harvestAmount: Math.round(gameState.lumberMill.baseHarvestAmount +
+                        (Math.random() * 2 - 1) * gameState.lumberMill.harvestAmountVariance)
+                });
+            }
         }
         // Initialize hunting if it's not already started
         if (!gameState.huntingInterval) {
@@ -2038,45 +1985,24 @@ function updateWellVisual() {
         const percentage = (gameState.well.current / gameState.well.capacity) * 100;
 
         wellModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Well</h2>
-            <div class="flex items-center justify-between">
-                <div id="well-container"
-                    class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
-                    <div id="well-water"
-                        class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500"
-                        style="height: ${percentage}%;">
+            <h2><i data-lucide="glass-water" class="icon-dark"></i> Well</h2>
+            <div class="well-container">
+                <div id="well-progress">
+                    <span id="well-level">${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
+                    <div id="well-water" style="width: ${percentage}%;">
                     </div>
                 </div>
-                <div class="ml-4 flex flex-col items-start">
-                    <span id="well-level" class="text-xl mb-2">${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
-                    <button onclick="collectWellWater()"
-                        class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
-                        Water</button>
-                </div>
-            </div>
-        `;
-
-        const wellWater = document.getElementById('well-water');
-        if (percentage > 75) {
-            wellWater.classList.remove('bg-blue-300', 'bg-blue-400');
-            wellWater.classList.add('bg-blue-500');
-        } else if (percentage > 25) {
-            wellWater.classList.remove('bg-blue-300', 'bg-blue-500');
-            wellWater.classList.add('bg-blue-400');
-        } else {
-            wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
-            wellWater.classList.add('bg-blue-300');
-        }
-    } else {
-        wellModule.classList.remove('hidden');
-        wellModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Hole</div>
-                <div class="text-sm text-neutral-400">Could this provide water?</div>
+                <button onclick="collectWellWater()">Collect Water</button>
             </div>
         `;
     }
+}
+
+// Add this helper function to determine the class based on the progress value
+function getProgressBarClass(value) {
+    if (value > 66) return 'high';
+    if (value > 33) return 'medium';
+    return 'low';
 }
 
 // Add these event listeners at the end of the file
