@@ -1232,6 +1232,8 @@ function updateUI() {
                     if (growthProgress === 100) {
                         plotElement.onclick = () => harvestCrop(rowIndex, colIndex);
                         plotElement.classList.add('ready-to-harvest');
+                    } else {
+                        plotElement.classList.add('growing');
                     }
                 } else {
                     plotElement.classList.add('empty-plot');

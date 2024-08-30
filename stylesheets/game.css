@@ -676,23 +676,30 @@
           opacity: 0.6;
         }
 
-        &.ready-to-harvest {
-          animation: pulse 1s infinite alternate;
-        }
-
         &:hover {
           background-color: var(--green);
         }
-      }
-    }
 
-    @keyframes pulse {
-      from {
-        transform: scale(1);
-      }
+        &.growing {
+          &:hover {
+            background-color: transparent;
+            cursor: default;
+          }
+        }
 
-      to {
-        transform: scale(1.1);
+        &.ready-to-harvest {
+          .lucide {
+            color: var(--green);
+          }
+
+          &:hover {
+            .lucide {
+              color: var(--background-color);
+            }
+
+            background-color: var(--green);
+          }
+        }
       }
     }
   }
