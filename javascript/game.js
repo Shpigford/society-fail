@@ -1094,10 +1094,10 @@ function updateAchievementsUI() {
 
     ACHIEVEMENTS.forEach(achievement => {
         const achievementElement = document.createElement('div');
-        achievementElement.className = `achievement p-2 rounded ${gameState.achievements[achievement.id] ? 'bg-green-900' : 'bg-neutral-800'} transition-colors duration-300`;
+        achievementElement.className = `achievement-item ${gameState.achievements[achievement.id] ? 'achievement-unlocked' : 'achievement-locked'}`;
         achievementElement.innerHTML = `
-            <div class="font-bold ${gameState.achievements[achievement.id] ? 'text-green-300' : 'text-neutral-400'}">${achievement.name}</div>
-            <div class="text-xs ${gameState.achievements[achievement.id] ? 'text-green-200' : 'text-neutral-500'}">${achievement.description}</div>
+            <div class="achievement-name">${achievement.name}</div>
+            <div class="achievement-description">${achievement.description}</div>
         `;
         achievementsContainer.appendChild(achievementElement);
     });
