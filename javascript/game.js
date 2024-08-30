@@ -1678,7 +1678,7 @@ function updateUpgradeButtons() {
         let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
 
         button.innerHTML = `
-            <div class="upgrade-name">${upgrade.name} (${costText})</div>
+            <div class="upgrade-name"><span class="name">${upgrade.name}</span> <span class="cost">${costText}</span></div>
             <div class="upgrade-effect">${upgrade.effect}</div>
         `;
 
@@ -1708,9 +1708,9 @@ function updateUpgradeButtons() {
 // Helper function to get resource emoji
 function getResourceEmoji(resource) {
     switch (resource) {
-        case 'food': return '🍖';
-        case 'water': return '💧';
-        case 'wood': return '🪵';
+        case 'food': return '<i data-lucide="beef" class="icon-dark-yellow"></i>';
+        case 'water': return '<i data-lucide="droplet" class="icon-blue"></i>';
+        case 'wood': return '<i data-lucide="tree-pine" class="icon-green"></i>';
         default: return '';
     }
 }

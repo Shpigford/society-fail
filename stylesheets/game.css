@@ -399,4 +399,57 @@
 
     }
   }
+
+  #upgrades-module {
+    #upgrades {
+      .upgrade-button {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        text-align: left;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &.cannot-afford {
+          &:hover {
+            cursor: not-allowed;
+            color: var(--text-color);
+            background-color: transparent;
+          }
+
+          .upgrade-name .name,
+          .upgrade-effect {
+            opacity: 0.7;
+          }
+        }
+      }
+
+      .upgrade-name {
+        text-transform: uppercase;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.2em;
+        justify-content: space-between;
+
+        .cost {
+          display: flex;
+          align-items: center;
+          gap: 0.2em;
+
+          .lucide {
+            width: 1em;
+            height: 1em;
+          }
+        }
+      }
+
+      .upgrade-effect {
+        font-size: 0.8em;
+      }
+    }
+  }
 }
