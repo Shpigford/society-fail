@@ -450,23 +450,31 @@ function showGameOverScreen() {
     const achievedAchievements = ACHIEVEMENTS.filter(achievement => gameState.achievements[achievement.id]);
 
     gameStats.innerHTML = `
-        <p>Time Survived: ${daysPlayed} days, ${hoursPlayed % 24} hours</p>
-        <p>Total Resources Gathered:</p>
-        <ul class="list-none">
-            <li>🍖 Food: ${Math.floor(gameState.totalResourcesGathered.food)}</li>
-            <li>💧 Water: ${Math.floor(gameState.totalResourcesGathered.water)}</li>
-            <li>🪵 Wood: ${Math.floor(gameState.totalResourcesGathered.wood)}</li>
-        </ul>
-        <p class="mt-4 font-bold">Achievements Unlocked:</p>
-        <ul class="list-none">
-            ${achievedAchievements.map(achievement => `
-                <li class="mb-1">
-                    <span class="text-green-400">✅ ${achievement.name}</span>: ${achievement.description}
-                </li>
-            `).join('')}
-        </ul>
-        ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
+        <h2>
+            <b>Time Survived</b>
+            <span class="time">${daysPlayed} days, ${hoursPlayed % 24} hours</span>
+        </h2>
+        <div class="numbers">
+            <p>Resources</p>
+            <div class="resource-list">
+                <div class="resource"><i data-lucide="beef" class="icon-dark-yellow"></i><span>${Math.floor(gameState.totalResourcesGathered.food)}</span></div>
+                <div class="resource"><i data-lucide="droplet" class="icon-blue"></i><span>${Math.floor(gameState.totalResourcesGathered.water)}</span></div>
+                <div class="resource"><i data-lucide="tree-pine" class="icon-green"></i><span>${Math.floor(gameState.totalResourcesGathered.wood)}</span></div>
+            </div>
+        </div>
+        <div class="achievements">
+            <div class="achievement-list">
+                ${achievedAchievements.map(achievement => `
+                    <div class="achievement-item">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-description">${achievement.description}</div>
+                    </div>
+                `).join('')}
+            </div>
+            ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
+        </div>
     `;
+    lucide.createIcons();
 }
 
 // Modify the gameLoop function

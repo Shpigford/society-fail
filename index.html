@@ -53,10 +53,17 @@
     </footer>
   </div>
   <div id="game-over-screen" class="hidden">
-    <h1>💀 Society Failed</h1>
-    <p>Your society has collapsed.</p>
-    <div id="game-stats"></div>
-    <button onclick="resetGame(true)">Try Again</button>
+    <div class="splash-screen">
+      <div class="splash-header">
+        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
+        <div>
+          <h1>Society Failed</h1>
+          <p>Your society has collapsed.</p>
+        </div>
+      </div>
+      <div id="game-stats"></div>
+      <button class="try-again" onclick="resetGame(true)">Try Again</button>
+    </div>
   </div>
   <div id="game-ui" class="hidden">
     <header>
