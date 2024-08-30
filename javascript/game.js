@@ -171,8 +171,8 @@ const ACTION_DURATIONS = {
 
 const CROP_TYPES = {
     wheat: { emoji: '🌾', growthTime: 24, waterNeeded: 5, yield: 20 },
-    corn: { emoji: '🌽', growthTime: 48, waterNeeded: 10, yield: 40 },
-    potato: { emoji: '🥔', growthTime: 72, waterNeeded: 15, yield: 60 }
+    carrot: { emoji: '🌽', growthTime: 48, waterNeeded: 10, yield: 40 },
+    bean: { emoji: '🥔', growthTime: 72, waterNeeded: 15, yield: 60 }
 };
 
 // Add this constant for trait ranges
@@ -1003,10 +1003,10 @@ function updateWatchtowerModule() {
     } else {
         watchtowerModule.classList.remove('hidden');
         watchtowerModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Tower</div>
-                <div class="text-sm text-neutral-400">What could we see from up there?</div>
+            <div class="mystery mysterious-tower">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Tower</div>
+                <div class="description">What could we see from up there?</div>
             </div>
         `;
     }
@@ -1175,33 +1175,35 @@ function updateUI() {
     if (gameState.upgrades.farming) {
         farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Farming</h2>
-            <div class="mb-4">
-                Plant: 
-                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Wheat (5 💧)">🌾 5💧</button>
-                <button id="plantCorn" onclick="setPlantingCrop('corn')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Corn (10 💧)">🌽 10💧</button>
-                <button id="plantPotato" onclick="setPlantingCrop('potato')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-1 px-2 rounded transition" title="Potato (15 💧)">🥔 15💧</button>
+            <h2><i data-lucide="tractor" class="icon-dark"></i> Farming</h2>
+            <div class="crop-picker">
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="inactive"><i data-lucide="wheat" class="icon-dark-yellow"></i> [5 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantCarrot" onclick="setPlantingCrop('carrot')" class="inactive"><i data-lucide="carrot" class="icon-dark-yellow"></i> [10 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantBean" onclick="setPlantingCrop('bean')" class="inactive"><i data-lucide="bean" class="icon-dark-yellow"></i> [15 <i data-lucide="droplet" class="icon-blue"></i>]</button>
             </div>
-            <div id="farming-grid" class="grid grid-cols-5 gap-2 mb-4"></div>
-            <div class="mt-4">
-                <button onclick="waterCrops()" class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Water All Crops (5 💧 each)</button>
+            <div class="water-all-button">
+                <button onclick="waterCrops()">
+                    <div>Water all crops [5 <i data-lucide="droplet" class="icon-blue"></i>]</div>
+                    <span>Reduces crop growth time by 20%</span>
+                </button>
             </div>
+            <div id="farming-grid"></div>
         `;
 
         // Update active state for planting buttons
         const plantButtons = {
             wheat: document.getElementById('plantWheat'),
-            corn: document.getElementById('plantCorn'),
-            potato: document.getElementById('plantPotato')
+            carrot: document.getElementById('plantCarrot'),
+            bean: document.getElementById('plantBean')
         };
 
         for (const [crop, button] of Object.entries(plantButtons)) {
             if (gameState.plantingCrop === crop) {
-                button.classList.add('bg-yellow-700', 'border-yellow-400');
-                button.classList.remove('bg-yellow-900/50', 'hover:bg-yellow-700');
+                button.classList.add('active');
+                button.classList.remove('inactive');
             } else {
-                button.classList.remove('bg-yellow-700', 'border-yellow-400');
-                button.classList.add('bg-yellow-900/50', 'hover:bg-yellow-700');
+                button.classList.remove('active');
+                button.classList.add('inactive');
             }
         }
 
@@ -1209,25 +1211,30 @@ function updateUI() {
         gameState.farming.grid.forEach((row, rowIndex) => {
             row.forEach((plot, colIndex) => {
                 const plotElement = document.createElement('div');
-                plotElement.className = 'w-12 h-12 border border-neutral-600 flex justify-center items-center text-2xl cursor-pointer bg-neutral-800 rounded';
+                plotElement.className = 'plot-cell';
 
                 if (plot) {
                     const now = gameState.hour + (gameState.day - 1) * 24;
                     const growthProgress = Math.min(100, ((now - plot.plantedAt) / CROP_TYPES[plot.type].growthTime) * 100);
-                    const cropEmoji = CROP_TYPES[plot.type].emoji;
-                    plotElement.textContent = cropEmoji;
+                    plotElement.classList.add(`crop-${plot.type}`);
                     plotElement.title = `${plot.type}: ${growthProgress.toFixed(0)}% grown, ${plot.watered ? 'Watered' : 'Needs Water'}`;
 
+                    // Add Lucide icon based on crop type
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', plot.type);
+                    iconElement.classList.add('icon-dark-yellow');
+                    plotElement.appendChild(iconElement);
+
                     if (!plot.watered) {
-                        plotElement.classList.add('opacity-50');
+                        plotElement.classList.add('needs-water');
                     }
 
                     if (growthProgress === 100) {
                         plotElement.onclick = () => harvestCrop(rowIndex, colIndex);
-                        plotElement.classList.add('bg-green-900/50', 'border-green-600');
+                        plotElement.classList.add('ready-to-harvest');
                     }
                 } else {
-                    plotElement.textContent = '🟫';
+                    plotElement.classList.add('empty-plot');
                     plotElement.onclick = () => plantCrop(rowIndex, colIndex, gameState.plantingCrop);
                 }
 
@@ -1237,10 +1244,10 @@ function updateUI() {
     } else {
         farmingModule.classList.remove('hidden');
         farmingModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Plot of Land</div>
-                <div class="text-sm text-neutral-400">What could grow here?</div>
+            <div class="mystery mysterious-plot">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Plot of Land</div>
+                <div class="description">What could grow here?</div>
             </div>
         `;
     }
@@ -1253,10 +1260,10 @@ function updateUI() {
     } else {
         wellModule.classList.remove('hidden');
         wellModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Hole</div>
-                <div class="text-sm text-neutral-400">Could this provide water?</div>
+            <div class="mystery mysterious-hole">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Hole</div>
+                <div class="description">Could this provide water?</div>
             </div>
         `;
     }
@@ -1276,10 +1283,10 @@ function updateUI() {
     } else {
         huntingModule.classList.remove('hidden');
         huntingModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Tracks</div>
-                <div class="text-sm text-neutral-400">What creatures roam these lands?</div>
+            <div class="mystery mysterious-tracks">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Tracks</div>
+                <div class="description">What creatures roam these lands?</div>
             </div>
         `;
     }
@@ -1678,14 +1685,16 @@ function updateUpgradeButtons() {
         let costText = Object.entries(upgrade.cost).map(([resource, amount]) => `${amount} ${getResourceEmoji(resource)}`).join(', ');
 
         button.innerHTML = `
-            <div class="upgrade-name"><span class="name">${upgrade.name}</span> <span class="cost">${costText}</span></div>
+            <div class="upgrade-name">
+                <span class="name">${gameState.upgrades[upgradeId] ? ' <i data-lucide="book-check" class="icon-green"></i> ' : ''}${upgrade.name}</span>
+                <span class="cost">${costText}</span>
+            </div>
             <div class="upgrade-effect">${upgrade.effect}</div>
         `;
 
         if (gameState.upgrades[upgradeId]) {
             button.disabled = true;
             button.classList.add('unlocked');
-            button.innerHTML += '<div class="upgrade-status">Unlocked ✅</div>';
         } else {
             button.onclick = () => buyUpgrade(upgradeId);
             let canAfford = true;
@@ -1854,10 +1863,10 @@ function updateLumberMillModule() {
     } else {
         lumberMillModule.classList.remove('hidden');
         lumberMillModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Machinery</div>
-                <div class="text-sm text-neutral-400">Could this help with wood production?</div>
+            <div class="mystery mysterious-machinery">
+                <div class="icon"><i data-lucide="circle-help" class="icon-gutter-grey"></i></div>
+                <div class="title">Mysterious Machinery</div>
+                <div class="description">Could this help with wood production?</div>
             </div>
         `;
     }

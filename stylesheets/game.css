@@ -276,6 +276,7 @@
 
     @media (min-width: 1024px) {
       grid-template-columns: 1fr 2fr;
+      align-items: start;
     }
 
     #main-modules,
@@ -338,6 +339,26 @@
     #secondary-modules {
       @media (min-width: 768px) {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      align-content: start;
+
+      h2 {
+        background-color: white;
+        color: black;
+        text-transform: uppercase;
+        font-weight: 900;
+        padding: 0.2em 0.5em;
+        font-size: 0.8em;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+
+        .lucide {
+          width: 1.2em;
+          height: 1.2em;
+        }
       }
     }
 
@@ -425,6 +446,12 @@
             opacity: 0.7;
           }
         }
+
+        &.unlocked {
+          color: var(--text-color);
+          cursor: default;
+          background-color: transparent;
+        }
       }
 
       .upgrade-name {
@@ -435,10 +462,17 @@
         margin-bottom: 0.2em;
         justify-content: space-between;
 
+        .name {
+          display: flex;
+          align-items: center;
+          gap: 0.2em;
+        }
+
         .cost {
           display: flex;
           align-items: center;
           gap: 0.2em;
+          font-size: 0.8em;
 
           .lucide {
             width: 1em;
@@ -498,3 +532,156 @@
       }
     }
   }
+
+  .mystery {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    padding: 2em;
+
+    .lucide {
+      width: 4em;
+      height: 4em;
+    }
+
+    .title {
+      margin-top: 0.5em;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 1.2em;
+    }
+
+    .description {
+      font-size: 0.8em;
+    }
+  }
+
+  #farming-module {
+    .crop-picker {
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+
+      button {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        border: 0;
+        border-left: var(--border-thickness) solid var(--text-color);
+        padding: 0.5em;
+        font-size: 0.8em;
+
+        &.active {
+          background-color: var(--green);
+        }
+
+        .lucide:first-child {
+          width: 1.75em;
+          height: 1.75em;
+          margin-right: 0.5em;
+        }
+
+        .lucide:last-child {
+          width: 1em;
+          height: 1em;
+        }
+      }
+    }
+
+    .water-all-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+
+      button {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 0.5em;
+        align-items: center;
+        justify-content: space-between;
+
+        div {
+          display: flex;
+          align-items: center;
+          gap: 0.2em;
+
+          .lucide {
+            width: 1em;
+            height: 1em;
+          }
+        }
+
+        span {
+          font-size: 0.8em;
+        }
+      }
+    }
+
+    #farming-grid {
+      margin: 1rem;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border: var(--border-thickness) solid var(--text-color);
+
+      .plot-cell {
+        aspect-ratio: 1 / 1;
+        border-right: 1px solid white;
+        border-bottom: 1px solid white;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .lucide {
+          width: 2em;
+          height: 2em;
+        }
+
+        &:nth-child(5n) {
+          border-right: none;
+        }
+
+        &:nth-last-child(-n+5) {
+          border-bottom: none;
+        }
+
+        &.empty-plot {
+          background-color: var(--background-color-alt);
+        }
+
+        &.needs-water {
+          opacity: 0.6;
+        }
+
+        &.ready-to-harvest {
+          animation: pulse 1s infinite alternate;
+        }
+
+        &:hover {
+          background-color: var(--green);
+        }
+      }
+    }
+
+    @keyframes pulse {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
