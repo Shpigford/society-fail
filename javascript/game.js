@@ -1957,21 +1957,14 @@ function updateWellVisual() {
         const percentage = (gameState.well.current / gameState.well.capacity) * 100;
 
         wellModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Well</h2>
-            <div class="flex items-center justify-between">
-                <div id="well-container"
-                    class="w-32 h-64 bg-neutral-800 rounded-lg relative overflow-hidden">
-                    <div id="well-water"
-                        class="absolute bottom-0 left-0 right-0 bg-blue-500 transition-all duration-500"
-                        style="height: ${percentage}%;">
+            <h2><i data-lucide="glass-water" class="icon-dark"></i> Well</h2>
+            <div class="well-container">
+                <div id="well-progress">
+                    <span id="well-level">${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
+                    <div id="well-water" style="width: ${percentage}%;">
                     </div>
                 </div>
-                <div class="ml-4 flex flex-col items-start">
-                    <span id="well-level" class="text-xl mb-2">${Math.floor(gameState.well.current)}/${gameState.well.capacity}</span>
-                    <button onclick="collectWellWater()"
-                        class="border border-blue-600 bg-blue-900/50 hover:bg-blue-700 text-white py-2 px-4 rounded transition">Collect
-                        Water</button>
-                </div>
+                <button onclick="collectWellWater()">Collect Water</button>
             </div>
         `;
 
@@ -1986,15 +1979,6 @@ function updateWellVisual() {
             wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
             wellWater.classList.add('bg-blue-300');
         }
-    } else {
-        wellModule.classList.remove('hidden');
-        wellModule.innerHTML = `
-            <div class="p-4 border border-neutral-800 bg-neutral-900 rounded-lg text-center">
-                <div class="text-6xl mb-2">❓</div>
-                <div class="text-xl">Mysterious Hole</div>
-                <div class="text-sm text-neutral-400">Could this provide water?</div>
-            </div>
-        `;
     }
 }
 
