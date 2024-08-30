@@ -749,4 +749,34 @@
       padding: 1em;
     }
   }
+
+  #hunting-module {
+    #hunting-area {
+      background-color: var(--green);
+      height: 10rem;
+      overflow: hidden;
+      position: relative;
+      cursor: crosshair;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+    }
+
+    .wildlife {
+      position: absolute;
+      cursor: pointer;
+      transition: all 0.2s;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      .lucide {
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+    }
+
+    .instruction {
+      text-align: center;
+      font-size: 0.8em;
+    }
+  }
 }

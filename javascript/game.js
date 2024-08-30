@@ -865,10 +865,9 @@ function checkForRandomEvent() {
     }
 }
 
-// Add these constants at the top of the file
-const WILDLIFE = ['🦌', '🐗', '🐇', '🦃', '🦆'];
+const WILDLIFE = ['bird', 'rabbit', 'rat', 'snail', 'squirrel', 'turtle'];
 const HUNT_INTERVAL = 5000; // 5 seconds
-const MOVE_INTERVAL = 300; // Reduced from 500 (0.3 seconds instead of 0.5)
+const MOVE_INTERVAL = 500;
 
 // Add this constant at the top of the file with other constants
 const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
@@ -1275,9 +1274,9 @@ function updateUI() {
     if (gameState.upgrades.huntingLodge) {
         huntingModule.classList.remove('hidden');
         huntingModule.innerHTML = `
-            <h2 class="text-2xl mb-4 font-black">Hunting Lodge</h2>
-            <div id="hunting-area" class="w-full h-64 bg-green-900/30 relative overflow-hidden rounded-lg"></div>
-            <p class="mt-2 text-sm">Click on the animal to hunt it before it escapes!</p>
+            <h2><i data-lucide="trees" class="icon-dark"></i> Hunting Lodge</h2>
+            <div id="hunting-area"></div>
+            <p class="instruction">Hunt the animal before it escapes!</p>
         `;
         if (!gameState.huntingInterval) {
             startHunting();
@@ -1329,8 +1328,8 @@ function spawnWildlife() {
 
     const animal = WILDLIFE[Math.floor(Math.random() * WILDLIFE.length)];
     const target = document.createElement('div');
-    target.textContent = animal;
-    target.className = 'absolute text-4xl cursor-pointer transition-all duration-200';
+    target.innerHTML = `<i data-lucide="${animal}" class="icon-dark"></i>`;
+    target.className = 'wildlife';
     target.style.left = `${Math.random() * 80}%`;
     target.style.top = `${Math.random() * 80}%`;
 
@@ -1349,6 +1348,7 @@ function spawnWildlife() {
             clearInterval(gameState.moveInterval);
         }
     }, 4000);
+    lucide.createIcons();
 }
 
 function moveWildlife() {
@@ -1359,8 +1359,8 @@ function moveWildlife() {
         // Increase movement range
         const moveRange = Math.floor(Math.random() * 26) + 25; // Random value between 25 and 50
         // Increase movement speed by reducing the divisor
-        const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange));
-        const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange));
+        const newLeft = Math.max(0, Math.min(80, currentLeft + (Math.random() - 0.5) * moveRange / 2));
+        const newTop = Math.max(0, Math.min(80, currentTop + (Math.random() - 0.5) * moveRange / 2));
 
         gameState.huntingTarget.style.left = `${newLeft}%`;
         gameState.huntingTarget.style.top = `${newTop}%`;
@@ -1377,19 +1377,20 @@ function huntAnimal(animal) {
 
     let foodGained;
     switch (animal) {
-        case '🦌': foodGained = 50; break;
-        case '🐗': foodGained = 40; break;
-        case '🐇': foodGained = 15; break;
-        case '🦃': foodGained = 25; break;
-        case '🦆': foodGained = 20; break;
-        default: foodGained = 30;
+        case 'bird': foodGained = 20; break;
+        case 'rabbit': foodGained = 25; break;
+        case 'rat': foodGained = 15; break;
+        case 'snail': foodGained = 5; break;
+        case 'squirrel': foodGained = 20; break;
+        case 'turtle': foodGained = 30; break;
+        default: foodGained = 10;
     }
 
     gameState.food += foodGained;
     gameState.totalResourcesGathered.food += foodGained;
     gameState.totalAnimalsHunted++;
     checkAchievements();
-    addLogEntry(`Successfully hunted ${animal}! Gained ${foodGained} food.`, 'success');
+    addLogEntry(`Successfully hunted a ${animal}! Gained ${foodGained} food.`, 'success');
     updateUI();
 }
 
@@ -1967,18 +1968,6 @@ function updateWellVisual() {
                 <button onclick="collectWellWater()">Collect Water</button>
             </div>
         `;
-
-        const wellWater = document.getElementById('well-water');
-        if (percentage > 75) {
-            wellWater.classList.remove('bg-blue-300', 'bg-blue-400');
-            wellWater.classList.add('bg-blue-500');
-        } else if (percentage > 25) {
-            wellWater.classList.remove('bg-blue-300', 'bg-blue-500');
-            wellWater.classList.add('bg-blue-400');
-        } else {
-            wellWater.classList.remove('bg-blue-400', 'bg-blue-500');
-            wellWater.classList.add('bg-blue-300');
-        }
     }
 }
 
