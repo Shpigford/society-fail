@@ -870,7 +870,7 @@ const HUNT_INTERVAL = 5000; // 5 seconds
 const MOVE_INTERVAL = 500;
 
 // Add this constant at the top of the file with other constants
-const RESCUE_MISSION_INTERVAL = 3; // Days between rescue missions
+const RESCUE_MISSION_INTERVAL = 1; // Days between rescue missions
 const RESCUE_MISSION_TYPES = {
     easy: { risk: 0.1, resourceCost: { food: 20, water: 20 }, duration: 24 }, // 1 day
     medium: { risk: 0.3, resourceCost: { food: 40, water: 40 }, duration: 48 }, // 2 days
@@ -976,27 +976,38 @@ function updateWatchtowerModule() {
             const remainingDays = Math.floor(remainingTime / 24);
 
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p class="mb-4">Rescue mission in progress:</p>
-                <p class="text-xl mb-2">${gameState.rescueMission.difficulty.charAt(0).toUpperCase() + gameState.rescueMission.difficulty.slice(1)} Mission</p>
-                <p>Time remaining: ${remainingDays}d ${remainingHours}h</p>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <div class="mission-progress">
+                    <p class="mission-status">Rescue mission in progress:</p>
+                    <p class="mission-difficulty">${gameState.rescueMission.difficulty.charAt(0).toUpperCase() + gameState.rescueMission.difficulty.slice(1)} Mission</p>
+                    <p class="time-remaining">Time remaining: <span>${remainingDays}d ${remainingHours}h</span></p>
+                </div>
             `;
         } else if (gameState.rescueMissionAvailable) {
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p class="mb-4">A rescue mission is available!</p>
-                <div class="flex flex-col gap-2">
-                    <button onclick="initiateRescueMission('easy')" class="border border-green-600 bg-green-900/50 hover:bg-green-700 text-white py-2 px-4 rounded transition">Easy Mission (1d, Low Risk, Cost: 20 🍖, 20 💧)</button>
-                    <button onclick="initiateRescueMission('medium')" class="border border-yellow-600 bg-yellow-900/50 hover:bg-yellow-700 text-white py-2 px-4 rounded transition">Medium Mission (2d, Moderate Risk, Cost: 40 🍖, 40 💧)</button>
-                    <button onclick="initiateRescueMission('hard')" class="border border-red-600 bg-red-900/50 hover:bg-red-700 text-white py-2 px-4 rounded transition">Hard Mission (3d, High Risk, Cost: 60 🍖, 60 💧)</button>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <p class="mission-available">A rescue mission is available!</p>
+                <div class="mission-options">
+                    <button onclick="initiateRescueMission('easy')" class="easy-mission">
+                        <div>Easy</div>
+                        <span>(1d, Low Risk, Cost: 20 <i data-lucide="beef"></i>, 20 <i data-lucide="droplet"></i>)</span>
+                    </button>
+                    <button onclick="initiateRescueMission('medium')" class="medium-mission">
+                        <div>Medium</div>
+                        <span>(2d, Moderate Risk, Cost: 40 <i data-lucide="beef"></i>, 40 <i data-lucide="droplet"></i>)</span>
+                    </button>
+                    <button onclick="initiateRescueMission('hard')" class="hard-mission">
+                        <div>Hard</div>
+                        <span>(3d, High Risk, Cost: 60 <i data-lucide="beef"></i>, 60 <i data-lucide="droplet"></i>)</span>
+                    </button>
                 </div>
             `;
         } else {
             const daysUntilNextMission = RESCUE_MISSION_INTERVAL - (gameState.day - gameState.lastRescueMissionDay);
             const hoursUntilNextMission = 24 - gameState.hour;
             watchtowerModule.innerHTML = `
-                <h2 class="text-2xl mb-4 font-black">Watchtower</h2>
-                <p>Next rescue mission available in ${daysUntilNextMission} ${daysUntilNextMission === 1 ? 'day' : 'days'} and ${hoursUntilNextMission} ${hoursUntilNextMission === 1 ? 'hour' : 'hours'}.</p>
+                <h2><i data-lucide="binoculars" class="icon-dark"></i> Watchtower</h2>
+                <p class="countdown">${daysUntilNextMission} ${daysUntilNextMission === 1 ? 'day' : 'days'}, ${hoursUntilNextMission} ${hoursUntilNextMission === 1 ? 'hour' : 'hours'}</p>
             `;
         }
     } else {

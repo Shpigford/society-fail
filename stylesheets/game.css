@@ -740,6 +740,7 @@
         align-items: center;
         justify-content: center;
         font-size: 0.8em;
+        z-index: 20;
       }
     }
 
@@ -836,6 +837,82 @@
               color: black;
             }
           }
+        }
+      }
+    }
+  }
+
+  #watchtower-module {
+    .countdown {
+      font-size: 1.7em;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .mission-available {
+      text-align: center;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+      padding: 1rem 0;
+      margin: 0;
+    }
+
+    .mission-options {
+      button {
+        margin: 0;
+        border: 0;
+        padding: 0.5em 1em;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+        width: 100%;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &.easy-mission {
+          background-color: var(--green);
+        }
+
+        &.medium-mission {
+          background-color: var(--light-yellow);
+        }
+
+        &.hard-mission {
+          background-color: var(--dark-red);
+        }
+
+        div {
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        span {
+          .lucide {
+            width: 1em;
+            height: 1em;
+          }
+        }
+      }
+    }
+
+    .mission-progress {
+      padding: 1rem;
+      text-align: center;
+
+      .mission-status {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      .mission-difficulty {
+        font-size: 1.2em;
+        margin-bottom: 0.5rem;
+      }
+
+      .time-remaining {
+        font-size: 1.1em;
+
+        span {
+          font-weight: bold;
         }
       }
     }
