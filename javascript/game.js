@@ -197,7 +197,7 @@ function addLogEntry(message, type = 'info') {
     const entryData = { message, type, day: gameState.day, hour: gameState.hour };
 
     logEntry.className = `log-entry ${type}`;
-    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
+    logEntry.innerHTML = `<b>${entryData.day}.${entryData.hour}</b> <span>${entryData.message}</span>`;
 
     logContent.insertBefore(logEntry, logContent.firstChild);
 
@@ -348,7 +348,7 @@ function loadActivityLog() {
         gameState.logEntries.forEach(entry => {
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry ${entry.type}`;
-            logEntry.textContent = `Day ${entry.day}, Hour ${entry.hour}: ${entry.message}`;
+            logEntry.innerHTML = `<b>${entry.day}.${entry.hour}</b> <span>${entry.message}</span>`;
             logContent.appendChild(logEntry);
         });
     }
@@ -863,35 +863,6 @@ function checkForRandomEvent() {
         gameState.todaysEventHour = null; // Reset for the next day
         updateUI();
     }
-}
-
-// Update the addLogEntry function to handle different types of events
-function addLogEntry(message, type = 'info') {
-    const logContent = document.getElementById('log-content');
-    const logEntry = document.createElement('div');
-    const entryData = { message, type, day: gameState.day, hour: gameState.hour };
-
-    logEntry.className = `log-entry ${type}`;
-    logEntry.textContent = `Day ${entryData.day}, Hour ${entryData.hour}: ${entryData.message}`;
-
-    logContent.insertBefore(logEntry, logContent.firstChild);
-
-    // Limit log entries to 100
-    while (logContent.children.length > 100) {
-        logContent.removeChild(logContent.lastChild);
-    }
-
-    // Store the log entry in the gameState
-    if (!gameState.logEntries) {
-        gameState.logEntries = [];
-    }
-    gameState.logEntries.unshift(entryData);
-    if (gameState.logEntries.length > 100) {
-        gameState.logEntries.pop();
-    }
-
-    // Scroll to the top of the log
-    logContent.scrollTop = 0;
 }
 
 // Add these constants at the top of the file

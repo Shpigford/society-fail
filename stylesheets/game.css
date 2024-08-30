@@ -102,8 +102,8 @@
   }
 
   #party-module {
-    margin-top: 2em;
-    margin-bottom: 2em;
+    margin-top: 1em;
+    margin-bottom: 1em;
     border: var(--border-thickness) solid var(--text-color);
 
     h2 {
@@ -344,6 +344,59 @@
     >div>div {
       border: var(--border-thickness) solid var(--text-color);
       border-radius: var(--border-radius);
+    }
+  }
+
+  #log-content {
+    max-height: 400px;
+    overflow-y: auto;
+
+    .log-entry {
+      font-size: 0.8em;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+      display: flex;
+      align-items: stretch;
+
+      b {
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: var(--border-thickness) solid var(--text-color);
+        padding: 0.5em;
+        width: 4em;
+        /* Set a fixed width */
+        min-width: 4em;
+        /* Ensure minimum width */
+        flex-shrink: 0;
+        /* Prevent shrinking */
+      }
+
+      span {
+        padding: 0.5em;
+      }
+
+      &.info {
+        background-color: var(--gutter-grey);
+      }
+
+      &.warning {
+        background-color: var(--light-yellow);
+      }
+
+      &.error {
+        background-color: var(--dark-red);
+      }
+
+      &.success {
+        background-color: var(--green);
+      }
+
+      &.whisper {
+        background-color: var(--magenta);
+      }
+
+
     }
   }
 }
