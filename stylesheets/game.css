@@ -386,6 +386,10 @@
       display: flex;
       align-items: stretch;
 
+      &:last-child {
+        border-bottom: none;
+      }
+
       b {
         font-weight: 900;
         display: flex;
@@ -424,8 +428,6 @@
       &.whisper {
         background-color: var(--magenta);
       }
-
-
     }
   }
 
