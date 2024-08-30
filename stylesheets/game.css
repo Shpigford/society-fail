@@ -276,12 +276,14 @@
 
     @media (min-width: 1024px) {
       flex-direction: row;
+      align-items: flex-start;
     }
 
     #main-modules {
       flex: 1;
       display: grid;
       gap: 1rem;
+      align-self: flex-start;
 
       @media (min-width: 768px) and (max-width: 1023px) {
         grid-template-columns: repeat(3, 1fr);
