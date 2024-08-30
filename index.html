@@ -60,25 +60,38 @@
   </div>
   <div id="game-ui" class="hidden">
     <header>
-      <h1>💀 Society Fail</h1>
+      <div class="logo">
+        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
+        <h1>Society Fail</h1>
+      </div>
       <div id="resources">
-        <div class="resource"><span>🍖</span><span id="food">0</span></div>
-        <div class="resource"><span>💧</span><span id="water">0</span></div>
-        <div class="resource"><span>🪵</span><span id="wood">0</span></div>
+        <div class="resource"><i data-lucide="beef" class="icon-dark-yellow"></i><span id="food">0</span></div>
+        <div class="resource"><i data-lucide="droplet" class="icon-blue"></i><span id="water">0</span></div>
+        <div class="resource"><i data-lucide="tree-pine" class="icon-green"></i><span id="wood">0</span></div>
       </div>
       <div id="time-module">
         <div id="time-display">
-          <span id="time">Day 1, Hour 1</span>
           <div id="day-night-indicator"></div>
+          <span id="time">Day 1, Hour 1</span>
         </div>
-        <button id="reset-game" onclick="resetGame(false)">Restart</button>
+        <button id="pause-game" onclick="pauseGame()"><i data-lucide="pause" class=""></i></button>
+        <button id="reset-game" onclick="resetGame(false)"><i data-lucide="rotate-ccw" class=""></i></button>
       </div>
     </header>
     <main>
       <div id="actions-module">
-        <button id="gatherFoodBtn" onclick="gatherFood()">Gather Food 🍖</button>
-        <button id="collectWaterBtn" onclick="collectWater()">Collect Water 💧</button>
-        <button id="chopWoodBtn" onclick="chopWood()">Chop Wood 🪵</button>
+        <button id="gatherFoodBtn" onclick="gatherFood()" class="action-button">
+          <i data-lucide="beef" class="icon-dark-yellow"></i>
+          <span>Gather Food</span>
+        </button>
+        <button id="collectWaterBtn" onclick="collectWater()" class="action-button">
+          <i data-lucide="droplet" class="icon-blue"></i>
+          <span>Collect Water</span>
+        </button>
+        <button id="chopWoodBtn" onclick="chopWood()" class="action-button">
+          <i data-lucide="tree-pine" class="icon-green"></i>
+          <span>Chop Wood</span>
+        </button>
       </div>
       <div id="party-module">
         <h2>Your Party</h2>

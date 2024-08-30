@@ -18,9 +18,9 @@ function initializeGameState() {
             lumberMill: false,
             watchtower: false
         },
-        maxStamina: 100,
-        staminaPerAction: 10,
-        staminaRecoveryPerHour: 5,
+        maxEnergy: 100,
+        energyPerAction: 10,
+        energyRecoveryPerHour: 5,
         selectedPerson: 0,
         busyUntil: {},
         farming: {
@@ -180,8 +180,8 @@ const TRAIT_RANGES = {
     hungerRate: { min: 0.8, max: 1.2 },
     thirstRate: { min: 0.8, max: 1.2 },
     energyRate: { min: 0.8, max: 1.2 },
-    maxStamina: { min: 80, max: 120 },
-    staminaRecoveryRate: { min: 0.8, max: 1.2 }
+    maxEnergy: { min: 80, max: 120 },
+    energyRecoveryRate: { min: 0.8, max: 1.2 }
 };
 
 // Add this helper function to generate a random trait value
@@ -371,13 +371,12 @@ function startGame(difficulty) {
             hunger: 0,
             thirst: 0,
             energy: 100,
-            stamina: gameState.maxStamina,
             traits: {
                 hungerRate: getRandomTrait('hungerRate'),
                 thirstRate: getRandomTrait('thirstRate'),
                 energyRate: getRandomTrait('energyRate'),
-                maxStamina: Math.round(getRandomTrait('maxStamina')),
-                staminaRecoveryRate: getRandomTrait('staminaRecoveryRate')
+                maxEnergy: Math.round(getRandomTrait('maxEnergy')),
+                energyRecoveryRate: getRandomTrait('energyRecoveryRate')
             }
         };
     });
@@ -491,16 +490,14 @@ function gameLoop() {
 
         if (gameState.busyUntil[index] === -1) {
             // Person is resting
-            person.energy = Math.min(100, person.energy + 10);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10 * person.traits.staminaRecoveryRate);
+            person.energy = Math.min(100, person.energy + 10 * person.traits.energyRecoveryRate);
 
             // Check if rest is complete
-            if (person.energy === 100 && person.stamina === person.traits.maxStamina) {
+            if (person.energy === 100) {
                 gameState.busyUntil[index] = 0;
             }
         } else {
             person.energy = Math.max(0, Math.min(100, person.energy - 0.5 * person.traits.energyRate));
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + gameState.staminaRecoveryPerHour * person.traits.staminaRecoveryRate);
         }
 
         if (person.hunger >= 100 || person.thirst >= 100 || person.energy <= 0) {
@@ -512,7 +509,6 @@ function gameLoop() {
         person.hunger = Math.min(100, person.hunger);
         person.thirst = Math.min(100, person.thirst);
         person.energy = Math.min(100, person.energy);
-        person.stamina = Math.min(person.traits.maxStamina, person.stamina);
 
         // Check if person has died
         if (person.health <= 0) {
@@ -608,17 +604,15 @@ const RANDOM_EVENTS = [
         name: "Illness", effect: (state) => {
             const victim = state.party[Math.floor(Math.random() * state.party.length)];
             victim.health -= 10;
-            victim.stamina = Math.max(0, victim.stamina - 30);
-            return `${victim.name} has fallen ill! (-10 health, -30 stamina)`;
+            return `${victim.name} has fallen ill! (-10 health)`;
         }, type: "negative"
     },
     {
         name: "Morale Boost", effect: (state) => {
             state.party.forEach(person => {
-                person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
-                person.energy = Math.min(100, person.energy + 20);
+                person.energy = Math.min(person.traits.maxEnergy, person.energy + 20);
             });
-            return "A surge of hope boosts everyone's morale! (+20 stamina, +20 energy for all)";
+            return "A surge of hope boosts everyone's morale! (+20 energy for all)";
         }, type: "positive"
     },
     {
@@ -654,17 +648,17 @@ const RANDOM_EVENTS = [
     {
         name: "Tool Upgrade", effect: (state) => {
             state.party.forEach(person => {
-                person.traits.maxStamina += 10;
+                person.traits.maxEnergy += 10;
             });
-            return "You've found ways to improve your tools! (+10 max stamina for all)";
+            return "You've found ways to improve your tools! (+10 max energy for all)";
         }, type: "positive"
     },
     {
         name: "Harsh Weather", effect: (state) => {
             state.party.forEach(person => {
-                person.stamina = Math.max(0, person.stamina - 15);
+                person.energy = Math.max(0, person.energy - 15);
             });
-            return "A spell of harsh weather has drained everyone's energy! (-15 stamina for all)";
+            return "A spell of harsh weather has drained everyone's energy! (-15 energy for all)";
         }, type: "negative"
     },
     {
@@ -705,11 +699,11 @@ const RANDOM_EVENTS = [
     },
     {
         name: "Community Spirit", effect: (state) => {
-            const staminaGain = 25;
+            const energyGain = 25;
             state.party.forEach(person => {
-                person.stamina = Math.min(person.traits.maxStamina, person.stamina + staminaGain);
+                person.energy = Math.min(person.traits.maxEnergy, person.energy + energyGain);
             });
-            return `A wave of community spirit energizes everyone! (+${staminaGain} stamina for all)`;
+            return `A wave of community spirit energizes everyone! (+${energyGain} energy for all)`;
         }, type: "positive"
     },
     {
@@ -722,9 +716,9 @@ const RANDOM_EVENTS = [
         name: "Mysterious Illness", effect: (state) => {
             state.party.forEach(person => {
                 person.health = Math.max(0, person.health - 5);
-                person.stamina = Math.max(0, person.stamina - 10);
+                person.energy = Math.max(0, person.energy - 10);
             });
-            return "A mysterious illness affects everyone in the group! (-5 health, -10 stamina for all)";
+            return "A mysterious illness affects everyone in the group! (-5 health, -10 energy for all)";
         }, type: "negative"
     },
     {
@@ -756,8 +750,8 @@ const RANDOM_EVENTS = [
     {
         name: "Inspiring Dream", effect: (state) => {
             const luckyPerson = state.party[Math.floor(Math.random() * state.party.length)];
-            luckyPerson.traits.maxStamina += 20;
-            return `${luckyPerson.name} had an inspiring dream! (+20 max stamina)`;
+            luckyPerson.traits.maxEnergy += 20;
+            return `${luckyPerson.name} had an inspiring dream! (+20 max energy)`;
         }, type: "positive"
     },
     {
@@ -785,9 +779,9 @@ const RANDOM_EVENTS = [
     {
         name: "Alien Artifact", effect: (state) => {
             const randomPerson = state.party[Math.floor(Math.random() * state.party.length)];
-            randomPerson.traits.maxStamina += 30;
+            randomPerson.traits.maxEnergy += 30;
             randomPerson.health = 100;
-            return `${randomPerson.name} found an alien artifact! (+30 max stamina, full health)`;
+            return `${randomPerson.name} found an alien artifact! (+30 max energy, full health)`;
         }, type: "positive"
     },
     {
@@ -1160,44 +1154,45 @@ function updateUI() {
         personElement.onclick = () => selectPerson(index);
 
         personElement.innerHTML = `
-            <h3>${person.name} ${isResting ? '(Resting)' : isBusy ? `(Busy: ${busyTimeLeft}h)` : ''}</h3>
-            ${isBusy ? `<div class="busy-label">${isResting ? 'RESTING' : 'BUSY'}</div>` : ''}
-            <div class="stat">
-                <label>Health:</label>
-                <div class="progress-bar"><div style="width: ${person.health}%"></div></div>
-                <span>${Math.floor(person.health)}%</span>
+            <div class="person-header">
+                <h3><i data-lucide="person-standing" class="icon-gutter-grey"></i> ${person.name}</h3>
+                <div class="busy-label ${isBusy ? (isResting ? 'resting' : 'busy') : 'idle'}">${isBusy ? `${isResting ? 'RESTING' : `BUSY [${busyTimeLeft}h]`}` : 'IDLE'}</div>
             </div>
-            <div class="stat">
-                <label>Hunger:</label>
-                <div class="progress-bar"><div style="width: ${100 - person.hunger}%"></div></div>
-                <span>${Math.floor(100 - person.hunger)}%</span>
-            </div>
-            <div class="stat">
-                <label>Thirst:</label>
-                <div class="progress-bar"><div style="width: ${100 - person.thirst}%"></div></div>
-                <span>${Math.floor(100 - person.thirst)}%</span>
-            </div>
-            <div class="stat">
-                <label>Energy:</label>
-                <div class="progress-bar"><div style="width: ${person.energy}%"></div></div>
-                <span>${Math.floor(person.energy)}%</span>
-            </div>
-            <div class="stat">
-                <label>Stamina:</label>
-                <div class="progress-bar"><div style="width: ${(person.stamina / person.traits.maxStamina) * 100}%"></div></div>
-                <span>${Math.floor((person.stamina / person.traits.maxStamina) * 100)}%</span>
+            <div class="stats-container">
+            <table class="stats">
+                <tr>
+                    <td>Health</td>
+                    <td><div class="progress-bar"><div class="progress health-bar ${getProgressBarClass(person.health)}" style="width: ${person.health}%;"></div></div></td>
+                    <td>${Math.floor(person.health)}%</td>
+                </tr>
+                <tr>
+                    <td>Hunger</td>
+                    <td><div class="progress-bar"><div class="progress hunger-bar ${getProgressBarClass(100 - person.hunger)}" style="width: ${100 - person.hunger}%;"></div></div></td>
+                    <td>${Math.floor(100 - person.hunger)}%</td>
+                </tr>
+                <tr>
+                    <td>Thirst</td>
+                    <td><div class="progress-bar"><div class="progress thirst-bar ${getProgressBarClass(100 - person.thirst)}" style="width: ${100 - person.thirst}%;"></div></div></td>
+                    <td>${Math.floor(100 - person.thirst)}%</td>
+                </tr>
+                <tr>
+                    <td>Energy</td>
+                    <td><div class="progress-bar"><div class="progress energy-bar ${getProgressBarClass(person.energy)}" style="width: ${person.energy}%;"></div></div></td>
+                    <td>${Math.floor(person.energy)}%</td>
+                </tr>
+            </table>
             </div>
             <div class="traits">
                 <span title="Hunger Rate">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
                 <span title="Thirst Rate">💧: ${person.traits.thirstRate.toFixed(2)}</span>
                 <span title="Energy Rate">⚡: ${person.traits.energyRate.toFixed(2)}</span>
-                <span title="Max Stamina">💪: ${person.traits.maxStamina}</span>
-                <span title="Stamina Recovery Rate">🔄: ${person.traits.staminaRecoveryRate.toFixed(2)}</span>
+                <span title="Max Energy">💪: ${person.traits.maxEnergy}</span>
+                <span title="Energy Recovery Rate">🔄: ${person.traits.energyRecoveryRate.toFixed(2)}</span>
             </div>
             <div class="person-actions">
-                <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''}>Eat (10 🍖)</button>
-                <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''}>Drink (5 💧)</button>
-                <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''}>Rest 💤</button>
+                <button onclick="eat(${index})" ${isBusy || gameState.food < 10 ? 'disabled' : ''}>Eat <span>[10 <i data-lucide="beef" class="icon-dark-yellow"></i>]</span></button>
+                <button onclick="drink(${index})" ${isBusy || gameState.water < 5 ? 'disabled' : ''}> Drink <span>[5 <i data-lucide="droplet" class="icon-blue"></i>]</span></button>
+                <button onclick="sleep(${index})" ${isBusy ? 'disabled' : ''}><i data-lucide="bed-single"></i> Rest</button>
             </div>
         `;
 
@@ -1323,6 +1318,8 @@ function updateUI() {
     updateAchievementsUI();
     updateLumberMillModule();
     updateWatchtowerModule();
+
+    lucide.createIcons();
 }
 
 // Add these new functions for hunting mechanics
@@ -1450,12 +1447,11 @@ function performAction(personIndex, action, actionName) {
         addLogEntry(`${person.name} is busy and can't ${actionName} right now!`, 'warning');
     } else if (person.energy <= 0 && !['eat', 'drink', 'sleep'].includes(actionName)) {
         addLogEntry(`${person.name} is too exhausted to ${actionName}!`, 'warning');
-    } else if (person.stamina >= gameState.staminaPerAction || ['eat', 'drink', 'sleep'].includes(actionName)) {
+    } else {
         action();
         // Increase energy drain for gather, collect, and chop actions
         const energyDrain = ['gatherFood', 'collectWater', 'chopWood'].includes(actionName) ? 15 : 5;
         if (!['eat', 'drink', 'sleep'].includes(actionName)) {
-            person.stamina -= gameState.staminaPerAction;
             person.energy = Math.max(0, person.energy - energyDrain);
             gameState.totalActions++;
         }
@@ -1471,8 +1467,6 @@ function performAction(personIndex, action, actionName) {
                 button.classList.remove('cooldown');
             }, { once: true });
         }
-    } else {
-        addLogEntry(`${person.name} doesn't have enough stamina to ${actionName}!`, 'warning');
     }
 }
 
@@ -1516,11 +1510,10 @@ function collectWater() {
 
         gameState.water += amount;
         gameState.totalResourcesGathered.water += amount;
+        gameState.totalWellWaterCollected += amount; // Add this line to track well water collection
+        checkAchievements(); // Check achievements after collecting water
         addLogEntry(`${gameState.party[gameState.selectedPerson].name} collected ${amount} water.`);
     }, "collectWater");
-
-    gameState.totalWellWaterCollected += collected;
-    checkAchievements();
 }
 
 function chopWood() {
@@ -1550,8 +1543,8 @@ function eat(personIndex) {
             gameState.food -= 10;
             person.hunger = Math.max(0, person.hunger - 30);
             person.health = Math.min(100, person.health + 5);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 20);
-            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 stamina.`, 'success');
+            person.energy = Math.min(100, person.energy + 20);
+            addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 energy.`, 'success');
         } else {
             addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`, 'error');
         }
@@ -1564,8 +1557,8 @@ function drink(personIndex) {
         if (gameState.water >= 5) {
             gameState.water -= 5;
             person.thirst = Math.max(0, person.thirst - 25);
-            person.stamina = Math.min(person.traits.maxStamina, person.stamina + 10);
-            addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 stamina.`);
+            person.energy = Math.min(100, person.energy + 10);
+            addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 energy.`);
         } else {
             addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`, 'error');
         }
@@ -1794,7 +1787,6 @@ function updateActionButtons() {
     }
 
     const isBusy = isPersonBusy(gameState.selectedPerson);
-    const hasEnoughStamina = selectedPerson.stamina >= gameState.staminaPerAction;
     const hasEnoughEnergy = selectedPerson.energy > 0;
 
     const actions = [
@@ -1806,14 +1798,13 @@ function updateActionButtons() {
     actions.forEach(action => {
         const button = document.getElementById(action.id);
         if (button) {
-            const isDisabled = isBusy || !hasEnoughStamina || !hasEnoughEnergy;
+            const isDisabled = isBusy || !hasEnoughEnergy;
             button.disabled = isDisabled;
             button.classList.toggle('opacity-50', isDisabled);
             button.classList.toggle('cursor-not-allowed', isDisabled);
 
             let tooltip = '';
             if (isBusy) tooltip = `${selectedPerson.name} is busy`;
-            else if (!hasEnoughStamina) tooltip = `Not enough stamina`;
             else if (!hasEnoughEnergy) tooltip = `Not enough energy`;
             else tooltip = `Gather ${action.amount} ${action.resource}`;
 
@@ -1938,13 +1929,12 @@ function setDebugMode(enabled) {
                 hunger: 0,
                 thirst: 0,
                 energy: 100,
-                stamina: 100,
                 traits: {
                     hungerRate: 1,
                     thirstRate: 1,
                     energyRate: 1,
-                    maxStamina: 100,
-                    staminaRecoveryRate: 1
+                    maxEnergy: 100,
+                    energyRecoveryRate: 1
                 }
             });
         }
@@ -2024,6 +2014,13 @@ function updateWellVisual() {
             </div>
         `;
     }
+}
+
+// Add this helper function to determine the class based on the progress value
+function getProgressBarClass(value) {
+    if (value > 66) return 'high';
+    if (value > 33) return 'medium';
+    return 'low';
 }
 
 // Add these event listeners at the end of the file
