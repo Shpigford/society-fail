@@ -628,6 +628,18 @@
       }
     }
 
+    .icon-wheat {
+      color: var(--light-yellow);
+    }
+
+    .icon-carrot {
+      color: var(--dark-yellow);
+    }
+
+    .icon-bean {
+      color: var(--dark-red);
+    }
+
     #farming-grid {
       margin: 1rem;
       display: grid;

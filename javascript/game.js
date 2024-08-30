@@ -170,9 +170,9 @@ const ACTION_DURATIONS = {
 };
 
 const CROP_TYPES = {
-    wheat: { emoji: '🌾', growthTime: 24, waterNeeded: 5, yield: 20 },
-    carrot: { emoji: '🌽', growthTime: 48, waterNeeded: 10, yield: 40 },
-    bean: { emoji: '🥔', growthTime: 72, waterNeeded: 15, yield: 60 }
+    wheat: { growthTime: 24, waterNeeded: 5, yield: 20 },
+    carrot: { growthTime: 48, waterNeeded: 10, yield: 40 },
+    bean: { growthTime: 72, waterNeeded: 15, yield: 60 }
 };
 
 // Add this constant for trait ranges
@@ -1177,9 +1177,9 @@ function updateUI() {
         farmingModule.innerHTML = `
             <h2><i data-lucide="tractor" class="icon-dark"></i> Farming</h2>
             <div class="crop-picker">
-                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="inactive"><i data-lucide="wheat" class="icon-dark-yellow"></i> [5 <i data-lucide="droplet" class="icon-blue"></i>]</button>
-                <button id="plantCarrot" onclick="setPlantingCrop('carrot')" class="inactive"><i data-lucide="carrot" class="icon-dark-yellow"></i> [10 <i data-lucide="droplet" class="icon-blue"></i>]</button>
-                <button id="plantBean" onclick="setPlantingCrop('bean')" class="inactive"><i data-lucide="bean" class="icon-dark-yellow"></i> [15 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantWheat" onclick="setPlantingCrop('wheat')" class="inactive"><i data-lucide="wheat" class="icon-wheat"></i> [5 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantCarrot" onclick="setPlantingCrop('carrot')" class="inactive"><i data-lucide="carrot" class="icon-carrot"></i> [10 <i data-lucide="droplet" class="icon-blue"></i>]</button>
+                <button id="plantBean" onclick="setPlantingCrop('bean')" class="inactive"><i data-lucide="bean" class="icon-bean"></i> [15 <i data-lucide="droplet" class="icon-blue"></i>]</button>
             </div>
             <div class="water-all-button">
                 <button onclick="waterCrops()">
@@ -1219,10 +1219,10 @@ function updateUI() {
                     plotElement.classList.add(`crop-${plot.type}`);
                     plotElement.title = `${plot.type}: ${growthProgress.toFixed(0)}% grown, ${plot.watered ? 'Watered' : 'Needs Water'}`;
 
-                    // Add Lucide icon based on crop type
+                    // Add Lucide icon based on crop type with specific color
                     const iconElement = document.createElement('i');
                     iconElement.setAttribute('data-lucide', plot.type);
-                    iconElement.classList.add('icon-dark-yellow');
+                    iconElement.classList.add(`icon-${plot.type}`);
                     plotElement.appendChild(iconElement);
 
                     if (!plot.watered) {
