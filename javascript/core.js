@@ -44,12 +44,15 @@ export function pauseGame() {
     gameInterval = null;
     document.getElementById('pause-game').innerHTML = '<i data-lucide="play" class=""></i>';
     document.getElementById('time-display').classList.add('paused');
+    gameState.isPaused = true;
   } else {
     startGameLoop();
     document.getElementById('pause-game').innerHTML = '<i data-lucide="pause" class=""></i>';
     document.getElementById('time-display').classList.remove('paused');
+    gameState.isPaused = false;
   }
   updateLucideIcons();
+  saveGame();
 }
 
 function gameLoop() {
@@ -75,7 +78,11 @@ function gameLoop() {
 }
 
 export function saveGame() {
-  localStorage.setItem('societyFailSave', JSON.stringify(gameState));
+  const saveState = {
+    ...gameState,
+    isPaused: gameInterval === null
+  };
+  localStorage.setItem('societyFailSave', JSON.stringify(saveState));
 }
 
 export function loadGame() {
@@ -88,7 +95,15 @@ export function loadGame() {
       document.getElementById('game-over-screen').classList.add('hidden');
       document.getElementById('game-ui').classList.remove('hidden');
       updateUI();
-      startGameLoop();
+      if (loadedState.isPaused) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+        document.getElementById('pause-game').innerHTML = '<i data-lucide="play" class=""></i>';
+        document.getElementById('time-display').classList.add('paused');
+      } else {
+        startGameLoop();
+      }
+      updateLucideIcons();
     } else {
       alert("Your saved game is incompatible with the current version. The apocalypse has no mercy. Please start a new game.");
       resetGame(true);

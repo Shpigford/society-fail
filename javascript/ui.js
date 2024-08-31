@@ -31,9 +31,7 @@ function updateResourcesUI() {
 function updateTimeUI() {
   const timeDisplay = document.getElementById('time');
   timeDisplay.textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
-  if (!gameInterval) {
-    timeDisplay.textContent += ' (Paused)';
-  }
+
   updateDayNightIndicator();
 }
 
