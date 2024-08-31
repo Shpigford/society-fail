@@ -71,6 +71,7 @@ function gameLoop() {
   gameState.totalPlayTime++;
   checkAchievements();
   updateUI();
+  saveGame();
 }
 
 export function saveGame() {
@@ -83,12 +84,20 @@ export function loadGame() {
     const loadedState = JSON.parse(savedGame);
     if (checkSaveCompatibility(loadedState)) {
       setGameState(loadedState);
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('game-over-screen').classList.add('hidden');
+      document.getElementById('game-ui').classList.remove('hidden');
       updateUI();
       startGameLoop();
     } else {
       alert("Your saved game is incompatible with the current version. The apocalypse has no mercy. Please start a new game.");
       resetGame(true);
     }
+  } else {
+    // No saved game found, show the start screen
+    document.getElementById('start-screen').classList.remove('hidden');
+    document.getElementById('game-ui').classList.add('hidden');
+    document.getElementById('game-over-screen').classList.add('hidden');
   }
 }
 
@@ -180,3 +189,5 @@ export function setDebugMode(enabled) {
   }
   updateUI();
 }
+
+window.addEventListener('load', loadGame);
