@@ -1,6 +1,7 @@
 import { gameState } from './state.js';
 import { addLogEntry } from './logging.js';
 import { updateUI } from './ui.js';
+import { NAMES } from './constants.js';
 
 export function createPartyMember(name) {
   return {
@@ -135,4 +136,15 @@ function getRandomTrait(traitName) {
 
   const range = traitRanges[traitName];
   return Math.random() * (range.max - range.min) + range.min;
+}
+
+
+export function createParty(size) {
+  let availableNames = [...NAMES];
+  return Array(size).fill().map(() => {
+    const randomIndex = Math.floor(Math.random() * availableNames.length);
+    const name = availableNames[randomIndex];
+    availableNames.splice(randomIndex, 1);
+    return createPartyMember(name);
+  });
 }

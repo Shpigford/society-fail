@@ -2,13 +2,18 @@ import { initializeGameState, gameState, setGameState } from './state.js';
 import { updateUI } from './ui.js';
 import { checkForRandomEvent } from './events.js';
 import { generateLumberMillWood, growLumberMillTrees } from './resources.js';
-import { updatePartyStats } from './party.js';
+import { createParty, updatePartyStats } from './party.js';
 import { checkAchievements } from './achievements.js';
 
 let gameInterval;
 
 export function startGame(difficulty) {
   const gameState = initializeGameState(difficulty);
+  const partySize = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
+
+  gameState.party = createParty(partySize);
+  gameState.selectedPerson = 0;
+
   setGameState(gameState);
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('game-over-screen').classList.add('hidden');

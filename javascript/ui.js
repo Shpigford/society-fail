@@ -43,35 +43,59 @@ function updatePartyUI() {
   });
 }
 
+function getProgressBarClass(value) {
+  if (value > 66) return 'high';
+  if (value > 33) return 'medium';
+  return 'low';
+}
+
 function createPersonElement(person, index) {
   const personElement = document.createElement('div');
   personElement.className = 'person';
+  const isBusy = gameState.busyUntil[index] > gameState.hour + (gameState.day - 1) * 24;
+  const isResting = gameState.busyUntil[index] === -1;
+  const busyTimeLeft = isBusy ? gameState.busyUntil[index] - (gameState.hour + (gameState.day - 1) * 24) : 0;
+
   personElement.innerHTML = `
-    <h3>${person.name}</h3>
-    <div class="stat">
-      <label>Health:</label>
-      <div class="progress-bar"><div style="width: ${person.health}%;"></div></div>
-      <span>${Math.floor(person.health)}</span>
+    <div class="person-header">
+      <h3><i data-lucide="person-standing" class="icon-gutter-grey"></i> ${person.name}</h3>
+      <div class="busy-label ${isBusy ? (isResting ? 'resting' : 'busy') : 'idle'}">${isBusy ? `${isResting ? 'RESTING' : `BUSY [${busyTimeLeft}h]`}` : 'IDLE'}</div>
     </div>
-    <div class="stat">
-      <label>Hunger:</label>
-      <div class="progress-bar"><div style="width: ${person.hunger}%;"></div></div>
-      <span>${Math.floor(person.hunger)}</span>
+    <div class="stats-container">
+      <table class="stats">
+        <tr>
+          <td>Health</td>
+          <td><div class="progress-bar"><div class="progress health-bar ${getProgressBarClass(person.health)}" style="width: ${person.health}%;"></div></div></td>
+          <td>${Math.floor(person.health)}%</td>
+        </tr>
+        <tr>
+          <td>Hunger</td>
+          <td><div class="progress-bar"><div class="progress hunger-bar ${getProgressBarClass(100 - person.hunger)}" style="width: ${100 - person.hunger}%;"></div></div></td>
+          <td>${Math.floor(100 - person.hunger)}%</td>
+        </tr>
+        <tr>
+          <td>Thirst</td>
+          <td><div class="progress-bar"><div class="progress thirst-bar ${getProgressBarClass(100 - person.thirst)}" style="width: ${100 - person.thirst}%;"></div></div></td>
+          <td>${Math.floor(100 - person.thirst)}%</td>
+        </tr>
+        <tr>
+          <td>Energy</td>
+          <td><div class="progress-bar"><div class="progress energy-bar ${getProgressBarClass(person.energy)}" style="width: ${person.energy}%;"></div></div></td>
+          <td>${Math.floor(person.energy)}%</td>
+        </tr>
+      </table>
     </div>
-    <div class="stat">
-      <label>Thirst:</label>
-      <div class="progress-bar"><div style="width: ${person.thirst}%;"></div></div>
-      <span>${Math.floor(person.thirst)}</span>
-    </div>
-    <div class="stat">
-      <label>Energy:</label>
-      <div class="progress-bar"><div style="width: ${person.energy}%;"></div></div>
-      <span>${Math.floor(person.energy)}</span>
+    <div class="traits">
+      <span title="Hunger Rate">🍽️: ${person.traits.hungerRate.toFixed(2)}</span>
+      <span title="Thirst Rate">💧: ${person.traits.thirstRate.toFixed(2)}</span>
+      <span title="Energy Rate">⚡: ${person.traits.energyRate.toFixed(2)}</span>
+      <span title="Max Energy">💪: ${person.traits.maxEnergy}</span>
+      <span title="Energy Recovery Rate">🔄: ${person.traits.energyRecoveryRate.toFixed(2)}</span>
     </div>
     <div class="person-actions">
-      <button onclick="performAction(${index}, 'eat')">Eat</button>
-      <button onclick="performAction(${index}, 'drink')">Drink</button>
-      <button onclick="performAction(${index}, 'sleep')">Sleep</button>
+      <button onclick="performAction(${index}, 'eat')" ${isBusy || gameState.food < 10 ? 'disabled' : ''}>Eat <span>[10 <i data-lucide="beef" class="icon-dark-yellow"></i>]</span></button>
+      <button onclick="performAction(${index}, 'drink')" ${isBusy || gameState.water < 5 ? 'disabled' : ''}> Drink <span>[5 <i data-lucide="droplet" class="icon-blue"></i>]</span></button>
+      <button onclick="performAction(${index}, 'sleep')" ${isBusy ? 'disabled' : ''}><i data-lucide="bed-single"></i> Rest</button>
     </div>
   `;
   return personElement;
