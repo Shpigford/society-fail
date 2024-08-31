@@ -7,6 +7,9 @@
   transform: translate(-50%, -50%);
   width: 100%;
   max-width: 800px;
+  padding: 0 2rem;
+
+  @media (max-width: 100ch) {}
 
   .splash-screen {
     border: var(--border-thickness) solid var(--text-color);
@@ -32,7 +35,7 @@
     }
 
     div {
-      padding-left: 1.5rem;
+      padding: 0 1.5rem;
     }
 
     h1 {
@@ -47,6 +50,22 @@
     p {
       font-size: 1.2rem;
       margin: 0;
+    }
+
+    @media (max-width: 100ch) {
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      p {
+        font-size: .9rem;
+      }
+    }
+
+    @media (max-width: 50ch) {
+      h1 {
+        font-size: 1.5rem;
+      }
     }
   }
 
@@ -95,6 +114,20 @@
           .lucide {
             width: 1em;
             height: 1em;
+          }
+        }
+      }
+
+      @media (max-width: 100ch) {
+        flex-direction: column;
+
+        button {
+          border-right: none;
+          border-bottom: var(--border-thickness) solid var(--text-color);
+          width: 100%;
+
+          &:last-child {
+            border-bottom: none;
           }
         }
       }
