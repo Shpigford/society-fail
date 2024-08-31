@@ -1,7 +1,7 @@
 import { initializeGameState, gameState, setGameState } from './state.js';
 import { updateUI, updateLucideIcons } from './ui.js';
 import { checkForRandomEvent } from './events.js';
-import { generateLumberMillWood, growLumberMillTrees } from './resources.js';
+import { generateLumberMillWood, growLumberMillTrees, gatherFood, collectWater, chopWood } from './resources.js';
 import { createParty, updatePartyStats } from './party.js';
 import { checkAchievements } from './achievements.js';
 import { addLogEntry } from './logging.js';
@@ -26,6 +26,10 @@ export function startGame(difficulty) {
 window.startGame = startGame;
 window.pauseGame = pauseGame;
 window.resetGame = resetGame;
+window.gatherFood = gatherFood;
+window.collectWater = collectWater;
+window.chopWood = chopWood;
+
 
 export function startGameLoop() {
   if (gameInterval) {

@@ -5,9 +5,8 @@ import { addLogEntry } from './logging.js';
 import { buyUpgrade } from './upgrades.js';
 import { performAction } from './party.js';
 import { harvestCrop, waterAllCrops } from './farming.js';
-import { collectWellWater } from './resources.js';
+import { collectWellWater, harvestTree, gatherFood } from './resources.js';
 import { startHunting, stopHunting } from './hunting.js';
-import { harvestTree } from './resources.js';
 
 export function updateUI() {
   updateResourcesUI();
