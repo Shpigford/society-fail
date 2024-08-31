@@ -471,7 +471,7 @@ function showGameOverScreen() {
                     </div>
                 `).join('')}
             </div>
-            ${achievedAchievements.length === 0 ? '<p class="text-yellow-400">No achievements unlocked</p>' : ''}
+            ${achievedAchievements.length === 0 ? '<p class="no-achievements">No achievements unlocked</p>' : ''}
         </div>
     `;
     lucide.createIcons();

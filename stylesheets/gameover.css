@@ -1,5 +1,6 @@
 #game-over-screen {
   text-align: left;
+  padding: 0 2rem;
   margin: 0 auto;
   position: absolute;
   top: 50%;
@@ -7,42 +8,59 @@
   transform: translate(-50%, -50%);
   width: 100%;
   max-width: 600px;
+
+  .splash-screen {
+    border: var(--border-thickness) solid var(--text-color);
+  }
+
+  .splash-header {
+    border-bottom: var(--border-thickness) solid var(--text-color);
+    display: flex;
+    align-items: center;
+    font-size: 3rem;
+
+    .icon-large {
+      padding: 1rem;
+      font-size: 2em;
+      border-right: var(--border-thickness) solid var(--text-color);
+    }
+
+    div {
+      padding-left: 1.5rem;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 900;
+      margin: 0;
+      line-height: 1em;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    @media (max-width: 100ch) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: .9rem;
+      }
+    }
+
+    @media (max-width: 50ch) {
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  }
 }
 
-#game-over-screen .splash-screen {
-  border: var(--border-thickness) solid var(--text-color);
-}
-
-#game-over-screen .splash-header {
-  border-bottom: var(--border-thickness) solid var(--text-color);
-  display: flex;
-  align-items: center;
-  font-size: 3rem;
-}
-
-#game-over-screen .splash-header .icon-large {
-  padding: 1rem;
-  font-size: 2em;
-  border-right: var(--border-thickness) solid var(--text-color);
-}
-
-#game-over-screen .splash-header div {
-  padding-left: 1.5rem;
-}
-
-#game-over-screen .splash-header h1 {
-  font-size: 3rem;
-  font-weight: 900;
-  margin: 0;
-  line-height: 1em;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
-
-#game-over-screen .splash-header p {
-  font-size: 1.2rem;
-  margin: 0;
-}
 
 #game-over-screen #game-stats {
   .numbers {
@@ -56,6 +74,12 @@
       font-weight: 900;
       text-transform: uppercase;
       border-right: var(--border-thickness) solid var(--text-color);
+    }
+
+    @media (max-width: 100ch) {
+      p {
+        font-size: 0.75rem;
+      }
     }
 
     .resource-list {
@@ -109,6 +133,10 @@
         }
       }
     }
+
+    .no-achievements {
+      padding: 0 1rem;
+    }
   }
 
   h2 {
@@ -126,6 +154,11 @@
     .time {
       padding: 1rem;
       color: var(--dark-red);
+    }
+
+
+    @media (max-width: 100ch) {
+      font-size: 1rem;
     }
   }
 }

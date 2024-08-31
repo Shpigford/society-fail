@@ -9,8 +9,6 @@
   max-width: 800px;
   padding: 0 2rem;
 
-  @media (max-width: 100ch) {}
-
   .splash-screen {
     border: var(--border-thickness) solid var(--text-color);
   }
