@@ -76,6 +76,15 @@
       }
     }
 
+    #time-display.paused {
+      background-color: var(--dark-red);
+      color: var(--background-color);
+    }
+
+    #time-display.paused #day-night-indicator {
+      opacity: 0.5;
+    }
+
     @media (max-width: 100ch) {
       flex-direction: column;
       align-items: flex-start;

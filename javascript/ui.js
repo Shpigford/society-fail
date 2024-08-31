@@ -1,4 +1,5 @@
 import { gameState } from './state.js';
+import { gameInterval } from './core.js';
 import { UPGRADES, ACHIEVEMENTS } from './constants.js';
 import { addLogEntry } from './logging.js';
 import { buyUpgrade } from './upgrades.js';
@@ -29,7 +30,11 @@ function updateResourcesUI() {
 }
 
 function updateTimeUI() {
-  document.getElementById('time').textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
+  const timeDisplay = document.getElementById('time');
+  timeDisplay.textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
+  if (!gameInterval) {
+    timeDisplay.textContent += ' (Paused)';
+  }
   updateDayNightIndicator();
 }
 
@@ -287,7 +292,7 @@ function updateDayNightIndicator() {
   indicator.style.filter = `brightness(${brightness}%)`;
 }
 
-function updateLucideIcons() {
+export function updateLucideIcons() {
   lucide.createIcons();
 }
 

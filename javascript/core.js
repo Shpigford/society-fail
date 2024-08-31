@@ -1,11 +1,11 @@
 import { initializeGameState, gameState, setGameState } from './state.js';
-import { updateUI } from './ui.js';
+import { updateUI, updateLucideIcons } from './ui.js';
 import { checkForRandomEvent } from './events.js';
 import { generateLumberMillWood, growLumberMillTrees } from './resources.js';
 import { createParty, updatePartyStats } from './party.js';
 import { checkAchievements } from './achievements.js';
 
-let gameInterval;
+export let gameInterval;
 
 export function startGame(difficulty) {
   const gameState = initializeGameState(difficulty);
@@ -22,8 +22,8 @@ export function startGame(difficulty) {
   startGameLoop();
 }
 
-// Make startGame globally accessible
 window.startGame = startGame;
+window.pauseGame = pauseGame;
 
 export function startGameLoop() {
   if (gameInterval) {
@@ -36,7 +36,14 @@ export function pauseGame() {
   if (gameInterval) {
     clearInterval(gameInterval);
     gameInterval = null;
+    document.getElementById('pause-game').innerHTML = '<i data-lucide="play" class=""></i>';
+    document.getElementById('time-display').classList.add('paused');
+  } else {
+    startGameLoop();
+    document.getElementById('pause-game').innerHTML = '<i data-lucide="pause" class=""></i>';
+    document.getElementById('time-display').classList.remove('paused');
   }
+  updateLucideIcons();
 }
 
 function gameLoop() {
