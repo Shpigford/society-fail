@@ -1,4 +1,5 @@
-// Add this new function at the beginning of the file
+// NOTE: THIS FILE IS EXCLUSIVELY USED FOR REFERENCE ONLY. ALL FUNCTIONALITY BELOW SHOULD BE IMPLEMENTED IN OTHER FILES.
+
 function initializeGameState() {
     return {
         day: 1,
@@ -65,7 +66,6 @@ function initializeGameState() {
     };
 }
 
-// Initialize gameState at the beginning of the file
 let gameState = initializeGameState();
 
 const names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Penny", "Quinn", "Ryan", "Sophia", "Thomas", "Uma", "Victor", "Wendy", "Xavier", "Yara", "Zack", "Abby", "Ben", "Chloe", "Dylan", "Emma", "Finn", "Gina", "Hugo", "Isla", "Adam", "Bella", "Caleb", "Daisy", "Ethan", "Fiona", "George", "Hannah", "Isaac", "Julia", "Kyle", "Luna", "Max", "Nora", "Oscar", "Poppy", "Quentin", "Rose", "Sam", "Tessa"];
@@ -93,7 +93,6 @@ const ACHIEVEMENTS = [
     { id: 'jackOfAllTrades', name: 'Jack of All Trades', description: 'Unlock all upgrades', condition: () => Object.values(gameState.upgrades).every(upgrade => upgrade) },
 ];
 
-// Add this new object to define all upgrades
 const UPGRADES = {
     farming: {
         id: 'farming',
@@ -175,7 +174,6 @@ const CROP_TYPES = {
     bean: { growthTime: 72, waterNeeded: 15, yield: 60 }
 };
 
-// Add this constant for trait ranges
 const TRAIT_RANGES = {
     hungerRate: { min: 0.8, max: 1.2 },
     thirstRate: { min: 0.8, max: 1.2 },
@@ -184,13 +182,11 @@ const TRAIT_RANGES = {
     energyRecoveryRate: { min: 0.8, max: 1.2 }
 };
 
-// Add this helper function to generate a random trait value
 function getRandomTrait(traitName) {
     const range = TRAIT_RANGES[traitName];
     return Math.random() * (range.max - range.min) + range.min;
 }
 
-// Add this function at the beginning of the file
 function addLogEntry(message, type = 'info') {
     const logContent = document.getElementById('log-content');
     const logEntry = document.createElement('div');
@@ -219,7 +215,6 @@ function addLogEntry(message, type = 'info') {
     logContent.scrollTop = 0;
 }
 
-// Add these functions at the beginning of the file
 function saveGame() {
     // Create a save object
     const saveObject = {
@@ -229,7 +224,6 @@ function saveGame() {
     localStorage.setItem('societyFailSave', JSON.stringify(saveObject));
 }
 
-// Add this function near the top of the file, after the constants
 function checkSaveCompatibility(savedGame) {
     const requiredKeys = [
         'day', 'hour', 'party', 'food', 'water', 'wood', 'upgrades',
@@ -253,7 +247,6 @@ function checkSaveCompatibility(savedGame) {
     return true;
 }
 
-// Modify the loadGame function
 function loadGame() {
     const savedGame = localStorage.getItem('societyFailSave');
     if (savedGame) {
@@ -298,7 +291,6 @@ function loadGame() {
     }
 }
 
-// Modify the resetGame function
 function resetGame(fromGameOver = false) {
     if (!fromGameOver && !confirm("Are you sure you want to reset the game? All progress will be lost.")) {
         return;
@@ -339,7 +331,6 @@ function resetGame(fromGameOver = false) {
     gameState.debug = false;
 }
 
-// Add this new function
 function loadActivityLog() {
     const logContent = document.getElementById('log-content');
     logContent.innerHTML = ''; // Clear existing log entries
@@ -354,7 +345,6 @@ function loadActivityLog() {
     }
 }
 
-// Modify the startGame function
 function startGame(difficulty) {
     const partySize = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 3 : 5;
 
@@ -427,7 +417,6 @@ function startGame(difficulty) {
     gameState.totalWellWaterCollected = 0;
 }
 
-// Add this new function
 function startGameLoop() {
     if (window.gameInterval) {
         clearInterval(window.gameInterval);
@@ -435,7 +424,6 @@ function startGameLoop() {
     window.gameInterval = setInterval(gameLoop, 2000); // Change this to 2000 milliseconds (2 seconds)
 }
 
-// Add this new function
 function showGameOverScreen() {
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('game-ui').classList.add('hidden');
@@ -477,7 +465,6 @@ function showGameOverScreen() {
     lucide.createIcons();
 }
 
-// Modify the gameLoop function
 function gameLoop() {
     gameState.hour++;
     if (gameState.hour > 24) {
@@ -576,7 +563,6 @@ function gameLoop() {
     checkRescueMission();
 }
 
-// Add this constant near the top of the file
 const RANDOM_EVENTS = [
     { name: "Rainstorm", effect: (state) => { state.water += 50; return "A sudden rainstorm replenished your water supply! (+50 💧)"; }, type: "positive" },
     {
@@ -849,7 +835,6 @@ const WHISPERS = [
     "The weight of eternity presses down..."
 ];
 
-// Replace the existing checkForRandomEvent function with this one
 function checkForRandomEvent() {
     // If it's a new day, schedule today's event
     if (gameState.day > gameState.lastEventDay) {
@@ -1030,7 +1015,6 @@ function updateWatchtowerModule() {
     }
 }
 
-// Add this function to check and complete rescue missions
 function checkRescueMission() {
     if (gameState.rescueMission) {
         const currentTime = gameState.hour + (gameState.day - 1) * 24;
@@ -1121,7 +1105,6 @@ function updateAchievementsUI() {
     });
 }
 
-// Merge the two updateUI functions
 function updateUI() {
     document.getElementById('time').textContent = `Day ${gameState.day}, Hour ${gameState.hour}`;
     document.getElementById('food').textContent = Math.floor(gameState.food);
@@ -1320,7 +1303,6 @@ function updateUI() {
     lucide.createIcons();
 }
 
-// Add these new functions for hunting mechanics
 function startHunting() {
     if (gameState.huntingInterval) {
         clearInterval(gameState.huntingInterval);
@@ -1736,7 +1718,6 @@ function updateUpgradeButtons() {
     }
 }
 
-// Helper function to get resource emoji
 function getResourceEmoji(resource) {
     switch (resource) {
         case 'food': return '<i data-lucide="beef" class="icon-dark-yellow"></i>';
