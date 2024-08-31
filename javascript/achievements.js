@@ -3,8 +3,9 @@ import { ACHIEVEMENTS } from './constants.js';
 import { addLogEntry } from './logging.js';
 
 export function checkAchievements() {
+  const state = gameState;
   ACHIEVEMENTS.forEach(achievement => {
-    if (!gameState.achievements[achievement.id] && achievement.condition()) {
+    if (!state.achievements[achievement.id] && achievement.condition(state)) {
       unlockAchievement(achievement.id);
     }
   });
