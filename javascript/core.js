@@ -4,6 +4,7 @@ import { checkForRandomEvent } from './events.js';
 import { generateLumberMillWood, growLumberMillTrees } from './resources.js';
 import { createParty, updatePartyStats } from './party.js';
 import { checkAchievements } from './achievements.js';
+import { addLogEntry } from './logging.js';
 
 export let gameInterval;
 
@@ -24,6 +25,7 @@ export function startGame(difficulty) {
 
 window.startGame = startGame;
 window.pauseGame = pauseGame;
+window.resetGame = resetGame;
 
 export function startGameLoop() {
   if (gameInterval) {
@@ -96,9 +98,30 @@ export function resetGame(showConfirmation = true) {
     return;
   }
   localStorage.removeItem('societyFailSave');
-  setGameState(initializeGameState('medium')); // Default to medium difficulty
+  const newState = initializeGameState('medium'); // Default to medium difficulty
+  setGameState(newState);
+
+  // Clear the log content
+  const logContent = document.getElementById('log-content');
+  if (logContent) {
+    logContent.innerHTML = '';
+  }
+
+  // Hide game over and game UI, show start screen
+  document.getElementById('game-over-screen').classList.add('hidden');
+  document.getElementById('game-ui').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+
+  // Clear any existing game interval
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+
+  // Add a log entry about the game reset
+  addLogEntry("Game has been reset. All progress has been cleared.");
+
   updateUI();
-  startGameLoop();
 }
 
 export function setDebugMode(enabled) {
