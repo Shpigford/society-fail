@@ -1,0 +1,135 @@
+#farming-module {
+  .crop-picker {
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+
+    button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      border: 0;
+      padding: 0.5em;
+      font-size: 0.8em;
+
+      &:not(:first-child) {
+        border-left: var(--border-thickness) solid var(--text-color);
+      }
+
+      &.active {
+        background-color: var(--green);
+      }
+
+      .lucide:first-child {
+        width: 1.75em;
+        height: 1.75em;
+        margin-right: 0.5em;
+      }
+
+      .lucide:last-child {
+        width: 1em;
+        height: 1em;
+      }
+    }
+  }
+
+  .water-all-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+
+    button {
+      width: 100%;
+      margin: 0;
+      border: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0.5em;
+      align-items: center;
+      justify-content: space-between;
+
+      div {
+        display: flex;
+        align-items: center;
+        gap: 0.2em;
+
+        .lucide {
+          width: 1em;
+          height: 1em;
+        }
+      }
+
+      span {
+        font-size: 0.8em;
+      }
+    }
+  }
+
+  .icon-wheat {
+    color: var(--light-yellow);
+  }
+
+  .icon-carrot {
+    color: var(--dark-yellow);
+  }
+
+  .icon-bean {
+    color: var(--dark-red);
+  }
+
+  #farming-grid {
+    margin: 1rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border: var(--border-thickness) solid var(--text-color);
+
+    .plot-cell {
+      aspect-ratio: 1 / 1;
+      border-right: 1px solid white;
+      border-bottom: 1px solid white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .lucide {
+        width: 2em;
+        height: 2em;
+      }
+
+      &.empty-plot {
+        background-color: var(--background-color-alt);
+      }
+
+      &.empty-plot:hover,
+      &.ready-to-harvest:hover {
+        background-color: var(--green);
+        cursor: pointer;
+      }
+
+      &.growing {
+        &:hover {
+          background-color: transparent;
+          cursor: default;
+        }
+      }
+
+      &.ready-to-harvest {
+        .lucide {
+          color: var(--green);
+        }
+
+        &:hover {
+          .lucide {
+            color: var(--background-color);
+          }
+
+          background-color: var(--green);
+        }
+      }
+    }
+  }
+}

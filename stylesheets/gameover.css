@@ -1,4 +1,4 @@
-#game-over-screen {
+#game_over_screen {
   text-align: left;
   padding: 0 2rem;
   margin: 0 auto;
@@ -9,11 +9,11 @@
   width: 100%;
   max-width: 600px;
 
-  .splash-screen {
+  .splash_screen {
     border: var(--border-thickness) solid var(--text-color);
   }
 
-  .splash-header {
+  .splash_header {
     border-bottom: var(--border-thickness) solid var(--text-color);
     display: flex;
     align-items: center;
@@ -42,68 +42,41 @@
       font-size: 1.2rem;
       margin: 0;
     }
-
-    @media (max-width: 100ch) {
-      h1 {
-        font-size: 1.8rem;
-      }
-
-      p {
-        font-size: .9rem;
-      }
-    }
-
-    @media (max-width: 50ch) {
-      h1 {
-        font-size: 1.5rem;
-      }
-    }
   }
-}
 
-
-#game-over-screen #game-stats {
-  .numbers {
-    border-bottom: var(--border-thickness) solid var(--text-color);
-    display: flex;
-
-    p {
-      padding: 1rem;
-      margin: 0;
-      font-size: 1.2rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      border-right: var(--border-thickness) solid var(--text-color);
-    }
-
-    @media (max-width: 100ch) {
-      p {
-        font-size: 0.75rem;
-      }
-    }
-
-    .resource-list {
+  #game_stats {
+    .numbers {
+      border-bottom: var(--border-thickness) solid var(--text-color);
       display: flex;
-      gap: 1.5em;
-      font-size: 1.5em;
-      font-weight: 900;
-      margin-left: 1rem;
 
-      .resource {
+      p {
+        padding: 1rem;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        border-right: var(--border-thickness) solid var(--text-color);
+      }
+
+      .resource-list {
         display: flex;
-        align-items: center;
-        gap: 0.2em;
+        gap: 1.5em;
+        font-size: 1.5em;
+        font-weight: 900;
+        margin-left: 1rem;
+
+        .resource {
+          display: flex;
+          align-items: center;
+          gap: 0.2em;
+        }
       }
     }
-  }
 
-  .achievements {
-    .achievement-list {
-      display: grid;
-      grid-template-columns: 1fr;
-
-      @media (min-width: 768px) {
-        grid-template-columns: 1fr 1fr;
+    .achievements {
+      .achievement-list {
+        display: grid;
+        grid-template-columns: 1fr;
       }
 
       .achievement-item {
@@ -112,16 +85,6 @@
 
         &:nth-child(even) {
           border-left: var(--border-thickness) solid var(--text-color);
-        }
-
-        &:nth-child(1),
-        &:nth-child(2) {
-          border-top: none;
-        }
-
-        &:last-child,
-        &:nth-last-child(2):nth-child(odd) {
-          border-bottom: none;
         }
 
         .achievement-name {
@@ -134,51 +97,77 @@
       }
     }
 
-    .no-achievements {
-      padding: 0 1rem;
+    h2 {
+      display: flex;
+      text-transform: uppercase;
+      font-size: 1.5rem;
+      font-weight: 900;
+      border-bottom: var(--border-thickness) solid var(--text-color);
+
+      b {
+        padding: 1rem;
+        border-right: var(--border-thickness) solid var(--text-color);
+      }
+
+      .time {
+        padding: 1rem;
+        color: var(--dark-red);
+      }
     }
   }
 
-  h2 {
-    display: flex;
-    text-transform: uppercase;
-    font-size: 1.5rem;
+  button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
     font-weight: 900;
-    border-bottom: var(--border-thickness) solid var(--text-color);
+    text-transform: uppercase;
+    border: none;
+    margin: 0;
+    background-color: var(--dark-red);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-    b {
-      padding: 1rem;
-      border-right: var(--border-thickness) solid var(--text-color);
-    }
-
-    .time {
-      padding: 1rem;
-      color: var(--dark-red);
-    }
-
-
-    @media (max-width: 100ch) {
-      font-size: 1rem;
+    &:hover {
+      background-color: var(--text-color);
+      color: var(--background-color);
     }
   }
 }
 
-#game-over-screen button {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  border: none;
-  margin: 0;
-  background-color: var(--dark-red);
-  color: var(--text-color);
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-top: var(--border-thickness) solid var(--text-color);
+@media (min-width: 768px) {
+  #game_over_screen #game_stats .achievements .achievement-list {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-#game-over-screen button:hover {
-  background-color: var(--text-color);
-  color: var(--background-color);
+@media (max-width: 100ch) {
+  #game_over_screen {
+    .splash_header {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: .9rem;
+      }
+    }
+
+    #game_stats {
+      .numbers p {
+        font-size: 0.75rem;
+      }
+
+      h2 {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 50ch) {
+  #game_over_screen .splash_header h1 {
+    font-size: 1.5rem;
+  }
 }

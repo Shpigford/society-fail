@@ -1,0 +1,57 @@
+#achievements-module {
+  #achievements {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-top: var(--border-thickness) solid var(--text-color);
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+#achievements .achievement-item {
+  padding: 0.75rem;
+  border-bottom: var(--border-thickness) solid var(--text-color);
+  display: flex;
+  align-items: center;
+
+  &:nth-child(even) {
+    border-left: var(--border-thickness) solid var(--text-color);
+  }
+
+  &:last-child,
+  &:nth-last-child(2):nth-child(odd) {
+    border-bottom: none;
+  }
+}
+
+.achievement-item {
+  .achievement-icon {
+    margin-right: 0.5rem;
+  }
+
+  .achievement-info {
+    flex: 1;
+  }
+
+  .achievement-name {
+    font-weight: 900;
+  }
+
+  .achievement-description {
+    font-size: 0.8em;
+  }
+}
+
+.achievement-unlocked {
+  background-color: var(--green);
+}
+
+.achievement-locked {
+
+  .achievement-name,
+  .achievement-description {
+    opacity: 0.5;
+  }
+}

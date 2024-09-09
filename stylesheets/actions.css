@@ -1,0 +1,73 @@
+#actions-module {
+  display: flex;
+  gap: 0;
+  border: var(--border-thickness) solid var(--text-color);
+  border-top: 0;
+  margin-bottom: 1em;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  border: 0;
+  border-right: var(--border-thickness) solid var(--text-color);
+  padding: 1em;
+  margin: 0;
+  flex: 1;
+  transition: background-color 0.3s ease;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.action-button:disabled:hover {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.action-button:last-child {
+  border-right: 0;
+}
+
+.action-button .lucide {
+  width: 2em;
+  height: 2em;
+}
+
+.action-button span {
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.action-button:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}
+
+@media (max-width: 100ch) {
+  #actions-module {
+    flex-direction: column;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-button {
+    border-right: 0;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+  }
+
+  .action-button:last-child {
+    border-bottom: 0;
+  }
+}
