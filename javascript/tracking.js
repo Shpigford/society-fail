@@ -30,6 +30,7 @@ function handleClick(event) {
 /**
  * Tracks an event using Fathom Analytics.
  * @param {Object} data - The event data to track.
+ * @param {string} [data.eventName] - Custom event name (optional).
  */
 function trackEvent(data) {
   if (typeof window.fathom === 'undefined') {
@@ -37,10 +38,22 @@ function trackEvent(data) {
     return;
   }
 
-  const eventName = `${data.type}:${data.text || data.id || 'unknown'}`;
-  window.fathom.trackEvent(eventName);
+  try {
+    // Use custom event name if provided, otherwise generate one
+    const eventName = data.eventName || `${data.type}:${(data.text || '').replace(/\s+/g, ' ').trim() || data.id || 'unknown'}`;
 
-  console.log('Tracked event:', eventName, data);
+    // Track the event
+    window.fathom.trackEvent(eventName);
+
+    // Track additional data if available
+    if (data.additionalData) {
+      window.fathom.trackGoal('GOAL_ID', data.additionalData); // Replace 'GOAL_ID' with your actual Fathom goal ID
+    }
+
+    console.log('Tracked event:', eventName, data);
+  } catch (error) {
+    console.error('Error tracking event:', error);
+  }
 }
 
 /**
