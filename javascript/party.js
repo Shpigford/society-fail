@@ -1,150 +1,294 @@
-import { gameState } from './state.js';
-import { addLogEntry } from './logging.js';
-import { updateUI } from './ui.js';
-import { NAMES } from './constants.js';
+/*
+  Party Module
+  This module handles the creation and management of party members in the game.
+  It includes functions for initializing the party, updating party stats,
+  displaying party information, and performing actions for party members.
+*/
 
-export function createPartyMember(name) {
-  return {
-    name: name,
-    health: 100,
-    hunger: 0,
-    thirst: 0,
-    energy: 100,
-    traits: {
-      hungerRate: getRandomTrait('hungerRate'),
-      thirstRate: getRandomTrait('thirstRate'),
-      energyRate: getRandomTrait('energyRate'),
-      maxEnergy: Math.round(getRandomTrait('maxEnergy')),
-      energyRecoveryRate: getRandomTrait('energyRecoveryRate')
+import { gameState } from './settings.js';
+import { gameOver, updateGameState } from './game.js';
+import { addLogEntry } from './log.js';
+
+// Move this outside the class to be accessible by all instances
+const usedNames = new Set();
+
+/**
+ * Represents a party member in the game.
+ */
+export class PartyMember {
+  /**
+   * Creates a new party member.
+   */
+  constructor() {
+    this.name = this.generateName();
+    this.health = 100;
+    this.hunger = 100;
+    this.thirst = 100;
+    this.energy = 100;
+    this.traits = {
+      hungerRate: Math.random() * 0.5 + 0.5,
+      thirstRate: Math.random() * 0.75 + 0.75,
+      energyRate: Math.random() * 0.4 + 0.3,
+      maxEnergy: 100,
+      energyRecoveryRate: Math.random() * 1.5 + 1
+    };
+  }
+
+  generateName() {
+    return getUniqueRandomName(usedNames);
+  }
+
+  /**
+   * Updates the party member's stats based on their traits.
+   */
+  updateStats() {
+    if (this.isDead) {
+      this.hunger = 0;
+      this.thirst = 0;
+      this.energy = 0;
+      return;
     }
-  };
-}
 
-export function updatePartyStats() {
-  gameState.party.forEach((person, index) => {
-    person.hunger = Math.min(100, person.hunger + 1 * person.traits.hungerRate);
-    person.thirst = Math.min(100, person.thirst + 1.5 * person.traits.thirstRate);
+    // Decrease hunger, thirst, and energy
+    this.hunger = Math.max(0, this.hunger - this.traits.hungerRate);
+    this.thirst = Math.max(0, this.thirst - this.traits.thirstRate);
+    this.energy = Math.max(0, Math.min(this.traits.maxEnergy, this.energy - this.traits.energyRate));
 
-    if (gameState.busyUntil[index] === -1) {
-      // Person is resting
-      person.energy = Math.min(100, person.energy + 10 * person.traits.energyRecoveryRate);
+    // Calculate health loss
+    const healthLoss = (this.hunger <= 0 || this.thirst <= 0 || this.energy <= 0) ? 2 : 0;
+    this.health = Math.max(0, this.health - healthLoss);
 
-      // Check if rest is complete
-      if (person.energy === 100) {
-        gameState.busyUntil[index] = 0;
-      }
-    } else {
-      person.energy = Math.max(0, Math.min(100, person.energy - 0.5 * person.traits.energyRate));
-    }
-
-    if (person.hunger >= 100 || person.thirst >= 100 || person.energy <= 0) {
-      person.health = Math.max(0, person.health - 5);
-    }
-
-    // Ensure all values are capped at their maximum
-    person.health = Math.min(100, person.health);
-    person.hunger = Math.min(100, person.hunger);
-    person.thirst = Math.min(100, person.thirst);
-    person.energy = Math.min(100, person.energy);
+    // Additional health loss for each stat at 0
+    if (this.hunger <= 0) this.health = Math.max(0, this.health - 1);
+    if (this.thirst <= 0) this.health = Math.max(0, this.health - 1);
+    if (this.energy <= 0) this.health = Math.max(0, this.health - 1);
 
     // Check if person has died
-    if (person.health <= 0) {
-      addLogEntry(`${person.name} has died!`, 'error');
-      gameState.party.splice(index, 1);
-      delete gameState.busyUntil[index];
+    if (this.health <= 0) {
+      this.isDead = true;
+      this.health = 0;
+      this.hunger = 0;
+      this.thirst = 0;
+      this.energy = 0;
     }
 
-    if (gameState.upgrades.medicalTent) {
-      person.health = Math.min(100, person.health + 1); // Heal 1 health per hour
+    // Recover health if all stats are above 50%
+    if (this.hunger > 50 && this.thirst > 50 && this.energy > 50 && this.health < 100) {
+      this.health = Math.min(100, this.health + 0.1);
     }
-  });
+  }
 
-  // Update busy status
-  for (let index in gameState.busyUntil) {
-    if (gameState.busyUntil[index] > 0 && gameState.busyUntil[index] <= gameState.hour + (gameState.day - 1) * 24) {
-      gameState.busyUntil[index] = 0;
+  applyActionEffects(effects) {
+    this.hunger = Math.max(0, Math.min(100, this.hunger + effects.hunger));
+    this.thirst = Math.max(0, Math.min(100, this.thirst + effects.thirst));
+    this.energy = Math.max(0, Math.min(100, this.energy + effects.energy));
+
+    // Check if the action caused any critical conditions
+    if (this.hunger <= 0 || this.thirst <= 0 || this.energy <= 0) {
+      this.health -= 5; // Lose health if any stat reaches 0
+      if (this.health <= 0) {
+        this.isDead = true;
+        this.health = 0;
+        addLogEntry(`${this.name} has died due to exhaustion.`, 'error');
+      }
     }
   }
 }
 
+// Array of possible names for party members
+const possibleNames = [
+  "Alex", "Sam", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Avery",
+  "Quinn", "Skyler", "Charlie", "Frankie", "Finley", "Sage", "Remy",
+  "Addison", "Blake", "Cameron", "Dakota", "Emerson", "Finley",
+  "Harper", "Jaden", "Kennedy", "London", "Micah", "Noel",
+  "Oakley", "Parker", "Quinn", "Reese", "Sawyer", "Tatum", "Uriah",
+  "Val", "Winter", "Xen", "Yael", "Zion", "Arden", "Bellamy", "Corey",
+  "Drew", "Ellis", "Fallon", "Greer", "Hadley", "Ira", "Jules",
+  "Kai", "Lennon", "Marlowe", "Nova", "Onyx", "Phoenix", "River",
+  "Shiloh", "Tate", "Unity", "Vesper", "Wren", "Xander", "Yara", "Zephyr"
+];
+
+/**
+ * Gets a unique random name from the list of possible names.
+ * @param {Set} usedNames - Set of already used names.
+ * @returns {string} A unique random name.
+ */
+function getUniqueRandomName(usedNames) {
+  let name;
+  do {
+    name = possibleNames[Math.floor(Math.random() * possibleNames.length)];
+  } while (usedNames.has(name));
+  usedNames.add(name);
+  return name;
+}
+
+/**
+ * Initializes the party with three members if it doesn't exist.
+ */
+export function initializeParty() {
+  if (!gameState.party || gameState.party.length === 0) {
+    const usedNames = new Set();
+    gameState.party = Array.from({ length: 3 }, () => new PartyMember(getUniqueRandomName(usedNames)));
+    gameState.busyUntil = Array(3).fill(0);
+  }
+}
+
+/**
+ * Updates the stats of all party members.
+ */
+export function updatePartyStats() {
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
+  gameState.party.forEach((member, index) => {
+    if (member.isDead) return;
+
+    const isResting = gameState.busyUntil[index] === -1;
+    const isBusy = gameState.busyUntil[index] > currentTime;
+
+    if (!isResting && !isBusy) {
+      member.updateStats();
+    } else if (isResting) {
+      // Handle resting logic
+      member.energy = Math.min(member.traits.maxEnergy, member.energy + member.traits.energyRecoveryRate);
+
+      // Hunger and thirst still decrease, but at a slower rate while resting
+      member.hunger = Math.max(0, member.hunger - member.traits.hungerRate * 0.5);
+      member.thirst = Math.max(0, member.thirst - member.traits.thirstRate * 0.5);
+
+      // Slight health recovery if hunger and thirst are above 50%
+      if (member.hunger > 50 && member.thirst > 50 && member.health < 100) {
+        member.health = Math.min(100, member.health + 0.1);
+      }
+
+      if (member.energy >= member.traits.maxEnergy) {
+        gameState.busyUntil[index] = currentTime;
+        member.energy = member.traits.maxEnergy;
+      }
+    }
+    // If busy, do nothing (stats remain unchanged)
+  });
+
+  updatePartyDisplay();
+  checkPartyStatus();
+}
+
+/**
+ * Gets the appropriate CSS class for a progress bar based on its value.
+ * @param {number} value - The current value of the stat.
+ * @returns {string} The CSS class for the progress bar.
+ */
+function getProgressBarClass(value) {
+  if (value > 66) return 'high';
+  if (value > 33) return 'medium';
+  return 'low';
+}
+
+/**
+ * Updates the party display in the UI.
+ */
+export function updatePartyDisplay() {
+  const partyContainer = document.getElementById('party-display');
+  partyContainer.innerHTML = '';
+
+  gameState.party.forEach((person, index) => {
+    const personElement = document.createElement('div');
+    personElement.className = 'person';
+    const currentTime = gameState.hour + (gameState.day - 1) * 24;
+    const isBusy = gameState.busyUntil[index] > currentTime;
+    const isResting = gameState.busyUntil[index] === -1;
+    const busyTimeLeft = isBusy ? gameState.busyUntil[index] - currentTime : 0;
+
+    personElement.innerHTML = `
+      <div class="person-header">
+        <h3><i data-lucide="person-standing" class="icon-gutter-grey"></i> ${person.name}</h3>
+        <div class="busy-label ${person.isDead ? 'dead' : (isBusy ? 'busy' : (isResting ? 'resting' : 'idle'))}">${person.isDead ? 'DEAD' : (isBusy ? `BUSY [${busyTimeLeft}h]` : (isResting ? 'RESTING' : 'IDLE'))}</div>
+      </div>
+      <div class="stats-container">
+        <table class="stats">
+          ${['health', 'hunger', 'thirst', 'energy'].map(stat => `
+            <tr>
+              <td>${stat.charAt(0).toUpperCase() + stat.slice(1)}</td>
+              <td><div class="progress-bar"><div class="progress ${stat}-bar ${getProgressBarClass(person[stat])}" style="width: ${person[stat]}%;"></div></div></td>
+              <td>${Math.floor(person[stat])}%</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+      <div class="person-actions">
+        <button data-action="eat" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.food < 5) ? 'disabled' : ''}>Eat <span>[5 <i data-lucide="beef" class="icon dark-yellow"></i>]</span></button>
+        <button data-action="drink" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.water < 3) ? 'disabled' : ''}> Drink <span>[3 <i data-lucide="droplet" class="icon blue"></i>]</span></button>
+        <button data-action="sleep" data-person="${index}" ${(person.isDead || isBusy || isResting) ? 'disabled' : ''}><i data-lucide="bed-single" class="icon magenta"></i> Rest</button>
+      </div>
+    `;
+    partyContainer.appendChild(personElement);
+  });
+
+  // Refresh Lucide icons
+  if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+    lucide.createIcons();
+  }
+}
+
+/**
+ * Performs an action for a party member.
+ * @param {number} personIndex - The index of the party member.
+ * @param {string} action - The action to perform ('eat', 'drink', or 'sleep').
+ */
 export function performAction(personIndex, action) {
   const person = gameState.party[personIndex];
-  if (isPersonBusy(personIndex)) {
-    addLogEntry(`${person.name} is busy and can't ${action} right now!`, 'warning');
-  } else if (person.energy <= 0 && !['eat', 'drink', 'sleep'].includes(action)) {
-    addLogEntry(`${person.name} is too exhausted to ${action}!`, 'warning');
-  } else {
-    switch (action) {
-      case 'eat':
-        eat(personIndex);
-        break;
-      case 'drink':
-        drink(personIndex);
-        break;
-      case 'sleep':
-        sleep(personIndex);
-        break;
-      default:
-        console.error(`Unknown action: ${action}`);
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
+  const isBusy = gameState.busyUntil[personIndex] > currentTime;
+  const isResting = gameState.busyUntil[personIndex] === -1;
+
+  if (isBusy || isResting) {
+    console.log("This person is busy or resting and cannot perform actions.");
+    return;
+  }
+
+  const actions = {
+    eat: () => {
+      if (gameState.food >= 5) {
+        person.hunger = Math.min(100, person.hunger + 25);
+        gameState.food -= 5;
+        gameState.busyUntil[personIndex] = currentTime + 1;
+        addLogEntry(`${person.name} ate some food.`, 'info');
+      }
+    },
+    drink: () => {
+      if (gameState.water >= 3) {
+        person.thirst = Math.min(100, person.thirst + 25);
+        gameState.water -= 3;
+        gameState.busyUntil[personIndex] = currentTime + 1;
+        addLogEntry(`${person.name} drank some water.`, 'info');
+      }
+    },
+    sleep: () => {
+      gameState.busyUntil[personIndex] = -1;
+      addLogEntry(`${person.name} started resting.`, 'info');
     }
-    updateUI();
-  }
-}
-
-function eat(personIndex) {
-  const person = gameState.party[personIndex];
-  if (gameState.food >= 10) {
-    gameState.food -= 10;
-    person.hunger = Math.max(0, person.hunger - 30);
-    person.health = Math.min(100, person.health + 5);
-    person.energy = Math.min(100, person.energy + 20);
-    addLogEntry(`${person.name} ate food, reducing hunger by 30 and recovering 5 health and 20 energy.`, 'success');
-  } else {
-    addLogEntry(`${person.name} tried to eat, but there wasn't enough food.`, 'error');
-  }
-}
-
-function drink(personIndex) {
-  const person = gameState.party[personIndex];
-  if (gameState.water >= 5) {
-    gameState.water -= 5;
-    person.thirst = Math.max(0, person.thirst - 25);
-    person.energy = Math.min(100, person.energy + 10);
-    addLogEntry(`${person.name} drank water, reducing thirst by 25 and recovering 10 energy.`);
-  } else {
-    addLogEntry(`${person.name} tried to drink, but there wasn't enough water.`, 'error');
-  }
-}
-
-function sleep(personIndex) {
-  addLogEntry(`${gameState.party[personIndex].name} went to sleep.`);
-  gameState.busyUntil[personIndex] = -1; // Set to -1 to indicate sleeping
-}
-
-function isPersonBusy(personIndex) {
-  return gameState.busyUntil[personIndex] > gameState.hour + (gameState.day - 1) * 24 || gameState.busyUntil[personIndex] === -1;
-}
-
-function getRandomTrait(traitName) {
-  const traitRanges = {
-    hungerRate: { min: 0.8, max: 1.2 },
-    thirstRate: { min: 0.8, max: 1.2 },
-    energyRate: { min: 0.8, max: 1.2 },
-    maxEnergy: { min: 90, max: 110 },
-    energyRecoveryRate: { min: 0.8, max: 1.2 }
   };
 
-  const range = traitRanges[traitName];
-  return Math.random() * (range.max - range.min) + range.min;
+  if (action in actions) {
+    actions[action]();
+    updatePartyDisplay();
+    updateGameState();
+  } else {
+    console.log(`Unknown action: ${action}`);
+  }
 }
 
-
-export function createParty(size) {
-  let availableNames = [...NAMES];
-  return Array(size).fill().map(() => {
-    const randomIndex = Math.floor(Math.random() * availableNames.length);
-    const name = availableNames[randomIndex];
-    availableNames.splice(randomIndex, 1);
-    return createPartyMember(name);
+/**
+ * Checks the status of all party members and triggers game over if all are dead.
+ */
+export function checkPartyStatus() {
+  const allDead = gameState.party.every(member => {
+    if (member.health <= 0) {
+      member.isDead = true;
+      return true;
+    }
+    return false;
   });
+
+  if (allDead) {
+    gameOver();
+  }
 }

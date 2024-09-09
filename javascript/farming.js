@@ -1,74 +1,73 @@
-import { gameState, updateGameState } from './state.js';
-import { addLogEntry } from './logging.js';
-import { CROP_TYPES } from './constants.js';
-import { consumeResource, addResource } from './resources.js';
-import { checkAchievements } from './achievements.js';
+import { gameState } from './settings.js';
+import { updateGameState } from './game.js';
+import { addLogEntry } from './log.js';
+import { createLucideIcons } from './utils.js';
 
-export function initializeFarmingGrid() {
-  gameState.farming.grid = Array(5).fill().map(() => Array(5).fill(null));
+/**
+ * Defines the types of crops and their properties.
+ * @typedef {Object} CropType
+ * @property {number} growthTime - Time in hours for the crop to grow
+ * @property {number} waterNeeded - Amount of water needed to plant the crop
+ * @property {number} yield - Amount of food yielded when harvested
+ */
+
+/**
+ * @type {Object.<string, CropType>}
+ */
+const CROP_TYPES = {
+  wheat: { growthTime: 24, waterNeeded: 5, yield: 20 },
+  carrot: { growthTime: 48, waterNeeded: 10, yield: 50 },
+  bean: { growthTime: 72, waterNeeded: 15, yield: 80 }
+};
+
+/**
+ * Initializes the farming module in the game state.
+ */
+export function initializeFarming() {
+  if (!gameState.farming) {
+    gameState.farming = {
+      grid: Array(5).fill().map(() => Array(5).fill(null)),
+      maxCrops: 25,
+      crops: CROP_TYPES,
+      plantingCrop: 'wheat'
+    };
+  }
+  updateFarmingUI();
 }
 
-export function plantCrop(row, col, cropType) {
+/**
+ * Plants a crop in the specified plot.
+ * @param {number} row - The row index of the plot
+ * @param {number} col - The column index of the plot
+ */
+export function plantCrop(row, col) {
   if (gameState.farming.grid[row][col] !== null) {
     addLogEntry("This plot is already occupied!", 'warning');
     return;
   }
 
+  const cropType = gameState.farming.plantingCrop;
   const waterCost = CROP_TYPES[cropType].waterNeeded;
+
   if (gameState.water >= waterCost) {
-    consumeResource('water', waterCost);
+    gameState.water -= waterCost;
     gameState.farming.grid[row][col] = {
       type: cropType,
-      plantedAt: gameState.hour + (gameState.day - 1) * 24,
-      watered: true
+      plantedAt: gameState.hour + (gameState.day - 1) * 24
     };
     addLogEntry(`Planted ${cropType} at row ${row + 1}, column ${col + 1}.`);
+    updateFarmingUI();
+    updateGameState();
   } else {
     addLogEntry("Not enough water to plant this crop!", 'error');
   }
 }
 
-export function waterCrop(row, col) {
-  const plot = gameState.farming.grid[row][col];
-  if (plot && !plot.watered && gameState.water >= 5) {
-    consumeResource('water', 5);
-    plot.watered = true;
-    addLogEntry(`Watered crop at row ${row + 1}, column ${col + 1}.`);
-  } else if (!plot) {
-    addLogEntry("No crop to water here!", 'warning');
-  } else if (plot.watered) {
-    addLogEntry("This crop is already watered!", 'info');
-  } else {
-    addLogEntry("Not enough water to water this crop!", 'error');
-  }
-}
-
-export function waterAllCrops() {
-  let waterNeeded = 0;
-  gameState.farming.grid.forEach(row => {
-    row.forEach(plot => {
-      if (plot && !plot.watered) waterNeeded += 5;
-    });
-  });
-
-  if (waterNeeded === 0) {
-    addLogEntry("All crops are already watered!", 'info');
-    return;
-  }
-
-  if (gameState.water >= waterNeeded) {
-    consumeResource('water', waterNeeded);
-    gameState.farming.grid.forEach(row => {
-      row.forEach(plot => {
-        if (plot) plot.watered = true;
-      });
-    });
-    addLogEntry(`Watered all crops, using ${waterNeeded} water.`, 'success');
-  } else {
-    addLogEntry(`Not enough water to water all crops! Need ${waterNeeded} water, but only have ${Math.floor(gameState.water)}.`, 'error');
-  }
-}
-
+/**
+ * Harvests a crop from the specified plot.
+ * @param {number} row - The row index of the plot
+ * @param {number} col - The column index of the plot
+ */
 export function harvestCrop(row, col) {
   const plot = gameState.farming.grid[row][col];
   if (!plot) {
@@ -77,28 +76,117 @@ export function harvestCrop(row, col) {
   }
 
   const now = gameState.hour + (gameState.day - 1) * 24;
-  if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime && plot.watered) {
+  if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime) {
     const cropYield = CROP_TYPES[plot.type].yield;
-    addResource('food', cropYield);
+    gameState.food += cropYield;
     gameState.farming.grid[row][col] = null;
-    gameState.totalCropsHarvested++;
     addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${cropYield} food.`);
-    checkAchievements();
+    updateFarmingUI();
+    updateGameState();
   } else {
     addLogEntry("This crop is not ready for harvest yet!", 'warning');
   }
 }
 
+/**
+ * Sets the current crop type for planting.
+ * @param {string} cropType - The type of crop to set for planting
+ */
 export function setPlantingCrop(cropType) {
-  updateGameState({ plantingCrop: cropType });
+  gameState.farming.plantingCrop = cropType;
+  updateFarmingUI();
 }
 
-export function updateFarmingGrid() {
-  gameState.farming.grid.forEach((row, rowIndex) => {
-    row.forEach((crop, colIndex) => {
-      if (crop && !crop.watered) {
-        crop.plantedAt++; // Delay growth if not watered
-      }
-    });
-  });
+/**
+ * Updates the farming UI.
+ */
+function updateFarmingUI() {
+  const farmingModule = document.getElementById('farming-module');
+  if (!farmingModule) return;
+
+  farmingModule.innerHTML = `
+    <h2><i data-lucide="sprout" class="icon-dark"></i> Farming</h2>
+    <div class="crop-picker">
+      ${Object.keys(CROP_TYPES).map(cropType => createCropButton(cropType)).join('')}
+    </div>
+    <div id="farming-grid">
+      ${gameState.farming.grid.map((row, rowIndex) =>
+    row.map((plot, colIndex) => createPlotElement(plot, rowIndex, colIndex)).join('')
+  ).join('')}
+    </div>
+  `;
+
+  createLucideIcons();
 }
+
+/**
+ * Creates a button element for a crop type.
+ * @param {string} cropType - The type of crop
+ * @returns {string} HTML string for the crop button
+ */
+function createCropButton(cropType) {
+  return `
+    <button onclick="window.setPlantingCrop('${cropType}')" class="${gameState.farming.plantingCrop === cropType ? 'active' : ''}">
+      <i data-lucide="${getCropIcon(cropType)}" class="icon ${getCropColor(cropType)}"></i>
+      ${cropType} [${CROP_TYPES[cropType].waterNeeded} <i data-lucide="droplet" class="icon blue"></i>]
+    </button>
+  `;
+}
+
+/**
+ * Creates an HTML element for a plot.
+ * @param {Object|null} plot - The plot object or null if empty
+ * @param {number} row - The row index of the plot
+ * @param {number} col - The column index of the plot
+ * @returns {string} HTML string for the plot element
+ */
+function createPlotElement(plot, row, col) {
+  if (!plot) {
+    return `<div class="plot-cell empty-plot" onclick="window.plantCrop(${row}, ${col})"></div>`;
+  }
+
+  const now = gameState.hour + (gameState.day - 1) * 24;
+  const growthTime = CROP_TYPES[plot.type].growthTime;
+  const growthProgress = (now - plot.plantedAt) / growthTime;
+  const isReady = growthProgress >= 1;
+
+  return `
+    <div class="plot-cell ${isReady ? 'ready-to-harvest' : ''}"
+         onclick="${isReady ? `window.harvestCrop(${row}, ${col})` : ''}">
+      <i data-lucide="${getCropIcon(plot.type)}" class="icon ${getCropColor(plot.type)}"></i>
+    </div>
+  `;
+}
+
+/**
+ * Gets the icon name for a crop type.
+ * @param {string} cropType - The type of crop
+ * @returns {string} The icon name
+ */
+function getCropIcon(cropType) {
+  const icons = {
+    wheat: 'wheat',
+    carrot: 'carrot',
+    bean: 'bean'
+  };
+  return icons[cropType] || 'sprout';
+}
+
+/**
+ * Gets the color class for a crop type.
+ * @param {string} cropType - The type of crop
+ * @returns {string} The color class
+ */
+function getCropColor(cropType) {
+  const colors = {
+    wheat: 'light-yellow',
+    carrot: 'dark-yellow',
+    bean: 'dark-red'
+  };
+  return colors[cropType] || 'green';
+}
+
+// Expose functions to the global scope for onclick events
+window.setPlantingCrop = setPlantingCrop;
+window.plantCrop = plantCrop;
+window.harvestCrop = harvestCrop;

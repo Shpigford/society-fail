@@ -1,38 +1,40 @@
-// Random number generation
-export function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+/**
+ * Creates Lucide icons if the library is available.
+ * This function checks for the presence of the Lucide library and its createIcons method.
+ * If available, it creates the icons. Otherwise, it logs a warning.
+ */
+export function createLucideIcons() {
+  // Check if Lucide library and createIcons function are available
+  if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+    // Create icons using Lucide
+    lucide.createIcons();
+  } else {
+    // Log a warning if Lucide is not available
+    console.warn('Lucide library not loaded or createIcons function not available');
+  }
 }
 
-export function getRandomFloat(min, max) {
-  return Math.random() * (max - min) + min;
-}
+import { saveCollapseState, loadCollapseState } from './storage.js';
 
-// Time conversion functions
-export function hoursToTime(hours) {
-  const days = Math.floor(hours / 24);
-  const remainingHours = hours % 24;
-  return { days, hours: remainingHours };
-}
+export function initializeCollapsibles() {
+  const collapsibles = document.querySelectorAll('.collapsible');
 
-export function timeToHours(days, hours) {
-  return days * 24 + hours;
-}
+  collapsibles.forEach(collapsible => {
+    const moduleId = collapsible.closest('[id]').id;
+    const isCollapsed = loadCollapseState(moduleId);
 
-export function formatTime(days, hours) {
-  return `Day ${days}, Hour ${hours}`;
-}
+    if (isCollapsed) {
+      collapsible.classList.add('collapsed');
+      collapsible.nextElementSibling.classList.add('collapsed');
+    }
 
-// Other utility functions
-export function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
+    collapsible.addEventListener('click', () => {
+      collapsible.classList.toggle('collapsed');
+      const content = collapsible.nextElementSibling;
+      content.classList.toggle('collapsed');
 
-export function percentageToDecimal(percentage) {
-  return percentage / 100;
-}
-
-export function decimalToPercentage(decimal) {
-  return decimal * 100;
+      const newCollapseState = collapsible.classList.contains('collapsed');
+      saveCollapseState(moduleId, newCollapseState);
+    });
+  });
 }

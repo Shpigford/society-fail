@@ -1,0 +1,116 @@
+#upgrades-module {
+  border: var(--border-thickness) solid var(--text-color);
+
+  h2 {
+    background-color: white;
+    color: black;
+    text-transform: uppercase;
+    font-weight: 900;
+    padding: 0.2em 0.5em;
+    font-size: 0.8em;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    cursor: pointer;
+
+    .lucide {
+      width: 1.2em;
+      height: 1.2em;
+    }
+  }
+
+  .module-content {
+    max-height: 400px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease-out;
+
+    &.collapsed {
+      max-height: 0;
+      overflow: hidden;
+    }
+  }
+}
+
+#upgrades {
+  .upgrade-button {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    text-align: left;
+    border-bottom: var(--border-thickness) solid var(--text-color);
+    padding: 0.5em;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.cannot-afford:hover {
+      cursor: not-allowed;
+      color: var(--text-color);
+      background-color: transparent;
+    }
+
+    &.cannot-afford .upgrade-name .name,
+    &.cannot-afford .upgrade-effect {
+      opacity: 0.7;
+    }
+
+    &.purchased {
+      cursor: default;
+      background-color: var(--green);
+
+      &:hover {
+        color: var(--text-color);
+      }
+    }
+
+    &.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: transparent;
+        color: var(--text-color);
+      }
+    }
+
+    .purchased-label {
+      font-size: 0.8em;
+      font-weight: bold;
+      color: var(--success-color);
+      margin-top: 0.2em;
+    }
+  }
+
+  .upgrade-name {
+    text-transform: uppercase;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.2em;
+    justify-content: space-between;
+
+    .name {
+      display: flex;
+      align-items: center;
+      gap: 0.2em;
+    }
+
+    .cost {
+      display: flex;
+      align-items: center;
+      gap: 0.2em;
+      font-size: 0.8em;
+
+      .lucide {
+        width: 1em;
+        height: 1em;
+      }
+    }
+  }
+
+  .upgrade-effect {
+    font-size: 0.8em;
+  }
+}

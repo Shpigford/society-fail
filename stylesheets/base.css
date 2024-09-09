@@ -1,19 +1,7 @@
-:root {
-  --border-thickness: 3px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
-  font-family: var(--font-family);
-  font-size: 16px;
-  line-height: var(--line-height);
   color: var(--text-color);
   background-color: var(--background-color);
   margin: 0;
-  padding: 0;
 }
 
 /* Links */

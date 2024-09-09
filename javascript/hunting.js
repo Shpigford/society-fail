@@ -1,87 +1,127 @@
-import { gameState, updateGameState } from './state.js';
-import { addResource } from './resources.js';
-import { addLogEntry } from './logging.js';
-import { checkAchievements } from './achievements.js';
+import { gameState } from './settings.js';
+import { updateGameState } from './game.js';
+import { addLogEntry } from './log.js';
+import { createLucideIcons } from './utils.js';
 
-export function startHunting() {
-  if (gameState.huntingInterval) {
-    clearInterval(gameState.huntingInterval);
+/**
+ * Defines the types of animals and their properties.
+ * @typedef {Object} AnimalType
+ * @property {number} foodYield - Amount of food yielded when hunted
+ * @property {string} icon - Lucide icon name for the animal
+ */
+
+/**
+ * @type {Object.<string, AnimalType>}
+ */
+const ANIMAL_TYPES = {
+  rabbit: { foodYield: 5, icon: 'rabbit' },
+  bird: { foodYield: 3, icon: 'bird' },
+  rat: { foodYield: 2, icon: 'rat' },
+  snail: { foodYield: 1, icon: 'snail' },
+  squirrel: { foodYield: 4, icon: 'squirrel' },
+  turtle: { foodYield: 6, icon: 'turtle' }
+};
+
+/**
+ * Initializes the hunting module.
+ */
+export function initializeHunting() {
+  if (!gameState.hunting) {
+    gameState.hunting = { animals: [] };
   }
-  if (gameState.moveInterval) {
-    clearInterval(gameState.moveInterval);
-  }
+  resetHuntingArea();
+  addLogEntry('Hunting Lodge is now operational.');
+}
 
-  gameState.hunting = {
-    active: true,
-    animals: generateAnimals()
-  };
-
-  gameState.huntingInterval = setInterval(updateHunting, 1000);
+/**
+ * Resets the hunting area with new animals and movement interval.
+ */
+function resetHuntingArea() {
+  gameState.hunting.animals = generateAnimals();
+  clearInterval(gameState.moveInterval);
   gameState.moveInterval = setInterval(moveAnimals, 500);
-
-  addLogEntry('Hunting started.');
+  updateHuntingUI();
 }
 
-export function stopHunting() {
-  if (gameState.huntingInterval) {
-    clearInterval(gameState.huntingInterval);
-  }
-  if (gameState.moveInterval) {
-    clearInterval(gameState.moveInterval);
-  }
-
-  gameState.hunting.active = false;
-  gameState.huntingInterval = null;
-  gameState.moveInterval = null;
-
-  addLogEntry('Hunting stopped.');
-}
-
+/**
+ * Generates a random set of animals.
+ * @returns {Array} Array of animal objects.
+ */
 function generateAnimals() {
-  const animals = [];
   const numAnimals = Math.floor(Math.random() * 3) + 1;
-  for (let i = 0; i < numAnimals; i++) {
-    animals.push({
-      type: Math.random() < 0.7 ? 'rabbit' : 'deer',
-      x: Math.random() * 100,
-      y: Math.random() * 100
-    });
-  }
-  return animals;
+  const animalTypes = Object.keys(ANIMAL_TYPES);
+  return Array.from({ length: numAnimals }, () => ({
+    type: animalTypes[Math.floor(Math.random() * animalTypes.length)],
+    x: Math.random() * 100,
+    y: Math.random() * 100
+  }));
 }
 
-function updateHunting() {
-  if (!gameState.hunting.active) return;
-
-  gameState.hunting.animals.forEach((animal, index) => {
-    if (Math.random() < 0.1) {
-      const foodGained = animal.type === 'rabbit' ? 5 : 20;
-      addResource('food', foodGained);
-      gameState.totalAnimalsHunted++;
-      addLogEntry(`Caught a ${animal.type}! Gained ${foodGained} food.`);
-      gameState.hunting.animals.splice(index, 1);
-      checkAchievements();
-    }
-  });
-
-  if (gameState.hunting.animals.length === 0) {
-    gameState.hunting.animals = generateAnimals();
-  }
-}
-
+/**
+ * Moves the animals randomly within the hunting area.
+ */
 function moveAnimals() {
-  if (!gameState.hunting.active) return;
-
   gameState.hunting.animals = gameState.hunting.animals.map(animal => ({
     ...animal,
     x: Math.max(0, Math.min(100, animal.x + (Math.random() - 0.5) * 10)),
     y: Math.max(0, Math.min(100, animal.y + (Math.random() - 0.5) * 10))
   }));
+  updateHuntingUI();
 }
 
-export function getHuntingStatus() {
-  return {
-    active: gameState.hunting.active,
-    animals: gameState.hunting.animals
-  };
+/**
+ * Updates the hunting UI.
+ */
+function updateHuntingUI() {
+  const huntingModule = document.getElementById('hunting-module');
+  if (!huntingModule) return;
+
+  huntingModule.classList.toggle('hidden', !gameState.upgrades.huntingLodge);
+
+  if (gameState.upgrades.huntingLodge) {
+    huntingModule.innerHTML = `
+      <h2><i data-lucide="target" class="icon-dark"></i> Hunting Lodge</h2>
+      <div id="hunting-area">
+        ${gameState.hunting.animals.map(renderAnimal).join('')}
+      </div>
+    `;
+    createLucideIcons();
+  }
 }
+
+/**
+ * Renders an individual animal for the hunting UI.
+ * @param {Object} animal - The animal object to render
+ * @returns {string} HTML string for the animal
+ */
+function renderAnimal(animal) {
+  return `
+    <div class="wildlife" style="left: ${animal.x}%; top: ${animal.y}%;" onclick="window.shootAnimal(${animal.x}, ${animal.y})">
+      <i data-lucide="${ANIMAL_TYPES[animal.type].icon}" class="icon-dark"></i>
+    </div>
+  `;
+}
+
+/**
+ * Shoots an animal at the given coordinates.
+ * @param {number} x - The x-coordinate of the animal.
+ * @param {number} y - The y-coordinate of the animal.
+ */
+export function shootAnimal(x, y) {
+  const animalIndex = gameState.hunting.animals.findIndex(animal =>
+    Math.abs(animal.x - x) < 5 && Math.abs(animal.y - y) < 5
+  );
+
+  if (animalIndex !== -1) {
+    const animal = gameState.hunting.animals[animalIndex];
+    const foodGained = ANIMAL_TYPES[animal.type].foodYield;
+    gameState.food += foodGained;
+    addLogEntry(`Shot a ${animal.type}! Gained ${foodGained} food.`);
+    gameState.hunting.animals.splice(animalIndex, 1);
+    updateGameState();
+    updateHuntingUI();
+  }
+}
+
+// Expose function to the global scope for onclick events
+window.shootAnimal = shootAnimal;

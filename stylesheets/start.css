@@ -1,4 +1,4 @@
-#start-screen {
+#game_start_screen {
   text-align: left;
   margin: 0 auto;
   position: absolute;
@@ -6,29 +6,23 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
-  max-width: 800px;
-  padding: 0 2rem;
+  max-width: 700px;
 
-  .splash-screen {
+  .splash_screen {
     border: var(--border-thickness) solid var(--text-color);
   }
 
-  footer {
-    text-align: center;
-    font-size: .9rem;
-    margin-top: 2rem;
-    color: var(--text-color-alt);
-  }
-
-  .splash-header {
+  header {
     border-bottom: var(--border-thickness) solid var(--text-color);
     display: flex;
     align-items: center;
     font-size: 3rem;
 
-    .icon-large {
-      padding: 1rem;
-      font-size: 2em;
+    .icon {
+      padding: 1.5rem;
+      width: 4rem;
+      height: 4rem;
+      color: var(--dark-red);
       border-right: var(--border-thickness) solid var(--text-color);
     }
 
@@ -45,88 +39,85 @@
       text-transform: uppercase;
     }
 
-    p {
+    h2 {
       font-size: 1.2rem;
       margin: 0;
     }
+  }
 
-    @media (max-width: 100ch) {
-      h1 {
-        font-size: 1.9rem;
+  /* Difficulty selection */
+  section {
+    text-align: center;
+    display: flex;
+
+    button {
+      flex: 1;
+      border: 0;
+      margin: 0;
+      padding: 1rem;
+      border-right: var(--border-thickness) solid var(--text-color);
+
+      &:last-child {
+        border-right: 0;
       }
 
-      p {
-        font-size: .9rem;
+      b {
+        font-weight: 900;
+        text-transform: uppercase;
+        font-size: 1.2rem;
       }
-    }
 
-    @media (max-width: 50ch) {
-      h1 {
-        font-size: 1.5rem;
+      div {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+
+        span {
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+        }
+
+        .icon {
+          width: 1rem;
+          height: 1rem;
+        }
       }
     }
   }
 
-  #difficulty-selection {
+  footer {
+    border-top: var(--border-thickness) solid var(--text-color);
     text-align: center;
+    padding: 0 1rem;
+    font-size: 0.8rem;
+  }
 
-    h2 {
-      padding: 1.5rem 0;
-      border-bottom: var(--border-thickness) solid var(--text-color);
-    }
+  @media (max-width: 100ch) {
+    max-width: 90%;
 
-    .difficulty-options {
-      display: flex;
-
-      button {
-        flex: 1;
-        border: 0;
-        margin: 0;
-        padding: 1rem;
-        border-right: var(--border-thickness) solid var(--text-color);
-        width: calc(100% / 3);
-
-        &:last-child {
-          border-right: none;
-        }
-
-        b {
-          font-weight: 900;
-          text-transform: uppercase;
-          font-size: 1.2rem;
-        }
-
-        div {
-          margin-top: 0.5rem;
-          display: flex;
-          gap: 1rem;
-          align-items: center;
-          justify-content: center;
-
-          span {
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-          }
-
-          .lucide {
-            width: 1em;
-            height: 1em;
-          }
-        }
+    header {
+      h1 {
+        font-size: 1.75rem;
       }
 
-      @media (max-width: 100ch) {
-        flex-direction: column;
+      h2 {
+        font-size: 1rem;
+      }
+    }
 
-        button {
-          border-right: none;
-          border-bottom: var(--border-thickness) solid var(--text-color);
-          width: 100%;
+    section {
+      flex-direction: column;
 
-          &:last-child {
-            border-bottom: none;
-          }
+      button {
+        border-right: none;
+        border-bottom: var(--border-thickness) solid var(--text-color);
+        width: 100%;
+
+        &:last-child {
+          border-bottom: none;
         }
       }
     }

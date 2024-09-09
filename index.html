@@ -5,145 +5,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Society Fail</title>
-  <link rel="stylesheet" href="stylesheets/application.css">
+  <link rel="stylesheet" href="stylesheets/core.css">
 </head>
 
 <body>
-  <div id="start-screen">
-    <div class="splash-screen">
-      <div class="splash-header">
-        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
+  <div id="game_start_screen">
+    <div class="splash_screen">
+
+      <header>
+        <i data-lucide="skull" class="icon"></i>
         <div>
           <h1>Society Fail</h1>
-          <p>Can you survive the apocalypse?</p>
+          <h2>Can you survive the apocalypse?</h2>
         </div>
+      </header>
+
+      <section>
+        <button data-difficulty="easy">
+          <b>Easy</b>
+          <div>
+            <span class="food"><b></b> <i data-lucide="beef" class="icon red"></i></span>
+            <span class="water"><b></b> <i data-lucide="droplet" class="icon blue"></i></span>
+            <span class="wood"><b></b> <i data-lucide="tree-pine" class="icon green"></i></span>
+          </div>
+        </button>
+        <button data-difficulty="medium">
+          <b>Medium</b>
+          <div>
+            <span class="food"><b></b> <i data-lucide="beef" class="icon red"></i></span>
+            <span class="water"><b></b> <i data-lucide="droplet" class="icon blue"></i></span>
+            <span class="wood"><b></b> <i data-lucide="tree-pine" class="icon green"></i></span>
+          </div>
+        </button>
+        <button data-difficulty="hard">
+          <b>Hard</b>
+          <div>
+            No resources <i data-lucide="circle-slash-2" class="icon red"></i>
+          </div>
+        </button>
+      </section>
+
+      <footer>
+        <p>Society Fail is <a href="https://github.com/Shpigford/society-fail" target="_blank">open source</a> and made
+          by
+          <a href="https://x.com/shpigford" target="_blank">@shpigford</a>!
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <div id="game_screen" class="hidden">
+    <header>
+      <div class="logo">
+        <i data-lucide="skull" class="icon red"></i>
+        <h1>Society Fail</h1>
       </div>
-      <div id="difficulty-selection">
-        <div class="difficulty-options">
-          <button onclick="startGame('easy')">
-            <b>Easy</b>
-            <div>
-              <span>50 <i data-lucide="beef" class="icon-dark-yellow"></i></span>
-              <span>50 <i data-lucide="droplet" class="icon-blue"></i></span>
-              <span>30 <i data-lucide="tree-pine" class="icon-green"></i></span>
-            </div>
-          </button>
-          <button onclick="startGame('medium')">
-            <b>Medium</b>
-            <div>
-              <span>30 <i data-lucide="beef" class="icon-dark-yellow"></i></span>
-              <span>30 <i data-lucide="droplet" class="icon-blue"></i></span>
-              <span>20 <i data-lucide="tree-pine" class="icon-green"></i></span>
-            </div>
-          </button>
-          <button onclick="startGame('hard')">
-            <b>Hard</b>
-            <div>
-              <span>No resources <i data-lucide="circle-slash-2" class="icon-dark-red"></i></span>
-            </div>
-          </button>
+      <div class="resources">
+        <div class="resource"><i data-lucide="beef" class="icon dark-yellow"></i><span>0</span></div>
+        <div class="resource"><i data-lucide="droplet" class="icon blue"></i><span>0</span></div>
+        <div class="resource"><i data-lucide="tree-pine" class="icon green"></i><span>0</span></div>
+      </div>
+      <div class="time-module">
+        <div class="time-display">
+          <div class="day-night-indicator"></div>
+          <span id="time">Day 1, Hour 1</span>
         </div>
+        <button id="pause-game"><i data-lucide="pause" class="icon"></i></button>
+        <button id="reset-game"><i data-lucide="rotate-ccw" class="icon"></i></button>
+      </div>
+    </header>
+
+    <section id="actions-module">
+      <button id="gatherFoodBtn" class="action-button">
+        <i data-lucide="beef" class="icon dark-yellow"></i>
+        <span>Gather Food</span>
+      </button>
+      <button id="collectWaterBtn" class="action-button">
+        <i data-lucide="droplet" class="icon blue"></i>
+        <span>Collect Water</span>
+      </button>
+      <button id="chopWoodBtn" class="action-button">
+        <i data-lucide="tree-pine" class="icon green"></i>
+        <span>Chop Wood</span>
+      </button>
+    </section>
+
+    <section id="party-container">
+      <h2><i data-lucide="users" class="icon-dark"></i> Your Party</h2>
+      <div id="party-display"></div>
+    </section>
+
+    <div id="game-modules">
+      <div id="main-modules">
+        <section id="log-module">
+          <h2 class="collapsible"><i data-lucide="cctv" class="icon-dark"></i> Activity Log <i data-lucide="chevron-up"
+              class="toggle-icon"></i></h2>
+          <div class="module-content">
+            <div id="log-content"></div>
+          </div>
+        </section>
+
+        <section id="upgrades-module">
+          <h2 class="collapsible"><i data-lucide="book-plus" class="icon-dark"></i> Upgrades <i data-lucide="chevron-up"
+              class="toggle-icon"></i></h2>
+          <div class="module-content">
+            <div id="upgrades"></div>
+          </div>
+        </section>
+
+        <section id="achievements-module">
+          <h2 class="collapsible"><i data-lucide="trophy" class="icon-dark"></i> Achievements <i
+              data-lucide="chevron-up" class="toggle-icon"></i></h2>
+          <div class="module-content">
+            <div id="achievements"></div>
+          </div>
+        </section>
+      </div>
+
+      <div id="secondary-modules">
+        <section id="farming-module" class="mystery">
+          <div class="icon"><i data-lucide="circle-help" class="icon gutter-grey"></i></div>
+          <div class="title">Mysterious Crops</div>
+          <div class="description">What secrets lie beneath the soil?</div>
+        </section>
+        <section id="well-module" class="mystery">
+          <div class="icon"><i data-lucide="circle-help" class="icon gutter-grey"></i></div>
+          <div class="title">Hidden Waters</div>
+          <div class="description">Is there a source of life nearby?</div>
+        </section>
+        <section id="hunting-module" class="mystery">
+          <div class="icon"><i data-lucide="circle-help" class="icon gutter-grey"></i></div>
+          <div class="title">Mysterious Tracks</div>
+          <div class="description">What creatures roam these lands?</div>
+        </section>
+        <section id="lumber-mill-module" class="mystery">
+          <div class="icon"><i data-lucide="circle-help" class="icon gutter-grey"></i></div>
+          <div class="title">Untamed Forest</div>
+          <div class="description">How can we harness nature's bounty?</div>
+        </section>
+        <section id="watchtower-module" class="mystery">
+          <div class="icon"><i data-lucide="circle-help" class="icon gutter-grey"></i></div>
+          <div class="title">Unexplored Horizon</div>
+          <div class="description">What lies beyond our sight?</div>
+        </section>
       </div>
     </div>
+
     <footer>
-      <p>
-        Society Fail is <a href="https://github.com/Shpigford/society-fail" target="_blank">open source</a> and made by
+      <p>Society Fail is <a href="https://github.com/Shpigford/society-fail" target="_blank">open source</a> and made
+        by
         <a href="https://x.com/shpigford" target="_blank">@shpigford</a>!
       </p>
     </footer>
   </div>
-  <div id="game-over-screen" class="hidden">
-    <div class="splash-screen">
-      <div class="splash-header">
-        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
-        <div>
-          <h1>Society Failed</h1>
-          <p>Your society has collapsed.</p>
-        </div>
-      </div>
-      <div id="game-stats"></div>
-      <button class="try-again" onclick="resetGame(true)">Try Again</button>
-    </div>
-  </div>
-  <div id="game-ui" class="hidden">
-    <header>
-      <div class="logo">
-        <i data-lucide="skull" class="icon-large icon-dark-red"></i>
-        <h1>Society Fail</h1>
-      </div>
-      <div id="resources">
-        <div class="resource"><i data-lucide="beef" class="icon-dark-yellow"></i><span id="food">0</span></div>
-        <div class="resource"><i data-lucide="droplet" class="icon-blue"></i><span id="water">0</span></div>
-        <div class="resource"><i data-lucide="tree-pine" class="icon-green"></i><span id="wood">0</span></div>
-      </div>
-      <div id="time-module">
-        <div id="time-display">
-          <div id="day-night-indicator"></div>
-          <span id="time">Day 1, Hour 1</span>
-        </div>
-        <button id="pause-game" onclick="pauseGame()"><i data-lucide="pause" class=""></i></button>
-        <button id="reset-game" onclick="resetGame(true)"><i data-lucide="rotate-ccw" class=""></i></button>
-      </div>
-    </header>
-    <main>
-      <div id="actions-module">
-        <button id="gatherFoodBtn" onclick="gatherFood()" class="action-button">
-          <i data-lucide="beef" class="icon-dark-yellow"></i>
-          <span>Gather Food</span>
-        </button>
-        <button id="collectWaterBtn" onclick="collectWater()" class="action-button">
-          <i data-lucide="droplet" class="icon-blue"></i>
-          <span>Collect Water</span>
-        </button>
-        <button id="chopWoodBtn" onclick="chopWood()" class="action-button">
-          <i data-lucide="tree-pine" class="icon-green"></i>
-          <span>Chop Wood</span>
-        </button>
-      </div>
-      <div id="party-module">
-        <h2><i data-lucide="users" class="icon-dark"></i> Your Party</h2>
-        <div id="party"></div>
-      </div>
-      <div id="game-modules">
-        <div id="main-modules">
-          <div id="log-module">
-            <h2 class="collapsible"><i data-lucide="cctv" class="icon-dark"></i> Activity Log <i
-                data-lucide="chevron-up" class="toggle-icon"></i></h2>
-            <div class="module-content">
-              <div id="log-content"></div>
-            </div>
-          </div>
-          <div id="upgrades-module">
-            <h2 class="collapsible"><i data-lucide="book-plus" class="icon-dark"></i> Upgrades <i
-                data-lucide="chevron-up" class="toggle-icon"></i></h2>
-            <div class="module-content">
-              <div id="upgrades"></div>
-            </div>
-          </div>
-          <div id="achievements-module">
-            <h2 class="collapsible"><i data-lucide="trophy" class="icon-dark"></i> Achievements <i
-                data-lucide="chevron-up" class="toggle-icon"></i></h2>
-            <div class="module-content">
-              <div id="achievements"></div>
-            </div>
-          </div>
-        </div>
-        <div id="secondary-modules">
-          <div id="farming-module" class="hidden"></div>
-          <div id="well-module" class="hidden"></div>
-          <div id="hunting-module" class="hidden"></div>
-          <div id="lumber-mill-module" class="hidden"></div>
-          <div id="watchtower-module" class="hidden"></div>
-        </div>
-      </div>
-    </main>
+
+  <div id="game_over_screen" class="hidden">
+    <div id="game_over_content"></div>
   </div>
 
-  <script type="module" src="javascript/core.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    lucide.createIcons();
-  </script>
+  <script type="module" src="javascript/core.js"></script>
 </body>
 
 </html>

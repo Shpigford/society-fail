@@ -1,0 +1,99 @@
+#game_screen {
+  margin: 1em;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    border: var(--border-thickness) solid var(--text-color);
+
+    .logo {
+      display: flex;
+      align-items: stretch;
+      gap: 1em;
+      text-transform: uppercase;
+      font-size: 1em;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+
+      h1 {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        padding-right: 1.2rem;
+        align-items: center;
+        border-right: var(--border-thickness) solid var(--text-color);
+      }
+
+      .icon {
+        width: 3rem;
+        height: 3rem;
+        padding: 0.5rem;
+        border-right: var(--border-thickness) solid var(--text-color);
+      }
+    }
+
+    .resources {
+      display: flex;
+      gap: 2em;
+      font-size: 1.5em;
+      font-weight: 900;
+
+      .resource {
+        display: flex;
+        align-items: center;
+        gap: 0.2em;
+      }
+    }
+
+    .time-module {
+      display: flex;
+      align-items: stretch;
+      border-left: var(--border-thickness) solid var(--text-color);
+
+      .time-display {
+        display: flex;
+        align-items: center;
+        padding: 0 1.5em;
+        gap: 1em;
+
+        &.paused {
+          background-color: var(--dark-red);
+        }
+
+        .day-night-indicator {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 50%;
+          background-color: var(--light-yellow);
+        }
+
+        #time {
+          transition: background-color 0.3s ease;
+        }
+      }
+
+      button {
+        border: none;
+        border-left: var(--border-thickness) solid var(--text-color);
+        cursor: pointer;
+        font-size: 1.5em;
+        padding: 0 1em;
+        margin: 0;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+
+  footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    margin-top: 1em;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    border: var(--border-thickness) solid var(--text-color);
+  }
+}

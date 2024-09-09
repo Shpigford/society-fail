@@ -1,28 +1,34 @@
-.icon-large {
-  width: 1.2em;
-  height: 1.2em;
-}
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-.icon-dark {
-  color: var(--background-color-alt);
-}
+  &.red,
+  &.dark-red {
+    color: var(--dark-red);
+  }
 
-.icon-dark-red {
-  color: var(--dark-red);
-}
+  &.blue {
+    color: var(--blue);
+  }
 
-.icon-blue {
-  color: var(--blue);
-}
+  &.green {
+    color: var(--green);
+  }
 
-.icon-dark-yellow {
-  color: var(--dark-yellow);
-}
+  &.light-yellow {
+    color: var(--light-yellow);
+  }
 
-.icon-green {
-  color: var(--green);
-}
+  &.dark-yellow {
+    color: var(--dark-yellow);
+  }
 
-.icon-gutter-grey {
-  color: var(--gutter-grey);
+  &.magenta {
+    color: var(--magenta);
+  }
+
+  &.gutter-grey {
+    color: var(--gutter-grey);
+  }
 }
