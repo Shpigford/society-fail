@@ -4,7 +4,7 @@ Society Fail is a browser-based incremental clicker game built by [@Shpigford](h
 
 It was built almost exclusively using AI.
 
-![CleanShot 2024-09-09 at 16 01 52@2x](https://github.com/user-attachments/assets/db69a8df-b3bf-456d-9607-1f3192008640)
+![Society Fail Screenshot](https://github.com/user-attachments/assets/db69a8df-b3bf-456d-9607-1f3192008640)
 
 ## Running locally
 
