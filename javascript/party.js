@@ -147,8 +147,9 @@ export function updatePartyStats() {
     if (!isResting && !isBusy) {
       member.updateStats();
     } else if (isResting) {
-      // Increased energy recovery rate
-      member.energy = Math.min(member.traits.maxEnergy, member.energy + member.traits.energyRecoveryRate * 3);
+      // Increased energy recovery rate (approximately 16.67% per hour)
+      const energyRecoveryRate = member.traits.maxEnergy / 6;
+      member.energy = Math.min(member.traits.maxEnergy, member.energy + energyRecoveryRate);
 
       // Slower hunger and thirst decrease while resting
       member.hunger = Math.max(0, member.hunger - member.traits.hungerRate * 0.25);
@@ -156,7 +157,7 @@ export function updatePartyStats() {
 
       // Increased health recovery if hunger and thirst are above 50%
       if (member.hunger > 50 && member.thirst > 50 && member.health < 100) {
-        member.health = Math.min(100, member.health + 0.5);
+        member.health = Math.min(100, member.health + 1);
       }
 
       if (member.energy >= member.traits.maxEnergy) {
