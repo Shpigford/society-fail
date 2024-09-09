@@ -38,7 +38,7 @@ function trackEvent(data) {
   }
 
   const eventName = `${data.type}:${data.text || data.id || 'unknown'}`;
-  window.fathom.trackGoal(eventName, 0);
+  window.fathom.trackEvent(eventName);
 
   console.log('Tracked event:', eventName, data);
 }
@@ -55,7 +55,7 @@ export function trackStateChange(stateName, newValue) {
   }
 
   const eventName = `state:${stateName}`;
-  window.fathom.trackGoal(eventName, 0);
+  window.fathom.trackEvent(eventName);
 
   console.log('Tracked state change:', eventName, newValue);
 }
