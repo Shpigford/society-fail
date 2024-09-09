@@ -147,16 +147,16 @@ export function updatePartyStats() {
     if (!isResting && !isBusy) {
       member.updateStats();
     } else if (isResting) {
-      // Handle resting logic
-      member.energy = Math.min(member.traits.maxEnergy, member.energy + member.traits.energyRecoveryRate);
+      // Increased energy recovery rate
+      member.energy = Math.min(member.traits.maxEnergy, member.energy + member.traits.energyRecoveryRate * 3);
 
-      // Hunger and thirst still decrease, but at a slower rate while resting
-      member.hunger = Math.max(0, member.hunger - member.traits.hungerRate * 0.5);
-      member.thirst = Math.max(0, member.thirst - member.traits.thirstRate * 0.5);
+      // Slower hunger and thirst decrease while resting
+      member.hunger = Math.max(0, member.hunger - member.traits.hungerRate * 0.25);
+      member.thirst = Math.max(0, member.thirst - member.traits.thirstRate * 0.25);
 
-      // Slight health recovery if hunger and thirst are above 50%
+      // Increased health recovery if hunger and thirst are above 50%
       if (member.hunger > 50 && member.thirst > 50 && member.health < 100) {
-        member.health = Math.min(100, member.health + 0.1);
+        member.health = Math.min(100, member.health + 0.5);
       }
 
       if (member.energy >= member.traits.maxEnergy) {
