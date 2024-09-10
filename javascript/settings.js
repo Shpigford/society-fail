@@ -132,6 +132,48 @@ export const UPGRADES = {
     cost: { wood: 500, food: 200 },
     effect: 'Allows you to spot and rescue potential survivors',
     prerequisite: 'huntingLodge'
+  },
+  automatedFeeding: {
+    id: 'automatedFeeding',
+    name: 'Automated Feeding System',
+    cost: { food: 500, wood: 200 },
+    effect: 'Automatically feeds party members when their hunger drops below 20%',
+    prerequisite: 'farming'
+  },
+  waterPurificationSystem: {
+    id: 'waterPurificationSystem',
+    name: 'Water Purification and Distribution',
+    cost: { water: 400, wood: 200 },
+    effect: 'Automatically provides water to party members when their thirst drops below 20%',
+    prerequisite: 'well'
+  },
+  comfortableSleepingQuarters: {
+    id: 'comfortableSleepingQuarters',
+    name: 'Comfortable Sleeping Quarters',
+    cost: { wood: 400, food: 200 },
+    effect: 'Automatically rests party members when their energy drops below 20%',
+    prerequisite: 'toolWorkshop'
+  },
+  foodGatheringDrone: {
+    id: 'foodGatheringDrone',
+    name: 'Food Gathering Drone',
+    cost: { wood: 300, food: 200 },
+    effect: 'Automatically gathers small amounts of food over time',
+    prerequisite: 'huntingLodge'
+  },
+  waterGatheringDrone: {
+    id: 'waterGatheringDrone',
+    name: 'Water Gathering Drone',
+    cost: { wood: 300, water: 200 },
+    effect: 'Automatically gathers small amounts of water over time',
+    prerequisite: 'well'
+  },
+  woodGatheringDrone: {
+    id: 'woodGatheringDrone',
+    name: 'Wood Gathering Drone',
+    cost: { wood: 400, food: 100 },
+    effect: 'Automatically gathers small amounts of wood over time',
+    prerequisite: 'lumberMill'
   }
 };
 

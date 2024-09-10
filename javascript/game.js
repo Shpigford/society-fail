@@ -22,6 +22,7 @@ import { initializeWatchtower, checkRescueMission, updateWatchtowerUI } from './
 import { checkForRandomEvent, initializeRandomEvents } from './randomevents.js';
 import { trackStateChange } from './tracking.js';
 import { checkTutorials, initializeTutorials, saveTutorialState } from './tutorial.js';
+import { runAutomations } from './automation.js';
 
 // Debug mode flag
 let isDebugMode = false;
@@ -190,6 +191,7 @@ export function updateGameState() {
   generateWellWater();
   checkTutorials();
   saveTutorialState();
+  runAutomations();
   saveGameState();
   checkAchievements();
   checkRescueMission();

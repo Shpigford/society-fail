@@ -5,6 +5,7 @@ import { createLucideIcons } from './utils.js';
 import { saveGameState } from './storage.js';
 import { initializeFarming } from './farming.js';
 import { initializeHunting } from './hunting.js';
+import { initializeAutomatedFeeding, initializeWaterPurificationSystem, initializeComfortableSleepingQuarters, initializeFoodGatheringDrone, initializeWaterGatheringDrone, initializeWoodGatheringDrone } from './automation.js';
 
 /**
  * Buys an upgrade if the player can afford it.
@@ -75,6 +76,24 @@ function applyUpgradeEffects(upgradeId) {
     case 'watchtower':
       unlockSecondaryModule('watchtower-module');
       initializeWatchtower();
+      break;
+    case 'automatedFeeding':
+      initializeAutomatedFeeding();
+      break;
+    case 'waterPurificationSystem':
+      initializeWaterPurificationSystem();
+      break;
+    case 'comfortableSleepingQuarters':
+      initializeComfortableSleepingQuarters();
+      break;
+    case 'foodGatheringDrone':
+      initializeFoodGatheringDrone();
+      break;
+    case 'waterGatheringDrone':
+      initializeWaterGatheringDrone();
+      break;
+    case 'woodGatheringDrone':
+      initializeWoodGatheringDrone();
       break;
     default:
       console.warn(`No effects implemented for upgrade: ${upgradeId}`);

@@ -1,3 +1,19 @@
+- Game Theme:
+  - Survive and thrive in a harsh wilderness environment.
+  - Build and manage a community of survivors.
+  - Explore and expand your base.
+  - Research and develop new technologies.
+  - Manage resources and energy efficiently.
+  - Fight off mutated creatures and other threats.
+  - Trade with other survivors.
+  - Solve mysteries and puzzles.
+  - Dark themes and atmosphere, a little sinister.
+  - A little bit of magic, a little bit of science, a whole lot of mystery.
+  - There's a dark secret in the woods.
+  - Someone is pulling all the strings.
+  - The deeper you go, the darker it gets.
+  - Science fiction
+  
 - Gameplay and Mechanics:
   - Balance consistent growth with occasional explosive boosts: Provide a steady sense of progress, but include periodic large upgrades or achievements to keep players excited.
   - Implement multiple interacting systems: Create depth by having various game elements influence each other, encouraging players to strategize and optimize.
