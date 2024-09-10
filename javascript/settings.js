@@ -21,7 +21,7 @@ export const STARTING_RESOURCES = {
  * @type {Object}
  */
 export const initialGameState = {
-  version: 2,
+  version: 3,
   automations: {},
   day: 1,
   hour: 1,
@@ -53,7 +53,8 @@ export const initialGameState = {
   },
   hunting: {
     animals: []
-  }
+  },
+  waterPurificationActive: false
 };
 
 // Current game state, initialized with the initial game state

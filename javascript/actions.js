@@ -51,6 +51,12 @@ function performResourceAction(resourceType, minAmount, maxAmount) {
   // Set the party member as busy for 1 hour
   gameState.busyUntil[selected.index] = gameState.hour + (gameState.day - 1) * 24 + 1;
 
+  // Apply water purification effect if active
+  if (resourceType === 'water' && gameState.waterPurificationActive) {
+    const waterSaved = Math.floor(amountGathered * 0.2);
+    amountGathered += waterSaved;
+  }
+
   updateGameState();
   updateActionButtonsState();
   checkUpgradeAvailability();

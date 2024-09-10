@@ -65,7 +65,7 @@ export function applyUpgradeEffects(upgradeId) {
       applyAdvancedFarmingEffects();
       break;
     case 'waterPurification':
-      // Implement water purification effects
+      applyWaterPurificationEffects();
       break;
     case 'toolWorkshop':
       // Implement tool workshop effects
@@ -280,4 +280,12 @@ function getModuleIcon(moduleId) {
 
 function getModuleTitle(moduleId) {
   return moduleId.replace('-module', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+/**
+ * Applies the effects of the Water Purification System upgrade.
+ */
+function applyWaterPurificationEffects() {
+  gameState.waterPurificationActive = true;
+  addLogEntry('Water Purification System activated: Water consumption reduced by 20% for all activities.', 'success');
 }
