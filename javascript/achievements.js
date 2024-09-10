@@ -13,7 +13,7 @@ export const ACHIEVEMENTS = [
   { id: 'wellFed', name: 'Well Fed', description: 'Accumulate 1000 food', condition: state => state.totalResourcesGathered.food >= 1000 },
   { id: 'hydrated', name: 'Hydrated', description: 'Accumulate 1000 water', condition: state => state.totalResourcesGathered.water >= 1000 },
   { id: 'lumberjack', name: 'Lumberjack', description: 'Accumulate 1000 wood', condition: state => state.totalResourcesGathered.wood >= 1000 },
-  { id: 'farmer', name: 'Farmer', description: 'Plant your first crop', condition: state => state.upgrades.farming },
+  { id: 'farmer', name: 'Farmer', description: 'Start a farm', condition: state => state.upgrades.farming },
   { id: 'hunter', name: 'Hunter', description: 'Build the Hunting Lodge', condition: state => state.upgrades.huntingLodge },
   { id: 'wellDriller', name: 'Well Driller', description: 'Build the Well', condition: state => state.upgrades.well },
   { id: 'doctor', name: 'Doctor', description: 'Build the Medical Tent', condition: state => state.upgrades.medicalTent },
