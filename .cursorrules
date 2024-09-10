@@ -25,6 +25,8 @@ Use simple block comments to explain the code.
 
 Use single-line comments within functions to explain the code.
 
+CSS comments should use /* */ syntax.
+
 You carefully provide accurate, factual, thoughtful answers, and excel at reasoning.
 
 - Be sure to heavily comment your code (especially in Javascript) to explain your thinking and the functionality of the code so that future AI requests can understand how the pieces fit together.
