@@ -42,7 +42,6 @@ export function initializeFarming() {
  */
 export function plantCrop(row, col) {
   if (gameState.farming.grid[row][col] !== null) {
-    addLogEntry("This plot is already occupied!", 'warning');
     return;
   }
 
@@ -51,9 +50,13 @@ export function plantCrop(row, col) {
 
   if (gameState.water >= waterCost) {
     gameState.water -= waterCost;
+    const growthTime = gameState.farming.advancedFarming
+      ? Math.floor(CROP_TYPES[cropType].growthTime * 0.75)
+      : CROP_TYPES[cropType].growthTime;
     gameState.farming.grid[row][col] = {
       type: cropType,
-      plantedAt: gameState.hour + (gameState.day - 1) * 24
+      plantedAt: gameState.hour + (gameState.day - 1) * 24,
+      growthTime: growthTime
     };
     addLogEntry(`Planted ${cropType} at row ${row + 1}, column ${col + 1}.`);
     updateFarmingUI();
@@ -76,8 +79,10 @@ export function harvestCrop(row, col) {
   }
 
   const now = gameState.hour + (gameState.day - 1) * 24;
-  if (now - plot.plantedAt >= CROP_TYPES[plot.type].growthTime) {
-    const cropYield = CROP_TYPES[plot.type].yield;
+  if (now - plot.plantedAt >= plot.growthTime) {
+    const cropYield = gameState.farming.advancedFarming
+      ? Math.floor(CROP_TYPES[plot.type].yield * 1.5)
+      : CROP_TYPES[plot.type].yield;
     gameState.food += cropYield;
     gameState.farming.grid[row][col] = null;
     addLogEntry(`Harvested ${plot.type} at row ${row + 1}, column ${col + 1}, yielding ${cropYield} food.`);
@@ -184,6 +189,28 @@ function getCropColor(cropType) {
     bean: 'dark-red'
   };
   return colors[cropType] || 'green';
+}
+
+/**
+ * Applies the effects of the Advanced Farming upgrade.
+ */
+export function applyAdvancedFarmingEffects() {
+  if (!gameState.farming.advancedFarming) {
+    gameState.farming.advancedFarming = true;
+
+    // Increase crop yield by 50%
+    for (const cropType of Object.values(CROP_TYPES)) {
+      cropType.yield = Math.floor(cropType.yield * 1.5);
+    }
+
+    // Reduce growth time by 25%
+    for (const cropType of Object.values(CROP_TYPES)) {
+      cropType.growthTime = Math.floor(cropType.growthTime * 0.75);
+    }
+
+    addLogEntry('Advanced Farming Techniques applied: Crop yields increased and growth times reduced!', 'success');
+    updateFarmingUI();
+  }
 }
 
 // Expose functions to the global scope for onclick events

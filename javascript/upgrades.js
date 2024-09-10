@@ -9,6 +9,7 @@ import { initializeAutomatedFeeding, initializeWaterPurificationSystem, initiali
 import { initializeWell } from './well.js';
 import { initializeLumberMill } from './lumbermill.js';
 import { initializeWatchtower } from './watchtower.js';
+import { applyAdvancedFarmingEffects } from './farming.js';
 
 /**
  * Buys an upgrade if the player can afford it.
@@ -61,7 +62,7 @@ export function applyUpgradeEffects(upgradeId) {
       initializeHunting();
       break;
     case 'advancedFarming':
-      // Implement advanced farming effects
+      applyAdvancedFarmingEffects();
       break;
     case 'waterPurification':
       // Implement water purification effects
