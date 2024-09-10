@@ -21,7 +21,12 @@ const TUTORIAL_MESSAGES = [
   {
     id: 'low_resources',
     message: "Your resources are running low. Remember to balance resource gathering with other activities!",
-    trigger: state => state.food < 10 || state.water < 10 || state.wood < 10
+    trigger: state => {
+      const lowResources = state.food < 10 || state.water < 10 || state.wood < 10;
+      const currentTime = state.hour + (state.day - 1) * 24;
+      const cooldownPassed = currentTime - (state.lastLowResourceWarning || 0) >= 48;
+      return lowResources && cooldownPassed;
+    }
   },
   {
     id: 'first_module',
@@ -116,10 +121,14 @@ const TUTORIAL_MESSAGES = [
 let shownTutorials = new Set();
 
 export function checkTutorials() {
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
   TUTORIAL_MESSAGES.forEach(tutorial => {
     if (!shownTutorials.has(tutorial.id) && tutorial.trigger(gameState)) {
       addLogEntry(tutorial.message, 'tutorial');
       shownTutorials.add(tutorial.id);
+      if (tutorial.id === 'low_resources') {
+        gameState.lastLowResourceWarning = currentTime;
+      }
     }
   });
 }
@@ -127,6 +136,9 @@ export function checkTutorials() {
 export function initializeTutorials() {
   if (!gameState.shownTutorials) {
     gameState.shownTutorials = [];
+  }
+  if (!gameState.hasOwnProperty('lastLowResourceWarning')) {
+    gameState.lastLowResourceWarning = 0;
   }
   shownTutorials = new Set();
 }
