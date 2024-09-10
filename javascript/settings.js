@@ -22,6 +22,7 @@ export const STARTING_RESOURCES = {
  */
 export const initialGameState = {
   version: 2,
+  automations: {},
   day: 1,
   hour: 1,
   difficulty: null,

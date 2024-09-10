@@ -1,7 +1,6 @@
 import { gameState } from './settings.js';
-import { updateGameState } from './game.js';
 import { addLogEntry } from './log.js';
-import { performAction } from './party.js';
+import { performAction, isBusy } from './party.js';
 
 export function initializeAutomatedFeeding() {
   gameState.automations = gameState.automations || {};
@@ -20,20 +19,22 @@ export function initializeComfortableSleepingQuarters() {
 
 export function initializeFoodGatheringDrone() {
   gameState.automations = gameState.automations || {};
-  gameState.automations.foodGathering = true;
+  gameState.automations.foodGathering = { active: true, lastGathered: gameState.hour + (gameState.day - 1) * 24 };
 }
 
 export function initializeWaterGatheringDrone() {
   gameState.automations = gameState.automations || {};
-  gameState.automations.waterGathering = true;
+  gameState.automations.waterGathering = { active: true, lastGathered: gameState.hour + (gameState.day - 1) * 24 };
 }
 
 export function initializeWoodGatheringDrone() {
   gameState.automations = gameState.automations || {};
-  gameState.automations.woodGathering = true;
+  gameState.automations.woodGathering = { active: true, lastGathered: gameState.hour + (gameState.day - 1) * 24 };
 }
 
 export function runAutomations() {
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
+
   if (gameState.automations) {
     if (gameState.automations.feeding) {
       automatedFeeding();
@@ -44,62 +45,74 @@ export function runAutomations() {
     if (gameState.automations.resting) {
       automatedResting();
     }
-    if (gameState.automations.foodGathering) {
-      automatedFoodGathering();
+    if (gameState.automations.foodGathering && gameState.automations.foodGathering.active) {
+      automatedFoodGathering(currentTime);
     }
-    if (gameState.automations.waterGathering) {
-      automatedWaterGathering();
+    if (gameState.automations.waterGathering && gameState.automations.waterGathering.active) {
+      automatedWaterGathering(currentTime);
     }
-    if (gameState.automations.woodGathering) {
-      automatedWoodGathering();
+    if (gameState.automations.woodGathering && gameState.automations.woodGathering.active) {
+      automatedWoodGathering(currentTime);
     }
   }
 }
 
 function automatedFeeding() {
-  gameState.party.forEach(member => {
-    if (member.hunger <= 20 && gameState.food >= 5) {
-      performAction('eat', gameState.party.indexOf(member));
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
+  gameState.party.forEach((member, index) => {
+    if (member.hunger <= 50 && gameState.food >= 5 && !isBusy(index, currentTime)) {
+      performAction(index, 'eat');
       addLogEntry(`Automated Feeding System fed ${member.name}`);
     }
   });
 }
 
 function automatedWatering() {
-  gameState.party.forEach(member => {
-    if (member.thirst <= 20 && gameState.water >= 3) {
-      performAction('drink', gameState.party.indexOf(member));
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
+  gameState.party.forEach((member, index) => {
+    if (member.thirst <= 50 && gameState.water >= 3 && !isBusy(index, currentTime)) {
+      performAction(index, 'drink');
       addLogEntry(`Water Purification System provided water to ${member.name}`);
     }
   });
 }
 
 function automatedResting() {
+  const currentTime = gameState.hour + (gameState.day - 1) * 24;
   gameState.party.forEach((member, index) => {
-    if (member.energy <= 20 && !member.isResting) {
-      performAction('sleep', index);
+    if (member.energy <= 35 && !isBusy(index, currentTime)) {
+      performAction(index, 'sleep');
       addLogEntry(`Comfortable Sleeping Quarters initiated rest for ${member.name}`);
     }
   });
 }
 
-function automatedFoodGathering() {
-  const gatherAmount = 2; // Adjust this value for balance
-  gameState.food += gatherAmount;
-  gameState.totalResourcesGathered.food += gatherAmount;
-  addLogEntry(`Food Gathering Drone collected ${gatherAmount} food`);
+function automatedFoodGathering(currentTime) {
+  if (currentTime - gameState.automations.foodGathering.lastGathered >= 1) {
+    const gatherAmount = Math.floor(Math.random() * 8) + 1; // Random amount between 1 and 8
+    gameState.food += gatherAmount;
+    gameState.totalResourcesGathered.food += gatherAmount;
+    // addLogEntry(`Food Gathering Drone collected ${gatherAmount} food`);
+    gameState.automations.foodGathering.lastGathered = currentTime;
+  }
 }
 
-function automatedWaterGathering() {
-  const gatherAmount = 2; // Adjust this value for balance
-  gameState.water += gatherAmount;
-  gameState.totalResourcesGathered.water += gatherAmount;
-  addLogEntry(`Water Gathering Drone collected ${gatherAmount} water`);
+function automatedWaterGathering(currentTime) {
+  if (currentTime - gameState.automations.waterGathering.lastGathered >= 1) {
+    const gatherAmount = Math.floor(Math.random() * 5) + 1; // Random amount between 1 and 5
+    gameState.water += gatherAmount;
+    gameState.totalResourcesGathered.water += gatherAmount;
+    // addLogEntry(`Water Gathering Drone collected ${gatherAmount} water`);
+    gameState.automations.waterGathering.lastGathered = currentTime;
+  }
 }
 
-function automatedWoodGathering() {
-  const gatherAmount = 2; // Adjust this value for balance
-  gameState.wood += gatherAmount;
-  gameState.totalResourcesGathered.wood += gatherAmount;
-  addLogEntry(`Wood Gathering Drone collected ${gatherAmount} wood`);
+function automatedWoodGathering(currentTime) {
+  if (currentTime - gameState.automations.woodGathering.lastGathered >= 1) {
+    const gatherAmount = Math.floor(Math.random() * 3) + 1; // Random amount between 1 and 3
+    gameState.wood += gatherAmount;
+    gameState.totalResourcesGathered.wood += gatherAmount;
+    // addLogEntry(`Wood Gathering Drone collected ${gatherAmount} wood`);
+    gameState.automations.woodGathering.lastGathered = currentTime;
+  }
 }

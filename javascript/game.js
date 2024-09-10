@@ -11,7 +11,7 @@ import { saveGameState, loadGameState, clearGameState } from './storage.js';
 import { gameState, UPGRADES, resetGameState, STARTING_RESOURCES } from './settings.js';
 import { initializeParty, updatePartyStats, updatePartyDisplay, performAction, PartyMember, checkPartyStatus } from './party.js';
 import { setupActionListeners, updateActionButtonsState } from './actions.js';
-import { initializeUpgrades, checkUpgradeAvailability, updateUpgradesUI } from './upgrades.js';
+import { initializeUpgrades, checkUpgradeAvailability, updateUpgradesUI, applyUpgradeEffects } from './upgrades.js';
 import { unlockSecondaryModule } from './upgrades.js';
 import { initializeFarming } from './farming.js';
 import { initializeWell, generateWellWater } from './well.js';
@@ -41,6 +41,7 @@ function enableDebugMode() {
   for (const upgradeId in UPGRADES) {
     gameState.upgrades[upgradeId] = true;
     UPGRADES[upgradeId].available = false;
+    applyUpgradeEffects(upgradeId);
   }
 
   updateResourceDisplay();

@@ -6,6 +6,9 @@ import { saveGameState } from './storage.js';
 import { initializeFarming } from './farming.js';
 import { initializeHunting } from './hunting.js';
 import { initializeAutomatedFeeding, initializeWaterPurificationSystem, initializeComfortableSleepingQuarters, initializeFoodGatheringDrone, initializeWaterGatheringDrone, initializeWoodGatheringDrone } from './automation.js';
+import { initializeWell } from './well.js';
+import { initializeLumberMill } from './lumbermill.js';
+import { initializeWatchtower } from './watchtower.js';
 
 /**
  * Buys an upgrade if the player can afford it.
@@ -43,7 +46,7 @@ export function buyUpgrade(upgradeId) {
  * Applies the effects of an upgrade.
  * @param {string} upgradeId - The ID of the upgrade to apply.
  */
-function applyUpgradeEffects(upgradeId) {
+export function applyUpgradeEffects(upgradeId) {
   switch (upgradeId) {
     case 'farming':
       unlockSecondaryModule('farming-module');

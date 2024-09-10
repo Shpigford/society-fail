@@ -293,3 +293,7 @@ export function checkPartyStatus() {
     gameOver();
   }
 }
+
+export function isBusy(personIndex, currentTime) {
+  return gameState.busyUntil[personIndex] > currentTime || gameState.busyUntil[personIndex] === -1;
+}
