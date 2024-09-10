@@ -275,7 +275,6 @@ function handlePartyAction(event) {
   if (button && !button.disabled) {
     const action = button.dataset.action;
     const personIndex = parseInt(button.dataset.person, 10);
-    console.log(`Attempting action: ${action} for person ${personIndex}`);
     try {
       performAction(personIndex, action);
     } catch (error) {
