@@ -84,8 +84,9 @@ function getResourceActionEffects(resourceType) {
  * Performs the gather food action.
  */
 export function gatherFood() {
-  const minAmount = Math.floor(5 + (gameState.day / 10)); // Scales with days played
-  const maxAmount = Math.floor(10 + (gameState.day / 5)); // Scales with days played
+  const efficiency = gameState.resourceEfficiency || 1;
+  const minAmount = Math.floor((3 + (gameState.day / 10)) * efficiency);
+  const maxAmount = Math.floor((8 + (gameState.day / 5)) * efficiency);
   performResourceAction('food', minAmount, maxAmount);
 }
 
@@ -93,8 +94,9 @@ export function gatherFood() {
  * Performs the collect water action.
  */
 export function collectWater() {
-  const minAmount = Math.floor(2 + (gameState.day / 10)); // Scales with days played
-  const maxAmount = Math.floor(6 + (gameState.day / 5)); // Scales with days played
+  const efficiency = gameState.resourceEfficiency || 1;
+  const minAmount = Math.floor((2 + (gameState.day / 10)) * efficiency);
+  const maxAmount = Math.floor((6 + (gameState.day / 5)) * efficiency);
   performResourceAction('water', minAmount, maxAmount);
 }
 
@@ -102,8 +104,9 @@ export function collectWater() {
  * Performs the chop wood action.
  */
 export function chopWood() {
-  const minAmount = Math.floor(1 + (gameState.day / 10)); // Scales with days played
-  const maxAmount = Math.floor(2 + (gameState.day / 5)); // Scales with days played
+  const efficiency = gameState.resourceEfficiency || 1;
+  const minAmount = Math.floor((1 + (gameState.day / 10)) * efficiency);
+  const maxAmount = Math.floor((2 + (gameState.day / 5)) * efficiency);
   performResourceAction('wood', minAmount, maxAmount);
 }
 

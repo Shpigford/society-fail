@@ -68,7 +68,7 @@ export function applyUpgradeEffects(upgradeId) {
       applyWaterPurificationEffects();
       break;
     case 'toolWorkshop':
-      // Implement tool workshop effects
+      applyToolWorkshopEffects();
       break;
     case 'medicalTent':
       // Implement medical tent effects
@@ -288,4 +288,9 @@ function getModuleTitle(moduleId) {
 function applyWaterPurificationEffects() {
   gameState.waterPurificationActive = true;
   addLogEntry('Water Purification System activated: Water consumption reduced by 20% for all activities.', 'success');
+}
+
+function applyToolWorkshopEffects() {
+  gameState.resourceEfficiency = 1.25; // 25% increase in resource gathering efficiency
+  addLogEntry('Tool Workshop built. Resource gathering efficiency increased by 25%!', 'success');
 }
