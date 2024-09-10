@@ -71,7 +71,7 @@ export function applyUpgradeEffects(upgradeId) {
       applyToolWorkshopEffects();
       break;
     case 'medicalTent':
-      // Implement medical tent effects
+      initializeMedicalTent();
       break;
     case 'lumberMill':
       unlockSecondaryModule('lumber-mill-module');

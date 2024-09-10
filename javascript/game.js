@@ -22,6 +22,7 @@ import { initializeWatchtower, checkRescueMission, updateWatchtowerUI } from './
 import { checkForRandomEvent, initializeRandomEvents } from './randomevents.js';
 import { checkTutorials, initializeTutorials, saveTutorialState } from './tutorial.js';
 import { runAutomations } from './automation.js';
+import { applyMedicalTentEffects } from './medicaltent.js';
 
 // Debug mode flag
 let isDebugMode = false;
@@ -196,6 +197,7 @@ export function updateGameState() {
   checkAchievements();
   checkRescueMission();
   checkForRandomEvent();
+  applyMedicalTentEffects();
 }
 
 /**

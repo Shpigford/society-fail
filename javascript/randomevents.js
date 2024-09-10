@@ -1,7 +1,7 @@
 import { gameState } from './settings.js';
 import { addLogEntry } from './log.js';
 import { updateGameState } from './game.js';
-import { createLucideIcons } from './utils.js';
+import { getIllnessChanceReduction } from './medicaltent.js';
 
 const WHISPERS = [
   "The shadows grow longer...",
@@ -74,10 +74,16 @@ const RANDOM_EVENTS = [
     }, type: "positive"
   },
   {
-    name: "Illness", effect: (state) => {
-      const victim = state.party[Math.floor(Math.random() * state.party.length)];
-      victim.health -= 10;
-      return `${victim.name} has fallen ill! (-10 health)`;
+    name: "Mysterious Illness", effect: (state) => {
+      const illnessChanceReduction = getIllnessChanceReduction();
+      if (Math.random() > illnessChanceReduction) {
+        state.party.forEach(person => {
+          person.health = Math.max(0, person.health - 5);
+          person.energy = Math.max(0, person.energy - 10);
+        });
+        return "A mysterious illness affects everyone in the group! (-5 health, -10 energy for all)";
+      }
+      return "A mysterious illness threatens the group, but the Medical Tent helps prevent its spread!";
     }, type: "negative"
   },
   {
@@ -184,15 +190,6 @@ const RANDOM_EVENTS = [
       state.staminaPerAction = Math.max(5, state.staminaPerAction - 2);
       return "You've found a way to make your tools more efficient! (-2 stamina cost per action)";
     }, type: "positive"
-  },
-  {
-    name: "Mysterious Illness", effect: (state) => {
-      state.party.forEach(person => {
-        person.health = Math.max(0, person.health - 5);
-        person.energy = Math.max(0, person.energy - 10);
-      });
-      return "A mysterious illness affects everyone in the group! (-5 health, -10 energy for all)";
-    }, type: "negative"
   },
   {
     name: "Solar Flare", effect: (state) => {
