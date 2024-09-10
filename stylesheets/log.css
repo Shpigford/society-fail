@@ -62,7 +62,8 @@
       padding: 0.5em;
     }
 
-    &.info {
+    &.info,
+    &.neutral {
       background-color: var(--gutter-grey);
     }
 
@@ -82,6 +83,10 @@
 
     &.whisper {
       background-color: var(--magenta);
+    }
+
+    &.tutorial {
+      background-color: var(--blue);
     }
   }
 }

@@ -21,6 +21,7 @@ import { initializeAchievements, checkAchievements, ACHIEVEMENTS, updateAchievem
 import { initializeWatchtower, checkRescueMission, updateWatchtowerUI } from './watchtower.js';
 import { checkForRandomEvent, initializeRandomEvents } from './randomevents.js';
 import { trackStateChange } from './tracking.js';
+import { checkTutorials, initializeTutorials, saveTutorialState } from './tutorial.js';
 
 // Debug mode flag
 let isDebugMode = false;
@@ -81,6 +82,7 @@ export function initializeGame() {
   initializeCollapsibles();
   initializeWatchtower();
   initializeRandomEvents();
+  initializeTutorials();
 
   // Check for debug mode
   if (window.location.hash === '#debug') {
@@ -186,6 +188,8 @@ export function updateGameState() {
   updateActionButtonsState();
   checkUpgradeAvailability();
   generateWellWater();
+  checkTutorials();
+  saveTutorialState();
   saveGameState();
   checkAchievements();
   checkRescueMission();
