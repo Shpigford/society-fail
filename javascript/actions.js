@@ -78,21 +78,27 @@ function getResourceActionEffects(resourceType) {
  * Performs the gather food action.
  */
 export function gatherFood() {
-  performResourceAction('food', 1, 3);
+  const minAmount = Math.floor(5 + (gameState.day / 10)); // Scales with days played
+  const maxAmount = Math.floor(10 + (gameState.day / 5)); // Scales with days played
+  performResourceAction('food', minAmount, maxAmount);
 }
 
 /**
  * Performs the collect water action.
  */
 export function collectWater() {
-  performResourceAction('water', 2, 6);
+  const minAmount = Math.floor(2 + (gameState.day / 10)); // Scales with days played
+  const maxAmount = Math.floor(6 + (gameState.day / 5)); // Scales with days played
+  performResourceAction('water', minAmount, maxAmount);
 }
 
 /**
  * Performs the chop wood action.
  */
 export function chopWood() {
-  performResourceAction('wood', 1, 2);
+  const minAmount = Math.floor(1 + (gameState.day / 10)); // Scales with days played
+  const maxAmount = Math.floor(2 + (gameState.day / 5)); // Scales with days played
+  performResourceAction('wood', minAmount, maxAmount);
 }
 
 /**

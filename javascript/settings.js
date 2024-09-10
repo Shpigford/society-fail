@@ -4,7 +4,7 @@
  */
 
 // Time interval (in milliseconds) between game ticks
-export const TICK_INTERVAL = 2000;
+export const TICK_INTERVAL = 1500;
 
 /**
  * Starting resources for each difficulty level
@@ -73,14 +73,14 @@ export const UPGRADES = {
   farming: {
     id: 'farming',
     name: 'Farming',
-    cost: { food: 100 },
+    cost: { food: 80 },
     effect: 'Allows you to grow your own food',
     available: true
   },
   well: {
     id: 'well',
     name: 'Well',
-    cost: { wood: 100 },
+    cost: { wood: 80 },
     effect: 'Generates water over time',
     prerequisite: 'farming'
   },
@@ -134,3 +134,9 @@ export const UPGRADES = {
     prerequisite: 'huntingLodge'
   }
 };
+
+// Add this function to scale upgrade costs
+export function getScaledUpgradeCost(baseUpgradeCost) {
+  const scaleFactor = 1 + (gameState.day / 20); // Costs increase by 5% every 20 days
+  return Math.floor(baseUpgradeCost * scaleFactor);
+}

@@ -285,8 +285,16 @@ export function checkForRandomEvent() {
       const whisper = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
       addLogEntry(`The Whispers: "${whisper}"`, 'whisper');
     } else {
-      // Select a single random event
-      const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+      // Select a single random event with higher chance for positive events
+      const eventTypeRoll = Math.random();
+      let event;
+      if (eventTypeRoll < 0.6) { // 60% chance for positive event
+        event = RANDOM_EVENTS.filter(e => e.type === 'positive')[Math.floor(Math.random() * RANDOM_EVENTS.filter(e => e.type === 'positive').length)];
+      } else if (eventTypeRoll < 0.8) { // 20% chance for neutral event
+        event = RANDOM_EVENTS.filter(e => e.type === 'neutral')[Math.floor(Math.random() * RANDOM_EVENTS.filter(e => e.type === 'neutral').length)];
+      } else { // 20% chance for negative event
+        event = RANDOM_EVENTS.filter(e => e.type === 'negative')[Math.floor(Math.random() * RANDOM_EVENTS.filter(e => e.type === 'negative').length)];
+      }
       const message = event.effect(gameState);
       addLogEntry(`Random Event: ${event.name}. ${message}`, event.type);
     }
