@@ -52,7 +52,7 @@ export class PartyMember {
     // Decrease hunger, thirst, and energy
     this.hunger = Math.max(0, this.hunger - this.traits.hungerRate);
     this.thirst = Math.max(0, this.thirst - this.traits.thirstRate);
-    this.energy = Math.max(0, Math.min(this.traits.maxEnergy, this.energy - this.traits.energyRate));
+    this.energy = Math.max(0, Math.min(100, this.energy - this.traits.energyRate)); // Ensure energy doesn't exceed 100
 
     // Calculate health loss
     const healthLoss = (this.hunger <= 0 || this.thirst <= 0 || this.energy <= 0) ? 2 : 0;
@@ -81,7 +81,7 @@ export class PartyMember {
   applyActionEffects(effects) {
     this.hunger = Math.max(0, Math.min(100, this.hunger + effects.hunger));
     this.thirst = Math.max(0, Math.min(100, this.thirst + effects.thirst));
-    this.energy = Math.max(0, Math.min(100, this.energy + effects.energy));
+    this.energy = Math.max(0, Math.min(100, this.energy + effects.energy)); // Ensure energy doesn't exceed 100
 
     // Check if the action caused any critical conditions
     if (this.hunger <= 0 || this.thirst <= 0 || this.energy <= 0) {
@@ -149,7 +149,7 @@ export function updatePartyStats() {
     } else if (isResting) {
       // Increased energy recovery rate (approximately 16.67% per hour)
       const energyRecoveryRate = member.traits.maxEnergy / 4;
-      member.energy = Math.min(member.traits.maxEnergy, member.energy + energyRecoveryRate);
+      member.energy = Math.min(100, member.energy + energyRecoveryRate); // Ensure energy doesn't exceed 100
 
       // Slower hunger and thirst decrease while resting
       member.hunger = Math.max(0, member.hunger - member.traits.hungerRate * 0.2);
@@ -160,9 +160,9 @@ export function updatePartyStats() {
         member.health = Math.min(100, member.health + 1);
       }
 
-      if (member.energy >= member.traits.maxEnergy) {
+      if (member.energy >= 100) {
         gameState.busyUntil[index] = currentTime;
-        member.energy = member.traits.maxEnergy;
+        member.energy = 100;
       }
     }
     // If busy, do nothing (stats remain unchanged)
