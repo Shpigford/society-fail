@@ -15,7 +15,7 @@ export function initializeWell() {
   if (!gameState.well) {
     gameState.well = {
       capacity: 100,
-      current: 50,
+      current: 0,
       fillRate: 1
     };
   }
