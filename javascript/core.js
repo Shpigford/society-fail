@@ -6,7 +6,6 @@
 
 import { createLucideIcons } from './utils.js';
 import { initializeGame } from './game.js';
-import { initializeTracking } from './tracking.js';
 
 /**
  * Event listener for DOMContentLoaded event.
@@ -24,7 +23,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Log successful initialization
   console.log('Game initialization complete');
-
-  // Initialize tracking
-  initializeTracking();
 });

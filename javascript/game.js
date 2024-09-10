@@ -20,7 +20,6 @@ import { initializeLumberMill, updateLumberMill } from './lumbermill.js';
 import { initializeAchievements, checkAchievements, ACHIEVEMENTS, updateAchievementsUI } from './achievements.js';
 import { initializeWatchtower, checkRescueMission, updateWatchtowerUI } from './watchtower.js';
 import { checkForRandomEvent, initializeRandomEvents } from './randomevents.js';
-import { trackStateChange } from './tracking.js';
 import { checkTutorials, initializeTutorials, saveTutorialState } from './tutorial.js';
 import { runAutomations } from './automation.js';
 
@@ -197,13 +196,6 @@ export function updateGameState() {
   checkAchievements();
   checkRescueMission();
   checkForRandomEvent();
-
-  // Track state changes
-  for (const [key, value] of Object.entries(gameState)) {
-    if (JSON.stringify(value) !== JSON.stringify(previousState[key])) {
-      trackStateChange(key, value);
-    }
-  }
 }
 
 /**
