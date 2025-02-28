@@ -51,7 +51,7 @@ const modalHTML = `
           <td><kbd>,</kbd> Drink</td>
         </tr>
         <tr>
-          <td><kbd>P</kbd> Rest</td>
+          <td><kbd>O</kbd> Rest</td>
           <td><kbd>L</kbd> Rest</td>
           <td><kbd>.</kbd> Rest</td>
         </tr>

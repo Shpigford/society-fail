@@ -8,7 +8,7 @@
  * - 'q' to gather food
  * - 'w' to collect water
  * - 'e' to chop wood
- * - Party member 1: 'u'=eat, 'i'=drink, 'p'=sleep
+ * - Party member 1: 'u'=eat, 'i'=drink, 'o'=sleep
  * - Party member 2: 'j'=eat, 'k'=drink, 'l'=sleep
  * - Party member 3: 'm'=eat, ','=drink, '.'=sleep
  */
@@ -31,7 +31,7 @@ export function initializeShortcuts() {
   const PARTY_SHORTCUTS = {
     'u': { index: 0, action: 'eat' },
     'i': { index: 0, action: 'drink' },
-    'p': { index: 0, action: 'sleep' },
+    'o': { index: 0, action: 'sleep' },
     'j': { index: 1, action: 'eat' },
     'k': { index: 1, action: 'drink' },
     'l': { index: 1, action: 'sleep' },

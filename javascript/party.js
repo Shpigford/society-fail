@@ -224,7 +224,7 @@ export function updatePartyDisplay() {
           Drink <span>[3 <i data-lucide="droplet" class="icon blue"></i>]</span>
         </button>
         <button data-action="sleep" data-person="${index}" ${(person.isDead || isBusy || isResting) ? 'disabled' : ''}>
-          ${index === 0 ? '<span class="shortcut">p</span>' : index === 1 ? '<span class="shortcut">l</span>' : '<span class="shortcut">.</span>'}
+          ${index === 0 ? '<span class="shortcut">o</span>' : index === 1 ? '<span class="shortcut">l</span>' : '<span class="shortcut">.</span>'}
           <i data-lucide="bed-single" class="icon magenta"></i> Rest
         </button>
       </div>
