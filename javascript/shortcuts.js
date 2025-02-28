@@ -4,6 +4,7 @@
  * - 'a' for Easy
  * - 's' for Medium
  * - 'd' for Hard
+ * - 'h' to open shortcuts help
  */
 export function initializeShortcuts() {
   // Map keys to difficulty levels
@@ -15,11 +16,24 @@ export function initializeShortcuts() {
 
   // Event listener for keydown events
   document.addEventListener('keydown', (event) => {
-    // Only process shortcuts if we're on the start screen
+    const key = event.key.toLowerCase();
+
+    // Handle help shortcut (works on any screen)
+    if (key === 'h') {
+      const modal = document.getElementById('shortcuts-modal');
+      const shortcutsBtn = document.getElementById('shortcuts-help');
+      
+      if (modal && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+      } else if (shortcutsBtn) {
+        shortcutsBtn.click();
+      }
+      return;
+    }
+
+    // Only process difficulty shortcuts if we're on the start screen
     const startScreen = document.getElementById('game_start_screen');
     if (startScreen.classList.contains('hidden')) return;
-
-    const key = event.key.toLowerCase();
     
     // Check if the pressed key matches any of our shortcuts
     if (DIFFICULTY_SHORTCUTS[key]) {

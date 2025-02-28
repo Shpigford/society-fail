@@ -7,6 +7,7 @@
 import { createLucideIcons } from './utils.js';
 import { initializeGame } from './game.js';
 import { initializeShortcuts } from './shortcuts.js';
+import { initializeShortcutsModal } from './shortcuts-modal.js';
 
 /**
  * Event listener for DOMContentLoaded event.
@@ -22,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize the game
   initializeGame();
 
-  // Initialize shortcuts
+  // Initialize shortcuts and modal
   initializeShortcuts();
+  initializeShortcutsModal();
 
   // Log successful initialization
   console.log('Game initialization complete');

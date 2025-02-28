@@ -58,21 +58,6 @@
       border-right: var(--border-thickness) solid var(--text-color);
       position: relative;
 
-      .shortcut {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: var(--text-color);
-        color: var(--background-color);
-        width: 1.5rem;
-        height: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-      }
-
       &:last-child {
         border-right: 0;
       }
@@ -131,11 +116,6 @@
         border-right: none;
         border-bottom: var(--border-thickness) solid var(--text-color);
         width: 100%;
-
-        .shortcut {
-          top: 50%;
-          transform: translateY(-50%);
-        }
 
         &:last-child {
           border-bottom: none;

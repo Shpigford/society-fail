@@ -1,0 +1,45 @@
+/* Shortcut indicators */
+.shortcut {
+  position: absolute;
+  background: var(--text-color);
+  color: var(--background-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+/* Difficulty selection shortcuts */
+#game_start_screen section button .shortcut {
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.8rem;
+}
+
+/* Header button shortcuts */
+.button-container button {
+  position: relative;
+
+  .shortcut {
+    top: 0.2rem;
+    right: 0.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Mobile view adjustments */
+@media (max-width: 100ch) {
+  #game_start_screen section button .shortcut {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+/* Hide shortcuts when toggled off */
+body.hide-shortcuts .shortcut {
+  display: none !important;
+} 
