@@ -2,8 +2,8 @@
  * Manages the shortcuts help modal and shortcuts visibility toggle
  */
 
-// Track if shortcuts are visible
-let shortcutsVisible = true;
+// Track if shortcuts are visible - default to false on mobile
+let shortcutsVisible = window.innerWidth > 800;
 
 // Create and append modal HTML
 const modalHTML = `
@@ -16,47 +16,46 @@ const modalHTML = `
     
     <div class="shortcuts-toggle">
       <label>
-        <input type="checkbox" id="shortcuts-toggle" checked>
+        <input type="checkbox" id="shortcuts-toggle" ${window.innerWidth > 800 ? 'checked' : ''}>
         Show shortcuts in game
       </label>
     </div>
 
     <div class="shortcuts-list">
-      <h3>Game Controls</h3>
       <ul>
         <li><kbd>H</kbd> Toggle shortcuts help</li>
+      </ul>
+
+      <h3>Game Controls</h3>
+      <ul>
         <li><kbd>Q</kbd> Gather Food</li>
         <li><kbd>W</kbd> Collect Water</li>
         <li><kbd>E</kbd> Chop Wood</li>
       </ul>
       
-      <h3>Party Member 1</h3>
-      <ul>
-        <li><kbd>U</kbd> Eat</li>
-        <li><kbd>I</kbd> Drink</li>
-        <li><kbd>P</kbd> Rest</li>
-      </ul>
-
-      <h3>Party Member 2</h3>
-      <ul>
-        <li><kbd>J</kbd> Eat</li>
-        <li><kbd>K</kbd> Drink</li>
-        <li><kbd>L</kbd> Rest</li>
-      </ul>
-
-      <h3>Party Member 3</h3>
-      <ul>
-        <li><kbd>M</kbd> Eat</li>
-        <li><kbd>,</kbd> Drink</li>
-        <li><kbd>.</kbd> Rest</li>
-      </ul>
-      
-      <h3>Difficulty Selection</h3>
-      <ul>
-        <li><kbd>A</kbd> Select Easy mode</li>
-        <li><kbd>S</kbd> Select Medium mode</li>
-        <li><kbd>D</kbd> Select Hard mode</li>
-      </ul>
+      <h3>Party Members</h3>
+      <table>
+        <tr>
+          <th>Member 1</th>
+          <th>Member 2</th>
+          <th>Member 3</th>
+        </tr>
+        <tr>
+          <td><kbd>U</kbd> Eat</td>
+          <td><kbd>J</kbd> Eat</td>
+          <td><kbd>M</kbd> Eat</td>
+        </tr>
+        <tr>
+          <td><kbd>I</kbd> Drink</td>
+          <td><kbd>K</kbd> Drink</td>
+          <td><kbd>,</kbd> Drink</td>
+        </tr>
+        <tr>
+          <td><kbd>P</kbd> Rest</td>
+          <td><kbd>L</kbd> Rest</td>
+          <td><kbd>.</kbd> Rest</td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>
@@ -65,6 +64,9 @@ const modalHTML = `
 export function initializeShortcutsModal() {
   // Append modal to body
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Set initial state for shortcuts visibility
+  document.body.classList.toggle('hide-shortcuts', !shortcutsVisible);
   
   const modal = document.getElementById('shortcuts-modal');
   const closeBtn = modal.querySelector('.close-modal');
