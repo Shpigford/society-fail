@@ -18,8 +18,9 @@
   font-size: 0.8rem;
 }
 
-/* Header button shortcuts */
-.button-container button {
+/* Button shortcuts */
+.button-container button,
+.action-button {
   position: relative;
 
   .shortcut {

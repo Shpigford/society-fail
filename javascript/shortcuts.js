@@ -1,10 +1,13 @@
 /**
- * Handles keyboard shortcuts for selecting game difficulty
+ * Handles keyboard shortcuts for selecting game difficulty and game actions
  * Shortcuts:
  * - 'a' for Easy
  * - 's' for Medium
  * - 'd' for Hard
  * - 'h' to open shortcuts help
+ * - 'q' to gather food
+ * - 'w' to collect water
+ * - 'e' to chop wood
  */
 export function initializeShortcuts() {
   // Map keys to difficulty levels
@@ -12,6 +15,13 @@ export function initializeShortcuts() {
     'a': 'easy',
     's': 'medium',
     'd': 'hard'
+  };
+
+  // Map keys to action buttons
+  const ACTION_SHORTCUTS = {
+    'q': 'gatherFoodBtn',
+    'w': 'collectWaterBtn',
+    'e': 'chopWoodBtn'
   };
 
   // Event listener for keydown events
@@ -27,6 +37,18 @@ export function initializeShortcuts() {
         modal.classList.add('hidden');
       } else if (shortcutsBtn) {
         shortcutsBtn.click();
+      }
+      return;
+    }
+
+    // Handle action shortcuts if we're on the game screen
+    if (ACTION_SHORTCUTS[key]) {
+      const gameScreen = document.getElementById('game_screen');
+      if (!gameScreen?.classList.contains('hidden')) {
+        const button = document.getElementById(ACTION_SHORTCUTS[key]);
+        if (button) {
+          button.click();
+        }
       }
       return;
     }

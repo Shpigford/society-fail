@@ -25,6 +25,9 @@ const modalHTML = `
       <h3>Game Controls</h3>
       <ul>
         <li><kbd>H</kbd> Toggle shortcuts help</li>
+        <li><kbd>Q</kbd> Gather Food</li>
+        <li><kbd>W</kbd> Collect Water</li>
+        <li><kbd>E</kbd> Chop Wood</li>
       </ul>
       
       <h3>Difficulty Selection</h3>
