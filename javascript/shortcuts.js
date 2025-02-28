@@ -33,7 +33,7 @@ export function initializeShortcuts() {
 
     // Only process difficulty shortcuts if we're on the start screen
     const startScreen = document.getElementById('game_start_screen');
-    if (startScreen.classList.contains('hidden')) return;
+    if (startScreen?.classList.contains('hidden')) return;
     
     // Check if the pressed key matches any of our shortcuts
     if (DIFFICULTY_SHORTCUTS[key]) {
