@@ -20,7 +20,8 @@
 
 /* Button shortcuts */
 .button-container button,
-.action-button {
+.action-button,
+.person-actions button {
   position: relative;
 
   .shortcut {

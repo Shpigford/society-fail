@@ -215,9 +215,18 @@ export function updatePartyDisplay() {
         </table>
       </div>
       <div class="person-actions">
-        <button data-action="eat" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.food < 5) ? 'disabled' : ''}>Eat <span>[5 <i data-lucide="beef" class="icon dark-yellow"></i>]</span></button>
-        <button data-action="drink" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.water < 3) ? 'disabled' : ''}> Drink <span>[3 <i data-lucide="droplet" class="icon blue"></i>]</span></button>
-        <button data-action="sleep" data-person="${index}" ${(person.isDead || isBusy || isResting) ? 'disabled' : ''}><i data-lucide="bed-single" class="icon magenta"></i> Rest</button>
+        <button data-action="eat" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.food < 5) ? 'disabled' : ''}>
+          ${index === 0 ? '<span class="shortcut">u</span>' : index === 1 ? '<span class="shortcut">j</span>' : '<span class="shortcut">m</span>'}
+          Eat <span>[5 <i data-lucide="beef" class="icon dark-yellow"></i>]</span>
+        </button>
+        <button data-action="drink" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.water < 3) ? 'disabled' : ''}>
+          ${index === 0 ? '<span class="shortcut">i</span>' : index === 1 ? '<span class="shortcut">k</span>' : '<span class="shortcut">,</span>'}
+          Drink <span>[3 <i data-lucide="droplet" class="icon blue"></i>]</span>
+        </button>
+        <button data-action="sleep" data-person="${index}" ${(person.isDead || isBusy || isResting) ? 'disabled' : ''}>
+          ${index === 0 ? '<span class="shortcut">p</span>' : index === 1 ? '<span class="shortcut">l</span>' : '<span class="shortcut">.</span>'}
+          <i data-lucide="bed-single" class="icon magenta"></i> Rest
+        </button>
       </div>
     `;
     partyContainer.appendChild(personElement);

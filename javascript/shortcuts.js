@@ -8,6 +8,9 @@
  * - 'q' to gather food
  * - 'w' to collect water
  * - 'e' to chop wood
+ * - Party member 1: 'u'=eat, 'i'=drink, 'p'=sleep
+ * - Party member 2: 'j'=eat, 'k'=drink, 'l'=sleep
+ * - Party member 3: 'm'=eat, ','=drink, '.'=sleep
  */
 export function initializeShortcuts() {
   // Map keys to difficulty levels
@@ -24,6 +27,19 @@ export function initializeShortcuts() {
     'e': 'chopWoodBtn'
   };
 
+  // Map keys to party member actions
+  const PARTY_SHORTCUTS = {
+    'u': { index: 0, action: 'eat' },
+    'i': { index: 0, action: 'drink' },
+    'p': { index: 0, action: 'sleep' },
+    'j': { index: 1, action: 'eat' },
+    'k': { index: 1, action: 'drink' },
+    'l': { index: 1, action: 'sleep' },
+    'm': { index: 2, action: 'eat' },
+    ',': { index: 2, action: 'drink' },
+    '.': { index: 2, action: 'sleep' }
+  };
+
   // Event listener for keydown events
   document.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();
@@ -37,6 +53,19 @@ export function initializeShortcuts() {
         modal.classList.add('hidden');
       } else if (shortcutsBtn) {
         shortcutsBtn.click();
+      }
+      return;
+    }
+
+    // Handle party member shortcuts if we're on the game screen
+    if (PARTY_SHORTCUTS[key]) {
+      const gameScreen = document.getElementById('game_screen');
+      if (!gameScreen?.classList.contains('hidden')) {
+        const { index, action } = PARTY_SHORTCUTS[key];
+        const button = document.querySelector(`button[data-action="${action}"][data-person="${index}"]:not([disabled])`);
+        if (button) {
+          button.click();
+        }
       }
       return;
     }

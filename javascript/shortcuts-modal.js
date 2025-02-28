@@ -30,6 +30,27 @@ const modalHTML = `
         <li><kbd>E</kbd> Chop Wood</li>
       </ul>
       
+      <h3>Party Member 1</h3>
+      <ul>
+        <li><kbd>U</kbd> Eat</li>
+        <li><kbd>I</kbd> Drink</li>
+        <li><kbd>P</kbd> Rest</li>
+      </ul>
+
+      <h3>Party Member 2</h3>
+      <ul>
+        <li><kbd>J</kbd> Eat</li>
+        <li><kbd>K</kbd> Drink</li>
+        <li><kbd>L</kbd> Rest</li>
+      </ul>
+
+      <h3>Party Member 3</h3>
+      <ul>
+        <li><kbd>M</kbd> Eat</li>
+        <li><kbd>,</kbd> Drink</li>
+        <li><kbd>.</kbd> Rest</li>
+      </ul>
+      
       <h3>Difficulty Selection</h3>
       <ul>
         <li><kbd>A</kbd> Select Easy mode</li>
