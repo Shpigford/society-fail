@@ -116,10 +116,18 @@ export function shootAnimal(x, y) {
     const animal = gameState.hunting.animals[animalIndex];
     const foodGained = ANIMAL_TYPES[animal.type].foodYield;
     gameState.food += foodGained;
+    gameState.totalAnimalsHunted = (gameState.totalAnimalsHunted || 0) + 1;
     addLogEntry(`Shot a ${animal.type}! Gained ${foodGained} food.`);
     gameState.hunting.animals.splice(animalIndex, 1);
+
+    // Reset hunting area if no animals remain
+    if (gameState.hunting.animals.length === 0) {
+      resetHuntingArea();
+    } else {
+      updateHuntingUI();
+    }
+
     updateGameState();
-    updateHuntingUI();
   }
 }
 
