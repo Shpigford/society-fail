@@ -201,9 +201,20 @@ function generateMissionOptionsUI() {
  * @returns {string} HTML string for countdown UI.
  */
 function generateCountdownUI(currentTime) {
-  const timeUntilNextMission = RESCUE_MISSION_INTERVAL * 24 - (currentTime - gameState.watchtower.lastRescueMissionDay * 24);
+  const lastMissionTime = gameState.watchtower.lastRescueMissionDay * 24;
+  const timeSinceLastMission = currentTime - lastMissionTime;
+  const missionInterval = RESCUE_MISSION_INTERVAL * 24;
+  const timeUntilNextMission = Math.max(
+    0,
+    missionInterval - timeSinceLastMission
+  );
   const daysUntilNextMission = Math.floor(timeUntilNextMission / 24);
-  const hoursUntilNextMission = timeUntilNextMission % 24;
+  const hoursUntilNextMission = Math.floor(timeUntilNextMission % 24);
+
+  if (timeUntilNextMission === 0) {
+    gameState.watchtower.rescueMissionAvailable = true;
+    return generateMissionOptionsUI();
+  }
 
   return `<p class="countdown">Next mission in: ${daysUntilNextMission}d ${hoursUntilNextMission}h</p>`;
 }
