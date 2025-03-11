@@ -21,7 +21,7 @@ export const STARTING_RESOURCES = {
  * @type {Object}
  */
 export const initialGameState = {
-  version: 4,
+  version: 5,
   automations: {},
   day: 1,
   hour: 1,
