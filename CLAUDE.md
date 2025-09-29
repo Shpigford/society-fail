@@ -127,3 +127,94 @@ The project has no automated tests. Manual testing involves:
 3. Testing save/load functionality
 4. Verifying resource calculations
 5. Checking UI updates on state changes
+
+## CSS Development Guidelines
+
+### File Organization
+- Each component or module has its own CSS file (e.g., `farming.css`, `party.css`)
+- Core styles split across: `reset.css`, `base.css`, `typography.css`, `buttons.css`, `shell.css`, `modules.css`, `utils.css`
+
+### Modern CSS Practices
+- Use CSS nesting for component structure (use `&` only when necessary)
+- Utilize logical properties (e.g., margin-block, padding-inline)
+- Employ CSS variables for theming and recurring values
+- Use modern selectors like :is() and :where()
+
+### Naming Conventions
+- Kebab-case for class names: `.resource-container`, `.party-member`
+- Component-based naming: `.module-name__element--modifier`
+- Avoid unnecessary abbreviations
+
+### Color System
+- Dark backgrounds for main UI
+- Red/dark yellow for food
+- Blue for water
+- Green for wood/nature
+- Purple/dark purple for knowledge and corruption
+- Status colors: Green (positive/high), Yellow/orange (medium), Red (negative/low)
+
+### Dark Theme Considerations
+- Ensure sufficient contrast for readability
+- Use subtle gradients for depth
+- Maintain the post-apocalyptic atmosphere through styling
+
+## JavaScript Development Guidelines
+
+### Module Structure
+- Use ES6 modules exclusively with `import` and `export`
+- Each file handles a specific game system
+- Export only public API functions
+- Follow the existing module pattern in the codebase
+
+### State Management
+- Access game state through `gameState` from `settings.js`
+- Use `updateGameState()` to sync UI after changes
+- Call `saveGameState()` after significant changes
+- Never modify state directly without proper update functions
+
+### Documentation Requirements
+- Use JSDoc comment blocks for all exported functions
+- Add single-line comments for complex logic
+- Document all state properties and their purpose
+
+### Naming Conventions
+- camelCase for variables/functions: `resourceAmount`, `updatePartyStats()`
+- PascalCase for classes: `PartyMember`
+- UPPER_SNAKE_CASE for constants: `TICK_INTERVAL`, `MAX_PARTY_SIZE`
+- Boolean variables prefix: `isDisabled`, `hasMember`
+
+### UI Interaction
+- Add event listeners in dedicated setup functions
+- Update UI with dedicated `updateXXXUI()` functions
+- Use template literals for HTML generation
+- Call `createLucideIcons()` after adding new icons
+
+### Performance
+- Cache DOM selections when used repeatedly
+- Batch DOM updates when possible
+- Avoid unnecessary recalculations in update loops
+
+## General Development Rules
+
+### Code Comments
+- Use JSDoc for JavaScript documentation
+- Single-line comments within functions to explain logic
+- CSS comments use /* */ syntax
+- Be thorough in commenting to help future AI understand the code
+
+### Feature Implementation
+- Always write correct, bug-free, fully functional code
+- Fully implement all requested functionality
+- Leave NO todos, placeholders or missing pieces
+- Focus on readability over performance
+- Consider new technologies and contrarian ideas
+
+### State Persistence
+- Any new feature affecting game state must be saved properly
+- Use the existing save/load system in `storage.js`
+- Handle save migration for compatibility
+
+### Icons
+- Use Lucide icons throughout the project
+- Add icons with `data-lucide` attributes
+- Call icon creation function after DOM updates

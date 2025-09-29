@@ -1,8 +1,3 @@
----
-description: New features to implement
-globs: 
-alwaysApply: false
----
 # Implementation Todo List for Society Fail
 
 ### 1. Add Knowledge Points Resource ✅

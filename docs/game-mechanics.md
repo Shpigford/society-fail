@@ -1,8 +1,3 @@
----
-description: Detailed game mechanics
-globs: 
-alwaysApply: false
----
 # Society Fail - Game Mechanics Document
 
 ## Core Game Philosophy
@@ -563,7 +558,7 @@ gameState = {
   day: 1,
   hour: 1,
   difficulty: "medium",
-  
+
   // Resources
   resources: {
     food: 50,
@@ -575,7 +570,7 @@ gameState = {
     scrapMetal: 0,
     fuel: 0
   },
-  
+
   // Resource caps
   resourceCaps: {
     food: 100,
@@ -587,24 +582,24 @@ gameState = {
     scrapMetal: 50,
     fuel: 10
   },
-  
+
   // Advanced resources
   advancedResources: {
     artifacts: [],
     corruptionEssence: 0,
     memoryFragments: 0
   },
-  
+
   // Party
   party: [], // Array of PartyMember objects
-  
+
   // Settlement
   settlement: {
     buildings: [], // Array of Building objects
     grid: [], // 2D array representing the settlement layout
     unlocked: false
   },
-  
+
   // Systems
   corruption: {
     level: 0,
@@ -612,31 +607,31 @@ gameState = {
     rate: 0.1,
     resistance: 0
   },
-  
+
   weather: {
     current: "clear",
     forecast: [],
     season: "spring",
     seasonDay: 1
   },
-  
+
   expeditions: {
     active: [],
     available: [],
     completed: 0,
     discoveredLocations: []
   },
-  
+
   research: {
     technologies: {},
     inProgress: null
   },
-  
+
   factions: {
     discovered: [],
     reputations: {}
   },
-  
+
   // Game progression
   gameAge: 1, // 1, 2, or 3
   prestige: {
@@ -644,7 +639,7 @@ gameState = {
     totalMemoryFragments: 0,
     permanentUpgrades: {}
   },
-  
+
   // Statistics tracking
   stats: {
     totalResourcesGathered: {},
