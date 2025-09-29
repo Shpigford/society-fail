@@ -292,6 +292,7 @@ export function updatePartyDisplay() {
           `).join('')}
         </table>
       </div>
+      ${(!gameState.upgrades.automatedFeeding || !gameState.upgrades.waterPurificationSystem || !gameState.upgrades.comfortableSleepingQuarters) ? `
       <div class="person-actions">
         ${!gameState.upgrades.automatedFeeding ? `
         <button data-action="eat" data-person="${index}" ${(person.isDead || isBusy || isResting || gameState.food < 5) ? 'disabled' : ''}>
@@ -312,6 +313,7 @@ export function updatePartyDisplay() {
         </button>
         ` : ''}
       </div>
+      ` : ''}
     `;
     partyContainer.appendChild(personElement);
 
