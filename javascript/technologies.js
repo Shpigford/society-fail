@@ -7,7 +7,7 @@
 import { gameState } from './settings.js';
 import { updateGameState } from './game.js';
 import { addLogEntry } from './log.js';
-import { createLucideIcons } from './utils.js';
+import { createLucideIcons, initializeCollapsibleForModule } from './utils.js';
 import { saveGameState } from './storage.js';
 import { unlockSecondaryModule } from './upgrades.js';
 
@@ -492,6 +492,9 @@ export function showTechnologyModule(show = true) {
       <div class="module-content tech-content"></div>
     `;
     updateTechnologiesUI();
+
+    // Initialize collapsible functionality for the newly created header
+    initializeCollapsibleForModule('technology-module');
   } else {
     techModule.classList.add('mystery');
     techModule.innerHTML = `
