@@ -486,9 +486,7 @@ export function showTechnologyModule(show = true) {
   if (show) {
     techModule.classList.remove('mystery');
     techModule.innerHTML = `
-      <div class="tech-header">
-        <h2 class="collapsible"><i data-lucide="microscope" class="icon-dark"></i> Technologies <i data-lucide="chevron-up" class="toggle-icon"></i></h2>
-      </div>
+      <h2 class="collapsible"><i data-lucide="microscope" class="icon-dark"></i> Technologies <i data-lucide="chevron-up" class="toggle-icon"></i></h2>
       <div class="module-content tech-content"></div>
     `;
     updateTechnologiesUI();
