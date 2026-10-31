@@ -25,6 +25,7 @@ export class PartyMember {
   constructor() {
     this.name = this.generateName();
     this.health = 100;
+    this.maxHealth = 100;
     this.hunger = 100;
     this.thirst = 100;
     this.energy = 100;
